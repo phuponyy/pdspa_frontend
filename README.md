@@ -1,36 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐼 PandaSpa Frontend
 
-## Getting Started
+Frontend website cho PandaSpa.vn xây dựng bằng Next.js 16.1.1 (App Router)
 
-First, run the development server:
+## 📦 Tech Stack
+- **Next.js 16.1.1** - App Router
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **React Query** - Server state management
+- **Zustand** - Client state management
+- **React Hook Form + Zod** - Form validation
+- **Axios** - HTTP client
+- **SWR** - Data fetching (fallback)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🗂️ Project Structure
+
+```
+pandaspa-frontend/
+├── src/
+│   ├── app/                          # App Router (Next.js 16)
+│   │   ├── [lang]/                   # Dynamic language routing
+│   │   │   ├── page.tsx              # Homepage
+│   │   │   ├── layout.tsx            # Root layout
+│   │   │   └── admin/                # Admin routes
+│   │   │       ├── login/
+│   │   │       ├── dashboard/
+│   │   │       └── leads/
+│   │   ├── api/                      # API routes (if needed)
+│   │   ├── globals.css
+│   │   └── layout.tsx
+│   │
+│   ├── components/                   # React components
+│   │   ├── common/                   # Shared components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Button.tsx
+│   │   │   └── Loading.tsx
+│   │   ├── home/                     # Homepage components
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── ServicesSection.tsx
+│   │   │   └── ContactForm.tsx
+│   │   └── admin/                    # Admin components
+│   │       ├── LeadTable.tsx
+│   │       ├── PageEditor.tsx
+│   │       └── Sidebar.tsx
+│   │
+│   ├── lib/                          # Utilities & configurations
+│   │   ├── api/                      # API client setup
+│   │   │   ├── client.ts             # Axios instance
+│   │   │   ├── public.ts             # Public API calls
+│   │   │   └── admin.ts              # Admin API calls
+│   │   ├── hooks/                    # Custom React hooks
+│   │   │   ├── usePageData.ts
+│   │   │   ├── useAuth.ts
+│   │   │   └── useLeads.ts
+│   │   ├── stores/                   # Zustand stores
+│   │   │   ├── authStore.ts
+│   │   │   └── languageStore.ts
+│   │   ├── schemas/                  # Zod validation schemas
+│   │   │   ├── leadSchema.ts
+│   │   │   └── authSchema.ts
+│   │   ├── utils/                    # Helper functions
+│   │   │   ├── formatters.ts
+│   │   │   └── validators.ts
+│   │   └── constants.ts              # Constants
+│   │
+│   ├── types/                        # TypeScript types
+│   │   ├── api.types.ts
+│   │   ├── page.types.ts
+│   │   └── lead.types.ts
+│   │
+│   └── middleware.ts                 # Next.js middleware (auth, i18n)
+│
+├── public/
+│   ├── images/
+│   └── locales/                      # i18n translations
+│       ├── en.json
+│       └── vn.json
+│
+├── .env.local
+├── .env.example
+├── next.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔑 Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tạo file `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_SITE_URL=https://pandaspa.vn
+NEXT_PUBLIC_DEFAULT_LANG=vn
+```
 
-## Learn More
+## 🚀 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Run development server
+npm run dev
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Build for production
+npm run build
 
-## Deploy on Vercel
+# Start production server
+npm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📋 Features Checklist
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Public Website
+- ✅ Multi-language support (VN/EN)
+- ✅ Homepage with dynamic content from CMS
+- ✅ SEO optimization (meta tags, canonical, hreflang)
+- ✅ Service booking form with validation
+- ✅ Responsive design
+- ✅ Loading states & error handling
+
+### Admin Dashboard
+- ✅ JWT authentication
+- ✅ Lead management (list, detail, status update)
+- ✅ Page content editor (Hero, Meta)
+- ✅ Role-based access control
+- ✅ Audit log viewer
+
+## 🎨 Design Principles
+
+1. **Performance First**: Code-splitting, lazy loading, image optimization
+2. **SEO Friendly**: Server-side rendering, meta tags, structured data
+3. **Type Safety**: Full TypeScript coverage
+4. **Error Handling**: Comprehensive error boundaries và user feedback
+5. **Accessibility**: WCAG 2.1 AA compliance
+6. **Mobile First**: Responsive design từ mobile lên desktop

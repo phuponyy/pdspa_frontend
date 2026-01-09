@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #1f1a16;
+  --ink-muted: #4d463f;
+  --jade: #1f6b5f;
+  --jade-deep: #0e3f38;
+  --sand: #f6f2ea;
+  --mist: #fbf8f3;
+  --rose: #d6a690;
+  --gold: #c9a25a;
+  --card: #ffffff;
+  --line: #e6ddd2;
+  --shadow: 0 30px 80px rgba(20, 18, 14, 0.14);
+}
+
+@theme inline {
+  --color-background: var(--sand);
+  --color-foreground: var(--ink);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  background: radial-gradient(circle at 10% 10%, #fdf8f0 0%, #f6efe3 45%, #efe6d8 100%);
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -10%;
+  background: radial-gradient(circle at 80% 20%, rgba(214, 166, 144, 0.25), transparent 55%),
+    radial-gradient(circle at 15% 70%, rgba(31, 107, 95, 0.18), transparent 60%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(31, 107, 95, 0.2);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
