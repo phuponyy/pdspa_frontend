@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const leadItemSchema = z.object({
   serviceId: z.number().min(1),
-  priceOptionId: z.number().optional(),
+  priceOptionId: z.number().min(1),
   qty: z.number().min(1),
 });
 

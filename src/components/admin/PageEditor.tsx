@@ -9,19 +9,34 @@ import {
   updateHomeMeta,
   updateHomeStatus,
 } from "@/lib/api/admin";
+import { ApiError } from "@/lib/api/client";
 
-export default function PageEditor({ token }: { token: string }) {
+export default function PageEditor({
+  token,
+  lang,
+}: {
+  token: string;
+  lang: string;
+}) {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [heading, setHeading] = useState("");
   const [subheading, setSubheading] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
   const [message, setMessage] = useState<string | null>(null);
 
   const notify = (text: string) => {
     setMessage(text);
     setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleError = (err: unknown) => {
+    if (err instanceof ApiError) {
+      notify(err.message || "Request failed.");
+      return;
+    }
+    notify("Unable to reach the server. Please try again.");
   };
 
   return (
@@ -41,8 +56,12 @@ export default function PageEditor({ token }: { token: string }) {
           />
           <Button
             onClick={async () => {
-              await updateHomeMeta(token, { metaTitle, metaDescription });
-              notify("SEO metadata updated.");
+              try {
+                await updateHomeMeta(token, lang, { metaTitle, metaDescription });
+                notify("SEO metadata updated.");
+              } catch (err) {
+                handleError(err);
+              }
             }}
           >
             Save SEO
@@ -63,15 +82,66 @@ export default function PageEditor({ token }: { token: string }) {
             value={subheading}
             onChange={(event) => setSubheading(event.target.value)}
           />
-          <Input
-            label="Image URL"
-            value={imageUrl}
-            onChange={(event) => setImageUrl(event.target.value)}
-          />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-[var(--ink)]">
+                Hero slider images (max 10)
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (images.length >= 10) {
+                    notify("Maximum 10 images.");
+                    return;
+                  }
+                  setImages((prev) => [...prev, ""]);
+                }}
+              >
+                Add image
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {images.map((value, idx) => (
+                <div key={`hero-image-${idx}`} className="flex gap-2">
+                  <Input
+                    label={`Image URL ${idx + 1}`}
+                    value={value}
+                    onChange={(event) => {
+                      const next = [...images];
+                      next[idx] = event.target.value;
+                      setImages(next);
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    className="h-12 px-4"
+                    onClick={() =>
+                      setImages((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              {!images.length ? (
+                <p className="text-xs text-[var(--ink-muted)]">
+                  No images yet. Add up to 10 URLs.
+                </p>
+              ) : null}
+            </div>
+          </div>
           <Button
             onClick={async () => {
-              await updateHomeHero(token, { heading, subheading, imageUrl });
-              notify("Hero section updated.");
+              try {
+                await updateHomeHero(token, lang, {
+                  heading,
+                  subheading,
+                  images: images.map((item) => item.trim()).filter(Boolean),
+                });
+                notify("Hero section updated.");
+              } catch (err) {
+                handleError(err);
+              }
             }}
           >
             Save hero
@@ -95,8 +165,12 @@ export default function PageEditor({ token }: { token: string }) {
           <Button
             variant="outline"
             onClick={async () => {
-              await updateHomeStatus(token, { status });
-              notify("Homepage status updated.");
+              try {
+                await updateHomeStatus(token, { status });
+                notify("Homepage status updated.");
+              } catch (err) {
+                handleError(err);
+              }
             }}
           >
             Update status

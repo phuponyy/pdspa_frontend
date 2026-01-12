@@ -40,7 +40,7 @@ export default function LeadTable({
                 <td className="px-6 py-4">
                   <Link
                     href={`/${lang}/admin/leads/${lead.id}`}
-                    className="text-[var(--jade)] hover:underline"
+                    className="text-[var(--accent-strong)] hover:underline"
                   >
                     View
                   </Link>

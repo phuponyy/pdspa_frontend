@@ -24,7 +24,7 @@ export const getLeads = async (token: string, page = 1, limit = 20) =>
     cache: "no-store",
   });
 
-export const getLead = async (token: string, id: string) =>
+export const getLead = async (token: string, id: string | number) =>
   apiFetch<LeadDetailResponse>(`/admin/leads/${id}`, {
     token,
     cache: "no-store",
@@ -32,7 +32,7 @@ export const getLead = async (token: string, id: string) =>
 
 export const updateLeadStatus = async (
   token: string,
-  id: string,
+  id: string | number,
   payload: LeadStatusUpdateRequest
 ) =>
   apiFetch<LeadDetailResponse>(`/admin/leads/${id}/status`, {
@@ -41,17 +41,27 @@ export const updateLeadStatus = async (
     body: JSON.stringify(payload),
   });
 
-export const updateHomeMeta = async (token: string, payload: HomeMetaUpdateRequest) =>
+export const updateHomeMeta = async (
+  token: string,
+  lang: string,
+  payload: HomeMetaUpdateRequest
+) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/meta", {
     token,
     method: "PATCH",
+    query: { lang },
     body: JSON.stringify(payload),
   });
 
-export const updateHomeHero = async (token: string, payload: HomeHeroUpdateRequest) =>
+export const updateHomeHero = async (
+  token: string,
+  lang: string,
+  payload: HomeHeroUpdateRequest
+) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/hero", {
     token,
     method: "PATCH",
+    query: { lang },
     body: JSON.stringify(payload),
   });
 

@@ -1,6 +1,6 @@
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
-import { getPublicConfig } from "@/lib/api/public";
+import { HOTLINE, SITE_NAME } from "@/lib/constants";
 import { isSupportedLang } from "@/lib/i18n";
 
 export default async function LangLayout({
@@ -12,16 +12,12 @@ export default async function LangLayout({
 }) {
   const { lang: rawLang } = await params;
   const lang = isSupportedLang(rawLang) ? rawLang : "vn";
-  const config = await getPublicConfig().catch(() => ({
-    success: true,
-    data: { siteName: "Panda Spa", hotline: "0909 000 000" },
-  }));
 
   return (
     <div lang={lang} className="min-h-screen">
-      <Header lang={lang} hotline={config.data.hotline} />
+      <Header lang={lang} hotline={HOTLINE} />
       <main className="flex min-h-[70vh] flex-col">{children}</main>
-      <Footer hotline={config.data.hotline} siteName={config.data.siteName} />
+      <Footer hotline={HOTLINE} siteName={SITE_NAME} lang={lang} />
     </div>
   );
 }

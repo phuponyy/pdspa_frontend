@@ -6,7 +6,7 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import StatCard from "@/components/admin/StatCard";
 import Loading from "@/components/common/Loading";
 
-export default function AdminDashboard({ params }: { params: { lang: string } }) {
+export default function AdminDashboard() {
   const token = useAuthStore((state) => state.token);
   const { data, isLoading } = useQuery({
     queryKey: ["leads-summary"],
@@ -16,8 +16,8 @@ export default function AdminDashboard({ params }: { params: { lang: string } })
 
   const payload = data?.data;
   const total =
-    (!Array.isArray(payload) && payload?.meta?.total) ??
-    (Array.isArray(payload) ? payload.length : payload?.items?.length) ??
+    payload?.pagination?.total ??
+    payload?.items?.length ??
     0;
 
   return (

@@ -7,7 +7,7 @@ import { submitLead } from "@/lib/api/public";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import Textarea from "@/components/common/Textarea";
-import type { HomeSectionItem } from "@/types/page.types";
+import type { PublicService } from "@/types/api.types";
 import { useState } from "react";
 
 export default function ContactForm({
@@ -16,7 +16,7 @@ export default function ContactForm({
   labels,
 }: {
   lang: string;
-  services?: HomeSectionItem[];
+  services?: PublicService[];
   labels: {
     fullName: string;
     phone: string;
@@ -50,7 +50,7 @@ export default function ContactForm({
 
   const items = useWatch({ control, name: "items" });
 
-  const toggleService = (serviceId: number, priceOptionId?: number) => {
+  const toggleService = (serviceId: number, priceOptionId: number) => {
     const existing = items?.find((item) => item.serviceId === serviceId);
     const nextItems = existing
       ? items.filter((item) => item.serviceId !== serviceId)
@@ -65,6 +65,13 @@ export default function ContactForm({
     setValue("items", nextItems, { shouldValidate: true });
   };
 
+  const updatePriceOption = (serviceId: number, priceOptionId: number) => {
+    const nextItems = (items || []).map((item) =>
+      item.serviceId === serviceId ? { ...item, priceOptionId } : item
+    );
+    setValue("items", nextItems, { shouldValidate: true });
+  };
+
   const onSubmit = async (data: LeadFormValues) => {
     setStatus("loading");
     try {
@@ -75,7 +82,7 @@ export default function ContactForm({
     }
   };
 
-  const serviceList = services?.length ? services : fallbackServices;
+  const serviceList = services?.length ? services : [];
 
   return (
     <form
@@ -110,57 +117,109 @@ export default function ContactForm({
           {labels.pickServices}
         </p>
         <div className="grid gap-3 md:grid-cols-2">
-          {serviceList.map((service, index) => {
-            const serviceId = Number(service.serviceId || service.id || index + 1);
+          {serviceList.length ? (
+            serviceList.map((service) => {
+              const serviceId = service.id;
             const selected = items?.some((item) => item.serviceId === serviceId);
+            const selectedItem = items?.find((item) => item.serviceId === serviceId);
+            const defaultOption = service.priceOptions[0];
+            const selectedOptionId = selectedItem?.priceOptionId ?? defaultOption?.id;
+            const selectedOption = service.priceOptions.find(
+              (option) => option.id === selectedOptionId
+            );
             return (
               <label
                 key={serviceId}
                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-sm transition ${
                   selected
-                    ? "border-[var(--jade)] bg-[rgba(31,107,95,0.08)]"
+                    ? "border-[var(--accent-strong)] bg-[rgba(255,106,61,0.08)]"
                     : "border-[var(--line)] bg-[var(--mist)]"
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={selected || false}
+                  disabled={!defaultOption}
                   onChange={() =>
-                    toggleService(
-                      serviceId,
-                      service.priceOptions?.[0]?.id
-                    )
+                    defaultOption
+                      ? toggleService(serviceId, defaultOption.id)
+                      : null
                   }
-                  className="mt-1 h-4 w-4 rounded border-[var(--line)] accent-[var(--jade)]"
+                  className="mt-1 h-4 w-4 rounded border-[var(--line)] accent-[var(--accent-strong)]"
                 />
                 <div className="space-y-2">
                   <div className="font-semibold text-[var(--ink)]">
-                    {service.title || "Custom service"}
+                    {service.name}
                   </div>
                   <p className="text-xs text-[var(--ink-muted)]">
                     {service.description || "Tailored recommendation with our team."}
                   </p>
+                  {service.priceOptions.length ? (
+                    <div className="text-xs text-[var(--ink-muted)]">
+                      Price from{" "}
+                      <span className="font-semibold text-[var(--ink)]">
+                        {service.priceOptions[0].price.toLocaleString("vi-VN")}₫
+                      </span>
+                    </div>
+                  ) : null}
                   {selected ? (
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="text-[var(--ink-muted)]">Qty</span>
-                      <input
-                        type="number"
-                        min={1}
-                        value={
-                          items?.find((item) => item.serviceId === serviceId)?.qty ||
-                          1
-                        }
-                        onChange={(event) =>
-                          updateQty(serviceId, Number(event.target.value) || 1)
-                        }
-                        className="h-8 w-16 rounded-full border border-[var(--line)] px-2 text-sm"
-                      />
+                    <div className="flex flex-wrap items-center gap-3 text-xs">
+                      {service.priceOptions.length ? (
+                        <label className="flex items-center gap-2">
+                          <span className="text-[var(--ink-muted)]">Option</span>
+                          <select
+                            className="h-8 rounded-full border border-[var(--line)] bg-white px-2 text-xs"
+                            value={selectedOptionId}
+                            onChange={(event) =>
+                              updatePriceOption(
+                                serviceId,
+                                Number(event.target.value)
+                              )
+                            }
+                          >
+                            {service.priceOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.code} -{" "}
+                                {option.price.toLocaleString("vi-VN")}₫
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
+                      <label className="flex items-center gap-2">
+                        <span className="text-[var(--ink-muted)]">Qty</span>
+                        <input
+                          type="number"
+                          min={1}
+                          value={selectedItem?.qty || 1}
+                          onChange={(event) =>
+                            updateQty(serviceId, Number(event.target.value) || 1)
+                          }
+                          className="h-8 w-16 rounded-full border border-[var(--line)] px-2 text-sm"
+                        />
+                      </label>
+                      {selectedOption ? (
+                        <span className="text-[var(--ink-muted)]">
+                          Total{" "}
+                          <span className="font-semibold text-[var(--ink)]">
+                            {(selectedOption.price * (selectedItem?.qty || 1)).toLocaleString(
+                              "vi-VN"
+                            )}
+                            ₫
+                          </span>
+                        </span>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
               </label>
             );
-          })}
+            })
+          ) : (
+            <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--mist)] p-6 text-sm text-[var(--ink-muted)]">
+              Services are being updated. Please contact us directly.
+            </div>
+          )}
         </div>
         {errors.items?.message ? (
           <p className="text-xs text-red-500">{errors.items.message}</p>
@@ -183,15 +242,3 @@ export default function ContactForm({
   );
 }
 
-const fallbackServices: HomeSectionItem[] = [
-  {
-    id: 1,
-    title: "Aroma body reset",
-    description: "Light pressure with aroma oils to release tension.",
-  },
-  {
-    id: 2,
-    title: "Signature foot therapy",
-    description: "Focused reflexology with calming herbal compress.",
-  },
-];

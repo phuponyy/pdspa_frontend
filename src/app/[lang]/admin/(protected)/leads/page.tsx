@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLeads } from "@/lib/api/admin";
@@ -7,8 +8,13 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import LeadTable from "@/components/admin/LeadTable";
 import Button from "@/components/common/Button";
 import Loading from "@/components/common/Loading";
+import { getDefaultLang } from "@/lib/i18n";
 
-export default function LeadsPage({ params }: { params: { lang: string } }) {
+export default function LeadsPage() {
+  const params = useParams<{ lang?: string }>();
+  const langParam = params?.lang;
+  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
+  const resolvedLang = lang ?? getDefaultLang();
   const token = useAuthStore((state) => state.token);
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -20,10 +26,10 @@ export default function LeadsPage({ params }: { params: { lang: string } }) {
   });
 
   const payload = data?.data;
-  const leads = Array.isArray(payload) ? payload : payload?.items || [];
-  const total =
-    (!Array.isArray(payload) && payload?.meta?.total) ?? leads.length;
-  const maxPage = Math.max(1, Math.ceil(total / limit));
+  const leads = payload?.items || [];
+  const total = payload?.pagination?.total ?? leads.length;
+  const maxPage =
+    payload?.pagination?.totalPages ?? Math.max(1, Math.ceil(total / limit));
 
   return (
     <div className="space-y-6">
@@ -39,7 +45,7 @@ export default function LeadsPage({ params }: { params: { lang: string } }) {
         <Loading label="Loading leads" />
       ) : (
         <>
-          <LeadTable lang={params.lang} leads={leads} />
+          <LeadTable lang={resolvedLang} leads={leads} />
           <div className="flex items-center justify-between">
             <span className="text-xs text-[var(--ink-muted)]">
               Page {page} of {maxPage}

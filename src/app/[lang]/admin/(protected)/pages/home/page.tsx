@@ -1,10 +1,16 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import PageEditor from "@/components/admin/PageEditor";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { getDefaultLang } from "@/lib/i18n";
 
 export default function HomeEditorPage() {
   const token = useAuthStore((state) => state.token);
+  const params = useParams<{ lang?: string }>();
+  const langParam = params?.lang;
+  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
+  const resolvedLang = lang ?? getDefaultLang();
 
   if (!token) {
     return (
@@ -24,7 +30,7 @@ export default function HomeEditorPage() {
           Content editor
         </h1>
       </div>
-      <PageEditor token={token} />
+      <PageEditor token={token} lang={resolvedLang} />
     </div>
   );
 }

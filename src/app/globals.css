@@ -1,17 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #1f1a16;
-  --ink-muted: #4d463f;
-  --jade: #1f6b5f;
-  --jade-deep: #0e3f38;
-  --sand: #f6f2ea;
-  --mist: #fbf8f3;
-  --rose: #d6a690;
-  --gold: #c9a25a;
+  --ink: #2b1a12;
+  --ink-muted: #5b4a41;
+  --accent: #ff6a3d;
+  --accent-bright: #ffb640;
+  --accent-strong: #ff6a3d;
+  --accent-deep: #b74222;
+  --sand: #fff6ee;
+  --mist: #fff9f3;
   --card: #ffffff;
-  --line: #e6ddd2;
-  --shadow: 0 30px 80px rgba(20, 18, 14, 0.14);
+  --line: rgba(255, 106, 61, 0.18);
+  --shadow: 0 30px 80px rgba(90, 35, 20, 0.18);
+  --shadow-soft: 0 18px 40px rgba(255, 106, 61, 0.25);
+  --jade: var(--accent-strong);
+  --jade-deep: var(--accent-deep);
 }
 
 @theme inline {
@@ -34,8 +37,9 @@ body {
 
 body {
   color: var(--ink);
-  font-family: var(--font-body), "Segoe UI", sans-serif;
-  background: radial-gradient(circle at 10% 10%, #fdf8f0 0%, #f6efe3 45%, #efe6d8 100%);
+  font-family: var(--font-body), "Inter",sans-serif;
+  /* background: radial-gradient(black 0.1px, transparent 0.1px) center/150px 150px #fff6ee; */
+  background: black;
   position: relative;
 }
 
@@ -43,8 +47,8 @@ body::before {
   content: "";
   position: fixed;
   inset: -20% -10%;
-  background: radial-gradient(circle at 80% 20%, rgba(214, 166, 144, 0.25), transparent 55%),
-    radial-gradient(circle at 15% 70%, rgba(31, 107, 95, 0.18), transparent 60%);
+  /* background: radial-gradient(circle at 80% 20%, rgba(255, 182, 64, 0.25), transparent 55%),
+    radial-gradient(circle at 15% 70%, rgba(255, 106, 61, 0.2), transparent 60%); */
   z-index: -1;
   pointer-events: none;
 }
@@ -55,7 +59,7 @@ a {
 }
 
 ::selection {
-  background: rgba(31, 107, 95, 0.2);
+  background: rgba(255, 106, 61, 0.2);
 }
 
 h1,
@@ -64,4 +68,19 @@ h3,
 h4 {
   font-family: var(--font-display), "Times New Roman", serif;
   letter-spacing: -0.02em;
+}
+
+.text-accent {
+  background: linear-gradient(135deg, #ff6a3d, #ffb640);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #fff0;
+  text-shadow: 0 4px 6px rgb(255 106 61 / 0.55);
+}
+
+.home-dark {
+  --ink: #ffffff;
+  --ink-muted: rgba(255, 255, 255, 0.7);
+  --mist: #0a0a0a;
+  --line: rgba(255, 255, 255, 0.12);
+  background: #000000;
 }

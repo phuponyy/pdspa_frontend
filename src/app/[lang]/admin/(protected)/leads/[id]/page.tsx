@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getLead, updateLeadStatus } from "@/lib/api/admin";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -9,24 +10,17 @@ import { formatDateTime } from "@/lib/utils/formatters";
 import Button from "@/components/common/Button";
 import Loading from "@/components/common/Loading";
 
-const STATUS_OPTIONS: LeadStatus[] = [
-  "NEW",
-  "CONTACTED",
-  "IN_PROGRESS",
-  "DONE",
-  "CANCELED",
-];
+const STATUS_OPTIONS: LeadStatus[] = ["NEW", "CONTACTED", "DONE"];
 
-export default function LeadDetailPage({
-  params,
-}: {
-  params: { id: string; lang: string };
-}) {
+export default function LeadDetailPage() {
+  const params = useParams<{ id?: string }>();
+  const idParam = params?.id;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
   const token = useAuthStore((state) => state.token);
   const { data, isLoading } = useQuery({
-    queryKey: ["lead", params.id],
-    queryFn: () => getLead(token || "", params.id),
-    enabled: Boolean(token),
+    queryKey: ["lead", id],
+    queryFn: () => getLead(token || "", id || ""),
+    enabled: Boolean(token && id),
   });
 
   const lead = data?.data;
@@ -96,7 +90,10 @@ export default function LeadDetailPage({
                 key={`${item.serviceId}-${index}`}
                 className="flex items-center justify-between rounded-2xl border border-[var(--line)] bg-[var(--mist)] px-4 py-3"
               >
-                <span>Service #{item.serviceId}</span>
+                <span>
+                  {item.service?.key || `Service #${item.serviceId}`}{" "}
+                  {item.priceOption?.code ? `(${item.priceOption.code})` : ""}
+                </span>
                 <span className="font-semibold text-[var(--ink)]">
                   Qty {item.qty}
                 </span>

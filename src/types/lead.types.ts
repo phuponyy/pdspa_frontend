@@ -1,20 +1,25 @@
 export type LeadStatus =
   | "NEW"
   | "CONTACTED"
-  | "IN_PROGRESS"
-  | "DONE"
-  | "CANCELED";
+  | "DONE";
 
 export type LeadItem = {
   serviceId: number;
-  priceOptionId?: number;
+  priceOptionId: number;
   qty: number;
-  title?: string;
-  price?: number;
+  service?: {
+    id: number;
+    key: string;
+  };
+  priceOption?: {
+    id: number;
+    code: string;
+    price: number;
+  };
 };
 
 export type Lead = {
-  id: string;
+  id: number;
   fullName: string;
   phone: string;
   email?: string;
@@ -23,5 +28,4 @@ export type Lead = {
   status: LeadStatus;
   items?: LeadItem[];
   createdAt?: string;
-  updatedAt?: string;
 };

@@ -26,7 +26,7 @@ export default function ServicesSection({
                 key={item.id || index}
                 className="group rounded-3xl border border-[var(--line)] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-[var(--shadow)]"
               >
-                <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--jade)]">
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
                   <span>Service</span>
                   <span>{item.price ? `${item.price}k` : "Tailored"}</span>
                 </div>

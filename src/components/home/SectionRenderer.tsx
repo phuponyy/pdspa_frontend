@@ -5,7 +5,11 @@ import { getDictionary } from "@/lib/i18n";
 
 const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
   sections?.find((section) =>
-    keys.some((key) => section.type?.toLowerCase() === key)
+    keys.some(
+      (key) =>
+        section.type?.toLowerCase() === key ||
+        section.key?.toLowerCase() === key
+    )
   );
 
 export default function SectionRenderer({

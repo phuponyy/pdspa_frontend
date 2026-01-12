@@ -19,13 +19,6 @@ export type ApiError = {
   };
 };
 
-export type PublicConfig = {
-  siteName?: string;
-  hotline?: string;
-};
-
-export type PublicConfigResponse = ApiSuccess<PublicConfig>;
-
 export type HomePageResponse = {
   page?: Record<string, unknown>;
   meta?: {
@@ -36,11 +29,6 @@ export type HomePageResponse = {
   sections?: HomeSection[];
 };
 
-export type HomeMetaResponse = ApiSuccess<{
-  metaTitle?: string;
-  metaDescription?: string;
-}>;
-
 export type LeadCreateRequest = {
   fullName: string;
   phone: string;
@@ -50,23 +38,38 @@ export type LeadCreateRequest = {
   items: LeadItem[];
 };
 
-export type LeadCreateResponse = ApiSuccess<{ id?: string }>;
+export type LeadCreateResponse = ApiSuccess<{ leadId: number }>;
 
 export type AdminLoginRequest = {
   email: string;
   password: string;
 };
 
-export type AdminLoginResponse = {
+export type AdminLoginResponse = ApiSuccess<{
   accessToken: string;
+}>;
+
+export type PublicService = {
+  id: number;
+  key: string;
+  name: string;
+  description?: string | null;
+  priceOptions: {
+    id: number;
+    code: string;
+    price: number;
+  }[];
 };
+
+export type PublicServicesResponse = ApiSuccess<PublicService[]>;
 
 export type LeadListResponse = ApiSuccess<{
   items: Lead[];
-  meta?: {
+  pagination?: {
     page?: number;
     limit?: number;
     total?: number;
+    totalPages?: number;
   };
 }>;
 
@@ -83,8 +86,8 @@ export type HomeMetaUpdateRequest = {
 
 export type HomeHeroUpdateRequest = {
   heading: string;
-  subheading: string;
-  imageUrl: string;
+  subheading?: string;
+  images?: string[];
 };
 
 export type HomeStatusUpdateRequest = {

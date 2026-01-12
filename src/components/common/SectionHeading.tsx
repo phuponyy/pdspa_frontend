@@ -19,7 +19,7 @@ export default function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <span className="text-xs uppercase tracking-[0.2em] text-[var(--jade)]">
+        <span className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
           {eyebrow}
         </span>
       ) : null}

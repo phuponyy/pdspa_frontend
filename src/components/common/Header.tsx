@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { getDictionary } from "@/lib/i18n";
+import {
+  HOTLINE,
+  HOTLINE_SECONDARY,
+  SPA_ADDRESS,
+  SPA_HOURS,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 
 export default function Header({
@@ -16,50 +23,221 @@ export default function Header({
   className?: string;
 }) {
   const dict = getDictionary(lang);
+  const pathname = usePathname();
+  const [hideTopBar, setHideTopBar] = useState(false);
+  const lastScroll = useRef(0);
+  const lastToggle = useRef(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      rafRef.current = requestAnimationFrame(() => {
+        const current = Math.max(window.scrollY, 0);
+        const isScrollingDown = current > lastScroll.current;
+        const distance = Math.abs(current - lastToggle.current);
+
+        if (current < 120) {
+          setHideTopBar(false);
+          lastToggle.current = current;
+        } else if (distance > 80) {
+          setHideTopBar(isScrollingDown);
+          lastToggle.current = current;
+        }
+
+        lastScroll.current = current;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  const segments = pathname.split("/").filter(Boolean);
+  const currentLang = segments[0] || lang;
+  const restPath = segments.slice(1).join("/");
+
+  const links = [
+    { href: `/${lang}`, label: dict.nav.home },
+    { href: `/${lang}/good-massage-in-da-nang`, label: dict.nav.about },
+    { href: `/${lang}/dich-vu`, label: dict.nav.services },
+    { href: `/${lang}/price-list`, label: dict.nav.price },
+    { href: `/${lang}/news`, label: dict.nav.news },
+    { href: `/${lang}/contact`, label: dict.nav.contact },
+  ];
+
+  const isActive = (href: string) =>
+    href === `/${lang}` ? pathname === href : pathname.startsWith(href);
+  const navLinkClass = (active: boolean) =>
+    cn(
+      "transition",
+      active
+        ? "text-[var(--accent-strong)]"
+        : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.9)]"
+    );
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-[rgba(230,221,210,0.6)] bg-[rgba(251,248,243,0.8)] backdrop-blur",
+        "sticky top-0 z-40 bg-black transition-[padding] duration-300 bg-transparent",
+        hideTopBar ? "m-[10px]" : "pt-0",
         className
       )}
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4 lg:px-10">
-        <Link href={`/${lang}`} className="flex items-center gap-2">
-          <span className="text-xl font-semibold tracking-tight text-[var(--ink)]">
-            Panda Spa
-          </span>
-          <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-            since 2014
-          </span>
-        </Link>
-        <nav className="hidden items-center gap-6 text-sm font-medium text-[var(--ink-muted)] md:flex">
-          <Link href={`/${lang}`} className="hover:text-[var(--jade)]">
-            {dict.nav.home}
-          </Link>
-          <a href="#services" className="hover:text-[var(--jade)]">
-            {dict.nav.services}
-          </a>
-          <a href="#contact" className="hover:text-[var(--jade)]">
-            {dict.nav.contact}
-          </a>
-          <Link href={`/${lang}/admin/login`} className="hover:text-[var(--jade)]">
-            {dict.nav.admin}
-          </Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          <Button
-            variant="outline"
-            className="hidden md:inline-flex"
-            onClick={() => {
-              if (hotline && typeof window !== "undefined") {
-                window.location.href = `tel:${hotline}`;
-              }
-            }}
-          >
-            {hotline || "Hotline"}
-          </Button>
+      <div
+        className={cn(
+          "hidden text-sm text-white transition-all duration-300 md:block",
+          hideTopBar ? "max-h-0 opacity-0" : "max-h-20 opacity-100"
+        )}
+      >
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-center gap-8 px-6 py-3 lg:px-10">
+          <div className="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+            <span>{SPA_ADDRESS}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="8" />
+              <path d="M12 8v5l3 2" />
+            </svg>
+            <span>Working Time: {SPA_HOURS}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.9 19.9 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.9 19.9 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 13 13 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1l-1.2 1.2a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5 13 13 0 0 0 2.8.7 2 2 0 0 1 1.7 2z" />
+            </svg>
+            <span>{hotline || HOTLINE}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.9 19.9 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.9 19.9 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 13 13 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1l-1.2 1.2a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5 13 13 0 0 0 2.8.7 2 2 0 0 1 1.7 2z" />
+            </svg>
+            <span>{HOTLINE_SECONDARY}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {[
+              { code: "vn", label: "VN" },
+              { code: "en", label: "EN" },
+            ].map((item) => (
+              <Link
+                key={item.code}
+                href={`/${item.code}${restPath ? `/${restPath}` : ""}`}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition",
+                  item.code === currentLang
+                    ? "border-white text-white"
+                    : "border-[rgba(255,255,255,0.4)] text-[rgba(255,255,255,0.7)] hover:text-white"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="bg-transparent">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+          <div className="flex flex-1 items-center justify-between gap-8 rounded-full bg-white px-8 py-2 shadow-[0_18px_40px_rgba(255,106,61,0.4)]">
+            <Link href={`/${lang}`} className="flex items-center gap-3">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
+                alt="Panda Spa"
+                className="h-14 w-auto object-contain"
+                loading="lazy"
+              />
+            </Link>
+            <nav className="hidden items-center gap-9 text-base font-semibold text-black md:flex">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={isActive(link.href) ? "page" : undefined}
+                  className={navLinkClass(isActive(link.href))}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="hidden h-12 w-12 items-center justify-center rounded-full border border-[rgba(0,0,0,0.08)] text-[var(--accent-strong)] transition hover:border-[var(--accent-strong)] md:inline-flex"
+                aria-label="Search"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-3.5-3.5" />
+                </svg>
+              </button>
+              <Button
+                className="hidden px-7 py-3 text-base md:inline-flex"
+                onClick={() => {
+                  const line = hotline || HOTLINE;
+                  if (line && typeof window !== "undefined") {
+                    window.location.href = `tel:${line}`;
+                  }
+                }}
+              >
+                Booking
+              </Button>
+              <Link
+                href={`/${lang}/admin/login`}
+                className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
+              >
+                {dict.nav.admin}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </header>

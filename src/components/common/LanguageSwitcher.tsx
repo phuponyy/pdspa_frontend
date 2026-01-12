@@ -12,7 +12,7 @@ export default function LanguageSwitcher() {
   const rest = segments.slice(1).join("/");
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+    <div className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)]">
       {SUPPORTED_LANGS.map((lang) => (
         <Link
           key={lang}
@@ -20,8 +20,8 @@ export default function LanguageSwitcher() {
           className={cn(
             "rounded-full px-2 py-1 transition",
             lang === currentLang
-              ? "bg-[var(--jade)] text-white"
-              : "hover:text-[var(--jade)]"
+              ? "bg-[var(--accent)] text-white"
+              : "hover:text-[var(--accent-strong)]"
           )}
         >
           {lang}

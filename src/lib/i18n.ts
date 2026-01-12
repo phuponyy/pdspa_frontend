@@ -4,7 +4,10 @@ export const dictionaries = {
   vn: {
     nav: {
       home: "Trang chu",
+      about: "Gioi thieu",
       services: "Dich vu",
+      price: "Bang gia",
+      news: "Tin tuc",
       contact: "Lien he",
       admin: "Quan tri",
     },
@@ -43,7 +46,10 @@ export const dictionaries = {
   en: {
     nav: {
       home: "Home",
+      about: "About",
       services: "Services",
+      price: "Price list",
+      news: "News",
       contact: "Contact",
       admin: "Admin",
     },

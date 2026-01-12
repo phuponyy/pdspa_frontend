@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,11 +9,16 @@ import { loginAdmin } from "@/lib/api/admin";
 import { useAuthStore } from "@/lib/stores/authStore";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
-import { getDictionary } from "@/lib/i18n";
+import { ApiError } from "@/lib/api/client";
+import { getDefaultLang, getDictionary } from "@/lib/i18n";
 
-export default function AdminLogin({ params }: { params: { lang: string } }) {
+export default function AdminLogin() {
   const router = useRouter();
-  const dict = getDictionary(params.lang);
+  const params = useParams<{ lang?: string }>();
+  const langParam = params?.lang;
+  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
+  const resolvedLang = lang ?? getDefaultLang();
+  const dict = getDictionary(resolvedLang);
   const setToken = useAuthStore((state) => state.setToken);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +34,18 @@ export default function AdminLogin({ params }: { params: { lang: string } }) {
     setError(null);
     try {
       const response = await loginAdmin(data);
-      setToken(response.accessToken);
-      router.replace(`/${params.lang}/admin/dashboard`);
+      const accessToken = response?.data?.accessToken;
+      if (!accessToken) {
+        setError("Login failed. Missing access token.");
+        return;
+      }
+      setToken(accessToken);
+      router.replace(`/${resolvedLang}/admin/dashboard`);
     } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message || "Login failed. Please check your credentials.");
+        return;
+      }
       setError("Login failed. Please check your credentials.");
     }
   };

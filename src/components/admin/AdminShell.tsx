@@ -31,6 +31,10 @@ export default function AdminShell({
     return <div className="min-h-screen bg-[var(--mist)]">{children}</div>;
   }
 
+  if (!token) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--mist)]">
       <div className="mx-auto flex w-full max-w-6xl gap-6 px-6 py-10 lg:px-10">

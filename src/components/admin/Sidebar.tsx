@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { getDictionary } from "@/lib/i18n";
 import Button from "../common/Button";
 import { useAuthStore } from "@/lib/stores/authStore";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils/cn";
 export default function Sidebar({ lang }: { lang: string }) {
   const dict = getDictionary(lang);
   const pathname = usePathname();
+  const router = useRouter();
   const clearToken = useAuthStore((state) => state.clearToken);
 
   const links = [
@@ -44,7 +45,14 @@ export default function Sidebar({ lang }: { lang: string }) {
           </Link>
         ))}
       </nav>
-      <Button variant="outline" onClick={clearToken}>
+      <Button
+        variant="outline"
+        onClick={() => {
+          clearToken();
+          router.replace(`/${lang}/admin/login`);
+          router.refresh();
+        }}
+      >
         {dict.admin.logout}
       </Button>
     </aside>

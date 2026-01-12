@@ -17,6 +17,12 @@ export function middleware(request: NextRequest) {
   const segments = pathname.split("/").filter(Boolean);
   const lang = segments[0];
 
+  if (lang === "vi") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/vn${pathname.replace(/^\/vi/, "")}`;
+    return NextResponse.redirect(url);
+  }
+
   if (!lang || !SUPPORTED_LANGS.includes(lang as (typeof SUPPORTED_LANGS)[number])) {
     const url = request.nextUrl.clone();
     url.pathname = `/${DEFAULT_LANG}${pathname === "/" ? "" : pathname}`;
