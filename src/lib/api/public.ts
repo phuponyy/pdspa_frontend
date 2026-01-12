@@ -1,11 +1,12 @@
 import { apiFetch } from "./client";
+import { API_BASE_URL } from "@/lib/constants";
 import type {
   HomePageResponse,
   LeadCreateRequest,
   LeadCreateResponse,
   PublicServicesResponse,
 } from "@/types/api.types";
-import type { HomeSection } from "@/types/page.types";
+import type { HeroSlide, HomeSection } from "@/types/page.types";
 
 type HomePageRawSection = {
   key?: string;
@@ -37,16 +38,31 @@ const mapSection = (section: HomePageRawSection): HomeSection => {
     ? ((body as { items: HomeSection["items"] }).items ?? [])
     : undefined;
   const images = Array.isArray((body as { images?: unknown }).images)
-    ? ((body as { images: string[] }).images ?? [])
+    ? ((body as { images: string[] }).images ?? []).map((src) =>
+        src && src.startsWith("/") ? `${API_BASE_URL}${src}` : src
+      )
+    : undefined;
+  const slides = Array.isArray((body as { slides?: unknown }).slides)
+    ? ((body as { slides: HeroSlide[] }).slides ?? []).map((slide) => ({
+        ...slide,
+        imageUrl:
+          slide.imageUrl && slide.imageUrl.startsWith("/")
+            ? `${API_BASE_URL}${slide.imageUrl}`
+            : slide.imageUrl,
+      }))
     : undefined;
   const description =
     typeof (body as { text?: unknown }).text === "string"
       ? (body as { text: string }).text
       : undefined;
-  const imageUrl =
+  const rawImageUrl =
     typeof (body as { imageUrl?: unknown }).imageUrl === "string"
       ? (body as { imageUrl: string }).imageUrl
       : undefined;
+  const imageUrl =
+    rawImageUrl && rawImageUrl.startsWith("/")
+      ? `${API_BASE_URL}${rawImageUrl}`
+      : rawImageUrl;
 
   return {
     key: section.key,
@@ -56,6 +72,7 @@ const mapSection = (section: HomePageRawSection): HomeSection => {
     description,
     imageUrl,
     images,
+    slides,
     items,
     body,
   };

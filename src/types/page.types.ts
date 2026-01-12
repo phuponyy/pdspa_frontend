@@ -14,6 +14,16 @@ export type HomeSectionItem = {
   priceOptions?: PriceOption[];
 };
 
+export type HeroSlide = {
+  imageUrl: string;
+  heading?: string;
+  subheading?: string;
+  primaryCta?: string;
+  primaryLink?: string;
+  secondaryCta?: string;
+  secondaryLink?: string;
+};
+
 export type HomeSection = {
   id?: number | string;
   key?: string;
@@ -23,6 +33,7 @@ export type HomeSection = {
   description?: string;
   imageUrl?: string;
   images?: string[];
+  slides?: HeroSlide[];
   items?: HomeSectionItem[];
   body?: Record<string, unknown> | null;
 };

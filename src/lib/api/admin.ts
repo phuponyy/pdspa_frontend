@@ -1,8 +1,10 @@
 import { apiFetch } from "./client";
+import { API_BASE_URL } from "@/lib/constants";
 import type {
   AdminLoginRequest,
   AdminLoginResponse,
   ApiSuccess,
+  HeroImageUploadResponse,
   LeadDetailResponse,
   LeadListResponse,
   LeadStatusUpdateRequest,
@@ -71,3 +73,22 @@ export const updateHomeStatus = async (token: string, payload: HomeStatusUpdateR
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+
+export const uploadHeroImage = async (token: string, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/admin/pages/home/hero/images`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+
+  return (await response.json()) as HeroImageUploadResponse;
+};

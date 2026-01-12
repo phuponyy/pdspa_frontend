@@ -88,7 +88,20 @@ export type HomeHeroUpdateRequest = {
   heading: string;
   subheading?: string;
   images?: string[];
+  slides?: {
+    imageUrl: string;
+    heading?: string;
+    subheading?: string;
+    primaryCta?: string;
+    primaryLink?: string;
+    secondaryCta?: string;
+    secondaryLink?: string;
+  }[];
 };
+
+export type HeroImageUploadResponse = ApiSuccess<{
+  url: string;
+}>;
 
 export type HomeStatusUpdateRequest = {
   status: "DRAFT" | "PUBLISHED";

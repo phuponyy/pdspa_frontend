@@ -86,7 +86,7 @@ export default function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 bg-black transition-[padding] duration-300 bg-transparent",
+        "sticky top-0 z-40 bg-black transition-[padding] duration-300 bg-transparent py-10",
         hideTopBar ? "m-[10px]" : "pt-0",
         className
       )}

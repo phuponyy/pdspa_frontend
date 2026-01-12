@@ -65,6 +65,7 @@ export default async function HomePage({
         subheading={(heroSection?.subheading as string) || dict.hero.subtitle}
         imageUrl={heroSection?.imageUrl as string | undefined}
         images={heroSection?.images}
+        slides={heroSection?.slides}
         primaryCta={dict.hero.ctaPrimary}
         secondaryCta={dict.hero.ctaSecondary}
       />
