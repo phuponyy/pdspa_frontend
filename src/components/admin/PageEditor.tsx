@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Button from "../common/Button";
 import Input from "../common/Input";
 import Textarea from "../common/Textarea";
+import { useToast } from "@/components/common/ToastProvider";
 import {
+  getHomeHero,
+  getHomeMeta,
+  getHomeStatus,
   updateHomeHero,
   updateHomeMeta,
   updateHomeStatus,
@@ -14,6 +19,17 @@ import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/constants";
 import type { HeroSlide } from "@/types/page.types";
 
+type MetaState = {
+  metaTitle: string;
+  metaDescription: string;
+};
+
+type HeroState = {
+  heading: string;
+  subheading: string;
+  slides: HeroSlide[];
+};
+
 export default function PageEditor({
   token,
   lang,
@@ -21,48 +37,270 @@ export default function PageEditor({
   token: string;
   lang: string;
 }) {
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [heading, setHeading] = useState("");
-  const [subheading, setSubheading] = useState("");
-  const [slides, setSlides] = useState<HeroSlide[]>([]);
+  const languages = useMemo(() => ["vn", "en"], []);
+  const searchParams = useSearchParams();
+  const initialLang =
+    searchParams.get("lang") && languages.includes(searchParams.get("lang") || "")
+      ? (searchParams.get("lang") as string)
+      : lang;
+  const [activeLang, setActiveLang] = useState(initialLang);
+  const [metaByLang, setMetaByLang] = useState<Record<string, MetaState>>({
+    vn: { metaTitle: "", metaDescription: "" },
+    en: { metaTitle: "", metaDescription: "" },
+  });
+  const [heroByLang, setHeroByLang] = useState<Record<string, HeroState>>({
+    vn: { heading: "", subheading: "", slides: [] },
+    en: { heading: "", subheading: "", slides: [] },
+  });
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
-  const [message, setMessage] = useState<string | null>(null);
+  const [loadedLangs, setLoadedLangs] = useState<Record<string, boolean>>({
+    vn: false,
+    en: false,
+  });
+  const [hasDraft, setHasDraft] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const storageKey = "home-editor-draft";
+  const toast = useToast();
 
-  const notify = (text: string) => {
-    setMessage(text);
-    setTimeout(() => setMessage(null), 3000);
+  const notify = (text: string, type: "success" | "error" | "info" = "info") => {
+    toast.push({ message: text, type });
   };
 
   const handleError = (err: unknown) => {
     if (err instanceof ApiError) {
-      notify(err.message || "Request failed.");
+      notify(err.message || "Request failed.", "error");
       return;
     }
-    notify("Unable to reach the server. Please try again.");
+    notify("Unable to reach the server. Please try again.", "error");
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("lang") !== activeLang) {
+      url.searchParams.set("lang", activeLang);
+      window.history.replaceState(null, "", url.toString());
+    }
+  }, [activeLang]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as {
+        metaByLang?: Record<string, MetaState>;
+        heroByLang?: Record<string, HeroState>;
+        activeLang?: string;
+        status?: "DRAFT" | "PUBLISHED";
+      };
+      if (parsed?.metaByLang) setMetaByLang(parsed.metaByLang);
+      if (parsed?.heroByLang) setHeroByLang(parsed.heroByLang);
+      if (parsed?.status) setStatus(parsed.status);
+      if (parsed?.activeLang && languages.includes(parsed.activeLang)) {
+        setActiveLang(parsed.activeLang);
+      }
+      setHasDraft(true);
+    } catch {
+      window.localStorage.removeItem(storageKey);
+    }
+  }, [languages]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isDirty) return;
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({ metaByLang, heroByLang, activeLang, status })
+    );
+  }, [metaByLang, heroByLang, activeLang, status, isDirty]);
+
+  const currentMeta = metaByLang[activeLang] || {
+    metaTitle: "",
+    metaDescription: "",
+  };
+  const currentHero = heroByLang[activeLang] || {
+    heading: "",
+    subheading: "",
+    slides: [],
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    if (loadedLangs[activeLang]) return;
+    let cancelled = false;
+
+    const isEmptyMeta = (meta: MetaState | undefined) =>
+      !meta?.metaTitle && !meta?.metaDescription;
+    const isEmptyHero = (hero: HeroState | undefined) =>
+      !hero?.heading && !hero?.subheading && !(hero?.slides?.length ?? 0);
+
+    const load = async () => {
+      try {
+        const [meta, hero] = await Promise.all([
+          getHomeMeta(token, activeLang),
+          getHomeHero(token, activeLang),
+        ]);
+        if (cancelled) return;
+
+        setMetaByLang((prev) => {
+          if (hasDraft && !isEmptyMeta(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              metaTitle: meta?.metaTitle ?? "",
+              metaDescription: meta?.metaDescription ?? "",
+            },
+          };
+        });
+
+        const fallbackSlides =
+          hero?.slides && hero.slides.length
+            ? hero.slides
+            : (hero?.images ?? []).map((imageUrl) => ({
+                imageUrl,
+                heading: "",
+                subheading: "",
+                primaryCta: "",
+                primaryLink: "",
+                secondaryCta: "",
+                secondaryLink: "",
+              }));
+
+        setHeroByLang((prev) => {
+          if (hasDraft && !isEmptyHero(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: hero?.heading ?? "",
+              subheading: hero?.subheading ?? "",
+              slides: fallbackSlides,
+            },
+          };
+        });
+
+        setLoadedLangs((prev) => ({ ...prev, [activeLang]: true }));
+      } catch (err) {
+        handleError(err);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeLang, token, loadedLangs, hasDraft]);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    const loadStatus = async () => {
+      try {
+        const response = await getHomeStatus(token);
+        if (cancelled) return;
+        if (!isDirty) {
+          setStatus(response.status);
+        }
+      } catch (err) {
+        handleError(err);
+      }
+    };
+    loadStatus();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, isDirty]);
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          {languages.map((code) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => {
+                setActiveLang(code);
+                if (typeof window !== "undefined") {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set("lang", code);
+                  window.history.replaceState(null, "", url.toString());
+                }
+              }}
+              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] ${
+                activeLang === code
+                  ? "bg-[var(--accent-strong)] text-white"
+                  : "border border-[var(--line)] text-[var(--ink-muted)] hover:text-[var(--ink)]"
+              }`}
+            >
+              {code.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        {activeLang !== lang ? (
+          <Button
+            variant="outline"
+            onClick={() => {
+              setMetaByLang((prev) => ({
+                ...prev,
+                [activeLang]: { ...prev[lang] },
+              }));
+              setHeroByLang((prev) => ({
+                ...prev,
+                [activeLang]: { ...prev[lang] },
+              }));
+              setIsDirty(true);
+            }}
+          >
+            Clone from {lang.toUpperCase()}
+          </Button>
+        ) : null}
+      </div>
+
       <div className="rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
         <h2 className="text-lg font-semibold text-[var(--ink)]">SEO Metadata</h2>
         <div className="mt-4 grid gap-4">
           <Input
             label="Meta title"
-            value={metaTitle}
-            onChange={(event) => setMetaTitle(event.target.value)}
+            value={currentMeta.metaTitle}
+            onChange={(event) => {
+              setIsDirty(true);
+              setMetaByLang((prev) => ({
+                ...prev,
+                [activeLang]: {
+                  ...prev[activeLang],
+                  metaTitle: event.target.value,
+                },
+              }));
+            }}
           />
           <Textarea
             label="Meta description"
-            value={metaDescription}
-            onChange={(event) => setMetaDescription(event.target.value)}
+            value={currentMeta.metaDescription}
+            onChange={(event) => {
+              setIsDirty(true);
+              setMetaByLang((prev) => ({
+                ...prev,
+                [activeLang]: {
+                  ...prev[activeLang],
+                  metaDescription: event.target.value,
+                },
+              }));
+            }}
           />
           <Button
             onClick={async () => {
               try {
-                await updateHomeMeta(token, lang, { metaTitle, metaDescription });
-                notify("SEO metadata updated.");
+                await updateHomeMeta(token, activeLang, {
+                  metaTitle: currentMeta.metaTitle,
+                  metaDescription: currentMeta.metaDescription,
+                });
+                notify("SEO metadata updated.", "success");
+                setIsDirty(false);
+                if (typeof window !== "undefined") {
+                  window.localStorage.removeItem(storageKey);
+                }
               } catch (err) {
                 handleError(err);
               }
@@ -78,13 +316,31 @@ export default function PageEditor({
         <div className="mt-4 grid gap-4">
           <Input
             label="Heading"
-            value={heading}
-            onChange={(event) => setHeading(event.target.value)}
+            value={currentHero.heading}
+            onChange={(event) => {
+              setIsDirty(true);
+              setHeroByLang((prev) => ({
+                ...prev,
+                [activeLang]: {
+                  ...prev[activeLang],
+                  heading: event.target.value,
+                },
+              }));
+            }}
           />
           <Textarea
             label="Subheading"
-            value={subheading}
-            onChange={(event) => setSubheading(event.target.value)}
+            value={currentHero.subheading}
+            onChange={(event) => {
+              setIsDirty(true);
+              setHeroByLang((prev) => ({
+                ...prev,
+                [activeLang]: {
+                  ...prev[activeLang],
+                  subheading: event.target.value,
+                },
+              }));
+            }}
           />
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -94,22 +350,29 @@ export default function PageEditor({
               <Button
                 variant="outline"
                 onClick={() => {
-                  if (slides.length >= 10) {
-                    notify("Maximum 10 images.");
+                  if (currentHero.slides.length >= 10) {
+                    notify("Maximum 10 images.", "info");
                     return;
                   }
-                  setSlides((prev) => [
+                  setIsDirty(true);
+                  setHeroByLang((prev) => ({
                     ...prev,
-                    {
-                      imageUrl: "",
-                      heading: "",
-                      subheading: "",
-                      primaryCta: "",
-                      primaryLink: "",
-                      secondaryCta: "",
-                      secondaryLink: "",
+                    [activeLang]: {
+                      ...prev[activeLang],
+                      slides: [
+                        ...prev[activeLang].slides,
+                        {
+                          imageUrl: "",
+                          heading: "",
+                          subheading: "",
+                          primaryCta: "",
+                          primaryLink: "",
+                          secondaryCta: "",
+                          secondaryLink: "",
+                        },
+                      ],
                     },
-                  ]);
+                  }));
                 }}
               >
                 Add image
@@ -125,36 +388,41 @@ export default function PageEditor({
                   onChange={async (event) => {
                     const files = Array.from(event.target.files || []);
                     if (!files.length) return;
-                    if (slides.length >= 10) {
-                      notify("Maximum 10 images.");
+                    if (currentHero.slides.length >= 10) {
+                      notify("Maximum 10 images.", "info");
                       return;
                     }
                     setIsUploading(true);
                     try {
-                      let remaining = 10 - slides.length;
+                      let remaining = 10 - currentHero.slides.length;
                       for (const file of files) {
                         if (remaining <= 0) break;
                         const response = await uploadHeroImage(token, file);
                         const url = response?.data?.url;
                         if (url) {
-                          setSlides((prev) =>
-                            [
-                              ...prev,
-                              {
-                                imageUrl: url,
-                                heading: "",
-                                subheading: "",
-                                primaryCta: "",
-                                primaryLink: "",
-                                secondaryCta: "",
-                                secondaryLink: "",
-                              },
-                            ].slice(0, 10)
-                          );
+                          setIsDirty(true);
+                          setHeroByLang((prev) => ({
+                            ...prev,
+                            [activeLang]: {
+                              ...prev[activeLang],
+                              slides: [
+                                ...prev[activeLang].slides,
+                                {
+                                  imageUrl: url,
+                                  heading: "",
+                                  subheading: "",
+                                  primaryCta: "",
+                                  primaryLink: "",
+                                  secondaryCta: "",
+                                  secondaryLink: "",
+                                },
+                              ].slice(0, 10),
+                            },
+                          }));
                           remaining -= 1;
                         }
                       }
-                      notify("Images uploaded.");
+                      notify("Images uploaded.", "success");
                     } catch (err) {
                       handleError(err);
                     } finally {
@@ -170,46 +438,70 @@ export default function PageEditor({
               </label>
             </div>
             <div className="space-y-3">
-              {slides.map((slide, idx) => (
+              {currentHero.slides.map((slide, idx) => (
                 <div key={`hero-image-${idx}`} className="flex gap-2">
                   <Input
                     label={`Image URL ${idx + 1}`}
                     value={slide.imageUrl}
                     onChange={(event) => {
-                      const next = [...slides];
-                      next[idx] = { ...next[idx], imageUrl: event.target.value };
-                      setSlides(next);
+                      setIsDirty(true);
+                      setHeroByLang((prev) => {
+                        const next = [...prev[activeLang].slides];
+                        next[idx] = { ...next[idx], imageUrl: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], slides: next },
+                        };
+                      });
                     }}
                   />
                   <Button
                     variant="outline"
                     className="h-12 px-4"
                     onClick={() =>
-                      setSlides((prev) => prev.filter((_, i) => i !== idx))
+                      setHeroByLang((prev) => ({
+                        ...prev,
+                        [activeLang]: {
+                          ...prev[activeLang],
+                          slides: prev[activeLang].slides.filter((_, i) => i !== idx),
+                        },
+                      }))
                     }
                   >
                     Remove
                   </Button>
                 </div>
               ))}
-              {slides.map((slide, idx) => (
+              {currentHero.slides.map((slide, idx) => (
                 <div key={`hero-text-${idx}`} className="grid gap-3">
                   <Input
                     label={`Heading ${idx + 1}`}
                     value={slide.heading || ""}
                     onChange={(event) => {
-                      const next = [...slides];
-                      next[idx] = { ...next[idx], heading: event.target.value };
-                      setSlides(next);
+                      setIsDirty(true);
+                      setHeroByLang((prev) => {
+                        const next = [...prev[activeLang].slides];
+                        next[idx] = { ...next[idx], heading: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], slides: next },
+                        };
+                      });
                     }}
                   />
                   <Textarea
                     label={`Subheading ${idx + 1}`}
                     value={slide.subheading || ""}
                     onChange={(event) => {
-                      const next = [...slides];
-                      next[idx] = { ...next[idx], subheading: event.target.value };
-                      setSlides(next);
+                      setIsDirty(true);
+                      setHeroByLang((prev) => {
+                        const next = [...prev[activeLang].slides];
+                        next[idx] = { ...next[idx], subheading: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], slides: next },
+                        };
+                      });
                     }}
                   />
                   <div className="grid gap-3 md:grid-cols-2">
@@ -217,42 +509,78 @@ export default function PageEditor({
                       label={`Primary button ${idx + 1}`}
                       value={slide.primaryCta || ""}
                       onChange={(event) => {
-                        const next = [...slides];
-                        next[idx] = { ...next[idx], primaryCta: event.target.value };
-                        setSlides(next);
+                        setIsDirty(true);
+                        setHeroByLang((prev) => {
+                          const next = [...prev[activeLang].slides];
+                          next[idx] = {
+                            ...next[idx],
+                            primaryCta: event.target.value,
+                          };
+                          return {
+                            ...prev,
+                            [activeLang]: { ...prev[activeLang], slides: next },
+                          };
+                        });
                       }}
                     />
                     <Input
                       label={`Primary link ${idx + 1}`}
                       value={slide.primaryLink || ""}
                       onChange={(event) => {
-                        const next = [...slides];
-                        next[idx] = { ...next[idx], primaryLink: event.target.value };
-                        setSlides(next);
+                        setIsDirty(true);
+                        setHeroByLang((prev) => {
+                          const next = [...prev[activeLang].slides];
+                          next[idx] = {
+                            ...next[idx],
+                            primaryLink: event.target.value,
+                          };
+                          return {
+                            ...prev,
+                            [activeLang]: { ...prev[activeLang], slides: next },
+                          };
+                        });
                       }}
                     />
                     <Input
                       label={`Secondary button ${idx + 1}`}
                       value={slide.secondaryCta || ""}
                       onChange={(event) => {
-                        const next = [...slides];
-                        next[idx] = { ...next[idx], secondaryCta: event.target.value };
-                        setSlides(next);
+                        setIsDirty(true);
+                        setHeroByLang((prev) => {
+                          const next = [...prev[activeLang].slides];
+                          next[idx] = {
+                            ...next[idx],
+                            secondaryCta: event.target.value,
+                          };
+                          return {
+                            ...prev,
+                            [activeLang]: { ...prev[activeLang], slides: next },
+                          };
+                        });
                       }}
                     />
                     <Input
                       label={`Secondary link ${idx + 1}`}
                       value={slide.secondaryLink || ""}
                       onChange={(event) => {
-                        const next = [...slides];
-                        next[idx] = { ...next[idx], secondaryLink: event.target.value };
-                        setSlides(next);
+                        setIsDirty(true);
+                        setHeroByLang((prev) => {
+                          const next = [...prev[activeLang].slides];
+                          next[idx] = {
+                            ...next[idx],
+                            secondaryLink: event.target.value,
+                          };
+                          return {
+                            ...prev,
+                            [activeLang]: { ...prev[activeLang], slides: next },
+                          };
+                        });
                       }}
                     />
                   </div>
                 </div>
               ))}
-              {!slides.length ? (
+              {!currentHero.slides.length ? (
                 <p className="text-xs text-[var(--ink-muted)]">
                   No slides yet. Add up to 10 slides.
                 </p>
@@ -262,7 +590,7 @@ export default function PageEditor({
           <Button
             onClick={async () => {
               try {
-                const normalizedSlides = slides
+                const normalizedSlides = currentHero.slides
                   .map((slide) => ({
                     imageUrl: slide.imageUrl.trim(),
                     heading: slide.heading?.trim(),
@@ -280,15 +608,19 @@ export default function PageEditor({
                       : slide.imageUrl,
                   }));
                 if (normalizedSlides.length > 10) {
-                  notify("Maximum 10 images.");
+                  notify("Maximum 10 images.", "info");
                   return;
                 }
-                await updateHomeHero(token, lang, {
-                  heading,
-                  subheading,
+                await updateHomeHero(token, activeLang, {
+                  heading: currentHero.heading,
+                  subheading: currentHero.subheading,
                   slides: normalizedSlides.slice(0, 10),
                 });
-                notify("Hero section updated.");
+                notify("Hero section updated.", "success");
+                setIsDirty(false);
+                if (typeof window !== "undefined") {
+                  window.localStorage.removeItem(storageKey);
+                }
               } catch (err) {
                 handleError(err);
               }
@@ -317,7 +649,7 @@ export default function PageEditor({
             onClick={async () => {
               try {
                 await updateHomeStatus(token, { status });
-                notify("Homepage status updated.");
+                notify("Homepage status updated.", "success");
               } catch (err) {
                 handleError(err);
               }
@@ -328,9 +660,6 @@ export default function PageEditor({
         </div>
       </div>
 
-      {message ? (
-        <p className="text-sm text-[var(--jade)]">{message}</p>
-      ) : null}
     </div>
   );
 }

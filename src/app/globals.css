@@ -17,6 +17,21 @@
   --jade-deep: var(--accent-deep);
 }
 
+.toast-enter {
+  animation: toast-in 0.25s ease-out;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
 @theme inline {
   --color-background: var(--sand);
   --color-foreground: var(--ink);
