@@ -6,9 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getLeads } from "@/lib/api/admin";
 import { useAuthStore } from "@/lib/stores/authStore";
 import LeadTable from "@/components/admin/LeadTable";
-import Button from "@/components/common/Button";
 import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 
 export default function LeadsPage() {
   const params = useParams<{ lang?: string }>();
@@ -33,13 +33,8 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--jade)]">
-          Leads
-        </p>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">
-          Customer inquiries
-        </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-white">Quản lý Leads</h1>
       </div>
       {isLoading ? (
         <Loading label="Loading leads" />
@@ -47,19 +42,19 @@ export default function LeadsPage() {
         <>
           <LeadTable lang={resolvedLang} leads={leads} />
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[var(--ink-muted)]">
+            <span className="text-xs text-slate-400">
               Page {page} of {maxPage}
             </span>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               >
                 Prev
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 disabled={page >= maxPage}
                 onClick={() => setPage((prev) => Math.min(maxPage, prev + 1))}
               >

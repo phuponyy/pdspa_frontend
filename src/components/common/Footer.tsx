@@ -1,4 +1,7 @@
+ "use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Container from "./Container";
 import { HOTLINE, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
 
@@ -11,6 +14,11 @@ export default function Footer({
   siteName?: string;
   lang?: string;
 }) {
+  const pathname = usePathname();
+  if (pathname.includes("/admin")) {
+    return null;
+  }
+
   return (
     <footer className="mt-20 border-t border-[rgba(255,255,255,0.4)] bg-[var(--accent-deep)] text-white">
       <Container className="grid gap-10 py-12 text-sm md:grid-cols-[1.3fr_1fr_1fr]">

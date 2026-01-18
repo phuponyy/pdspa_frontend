@@ -2,30 +2,30 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getDictionary } from "@/lib/i18n";
-import Button from "../common/Button";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
 
 export default function Sidebar({ lang }: { lang: string }) {
-  const dict = getDictionary(lang);
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const clearToken = useAuthStore((state) => state.clearToken);
 
   const links = [
-    { href: `/${lang}/admin/dashboard`, label: dict.admin.dashboard },
+    { href: `/${lang}/admin/dashboard`, label: t("admin.dashboard") },
     { href: `/${lang}/admin/posts`, label: "Posts" },
     { href: `/${lang}/admin/pages`, label: "Pages" },
     { href: `/${lang}/admin/media`, label: "Media" },
-    { href: `/${lang}/admin/leads`, label: dict.admin.leads },
+    { href: `/${lang}/admin/leads`, label: t("admin.leads") },
     { href: `/${lang}/admin/pages/home`, label: "Homepage" },
     { href: `/${lang}/admin/settings`, label: "Settings" },
     { href: `/${lang}/admin/users`, label: "Users" },
   ];
 
   return (
-    <aside className="sticky top-10 hidden h-fit w-72 flex-col gap-6 rounded-3xl border border-[var(--line)] bg-[#111111] p-6 text-white shadow-[var(--shadow)] lg:flex">
+    <aside className="sticky top-10 hidden h-fit w-72 flex-col gap-6 rounded-3xl border border-white/5 bg-[#0f1722] p-6 text-white shadow-[0_20px_60px_rgba(5,10,18,0.45)] lg:flex">
       <div className="space-y-1">
         <p className="text-xs uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
           Panda Spa
@@ -50,14 +50,14 @@ export default function Sidebar({ lang }: { lang: string }) {
       </nav>
       <Button
         variant="outline"
-        className="border-white/30 text-white hover:border-white"
+        className="w-full"
         onClick={() => {
           clearToken();
           router.replace(`/${lang}/admin/login`);
           router.refresh();
         }}
       >
-        {dict.admin.logout}
+      {t("admin.logout")}
       </Button>
     </aside>
   );

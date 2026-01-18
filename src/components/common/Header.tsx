@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Button from "./Button";
-import { getDictionary } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 import {
   HOTLINE,
   HOTLINE_SECONDARY,
@@ -12,6 +12,15 @@ import {
   SPA_HOURS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
+import { getSiteConfig } from "@/lib/api/public";
+
+type NavItem = { label: string; href: string };
+type TopBarConfig = {
+  address?: string;
+  hours?: string;
+  phonePrimary?: string;
+  phoneSecondary?: string;
+};
 
 export default function Header({
   lang,
@@ -22,14 +31,32 @@ export default function Header({
   hotline?: string;
   className?: string;
 }) {
-  const dict = getDictionary(lang);
+  const { i18n } = useTranslation();
+  const fixedT = useMemo(() => i18n.getFixedT(lang), [i18n, lang]);
   const pathname = usePathname();
+  const isAdminRoute = pathname.includes("/admin");
   const [hideTopBar, setHideTopBar] = useState(false);
   const lastScroll = useRef(0);
   const lastToggle = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const defaultLinks = useMemo(
+    () => [
+      { href: `/${lang}`, label: fixedT("nav.home") },
+      { href: `/${lang}/good-massage-in-da-nang`, label: fixedT("nav.about") },
+      { href: `/${lang}/dich-vu`, label: fixedT("nav.services") },
+      { href: `/${lang}/price-list`, label: fixedT("nav.price") },
+      { href: `/${lang}/news`, label: fixedT("nav.news") },
+      { href: `/${lang}/contact`, label: fixedT("nav.contact") },
+    ],
+    [lang, fixedT]
+  );
+  const [links, setLinks] = useState<NavItem[]>(defaultLinks);
+  const [topBar, setTopBar] = useState<TopBarConfig>({});
 
   useEffect(() => {
+    if (isAdminRoute) {
+      return;
+    }
     const onScroll = () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
@@ -58,20 +85,66 @@ export default function Header({
         cancelAnimationFrame(rafRef.current);
       }
     };
-  }, []);
+  }, [isAdminRoute]);
+
+  useEffect(() => {
+    if (isAdminRoute) {
+      return;
+    }
+    let active = true;
+    const loadConfig = async () => {
+      try {
+        setLinks(defaultLinks);
+        const response = await getSiteConfig();
+        const config = response?.data ?? {};
+        const raw = config[`navbar_${lang}`];
+        if (!raw) {
+          setLinks(defaultLinks);
+        } else {
+          const parsed = JSON.parse(raw) as NavItem[];
+          if (!Array.isArray(parsed) || !parsed.length) {
+            setLinks(defaultLinks);
+          } else if (active) {
+            setLinks(
+              parsed.map((item) => ({
+                label: String(item.label || ""),
+                href: String(item.href || ""),
+              }))
+            );
+          }
+        }
+
+        if (active) {
+          setTopBar({
+            address: config[`topbar_address_${lang}`] || SPA_ADDRESS,
+            hours: config[`topbar_hours_${lang}`] || SPA_HOURS,
+            phonePrimary: config[`topbar_phone_primary_${lang}`] || HOTLINE,
+            phoneSecondary:
+              config[`topbar_phone_secondary_${lang}`] || HOTLINE_SECONDARY,
+          });
+        }
+      } catch {
+        if (active) {
+          setLinks(defaultLinks);
+          setTopBar({
+            address: SPA_ADDRESS,
+            hours: SPA_HOURS,
+            phonePrimary: HOTLINE,
+            phoneSecondary: HOTLINE_SECONDARY,
+          });
+        }
+      }
+    };
+
+    loadConfig();
+    return () => {
+      active = false;
+    };
+  }, [lang, defaultLinks, isAdminRoute]);
 
   const segments = pathname.split("/").filter(Boolean);
   const currentLang = segments[0] || lang;
   const restPath = segments.slice(1).join("/");
-
-  const links = [
-    { href: `/${lang}`, label: dict.nav.home },
-    { href: `/${lang}/good-massage-in-da-nang`, label: dict.nav.about },
-    { href: `/${lang}/dich-vu`, label: dict.nav.services },
-    { href: `/${lang}/price-list`, label: dict.nav.price },
-    { href: `/${lang}/news`, label: dict.nav.news },
-    { href: `/${lang}/contact`, label: dict.nav.contact },
-  ];
 
   const isActive = (href: string) =>
     href === `/${lang}` ? pathname === href : pathname.startsWith(href);
@@ -82,6 +155,10 @@ export default function Header({
         ? "text-[var(--accent-strong)]"
         : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.9)]"
     );
+
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <header
@@ -111,7 +188,7 @@ export default function Header({
               <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
-            <span>{SPA_ADDRESS}</span>
+            <span>{topBar.address || SPA_ADDRESS}</span>
           </div>
           <div className="flex items-center gap-2">
             <svg
@@ -126,7 +203,7 @@ export default function Header({
               <circle cx="12" cy="12" r="8" />
               <path d="M12 8v5l3 2" />
             </svg>
-            <span>Working Time: {SPA_HOURS}</span>
+            <span>Working Time: {topBar.hours || SPA_HOURS}</span>
           </div>
           <div className="flex items-center gap-2">
             <svg
@@ -140,7 +217,7 @@ export default function Header({
             >
               <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.9 19.9 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.9 19.9 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 13 13 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1l-1.2 1.2a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5 13 13 0 0 0 2.8.7 2 2 0 0 1 1.7 2z" />
             </svg>
-            <span>{hotline || HOTLINE}</span>
+            <span>{topBar.phonePrimary || hotline || HOTLINE}</span>
           </div>
           <div className="flex items-center gap-2">
             <svg
@@ -154,7 +231,7 @@ export default function Header({
             >
               <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.9 19.9 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.9 19.9 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 13 13 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1l-1.2 1.2a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5 13 13 0 0 0 2.8.7 2 2 0 0 1 1.7 2z" />
             </svg>
-            <span>{HOTLINE_SECONDARY}</span>
+            <span>{topBar.phoneSecondary || HOTLINE_SECONDARY}</span>
           </div>
           <div className="flex items-center gap-2">
             {[
@@ -234,7 +311,7 @@ export default function Header({
                 href={`/${lang}/admin/login`}
                 className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
               >
-                {dict.nav.admin}
+                {fixedT("nav.admin")}
               </Link>
             </div>
           </div>

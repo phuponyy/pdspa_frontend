@@ -63,6 +63,8 @@ export type PublicService = {
 
 export type PublicServicesResponse = ApiSuccess<PublicService[]>;
 
+export type SiteConfigResponse = ApiSuccess<Record<string, string>>;
+
 export type LeadListResponse = ApiSuccess<{
   items: Lead[];
   pagination?: {

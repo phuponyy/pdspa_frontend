@@ -21,14 +21,17 @@ export default function HomeEditorPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--jade)]">
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-[0.2em] text-[#8fb6ff]">
           Homepage
         </p>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">
-          Content editor
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold text-white">Content editor</h1>
+          <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs text-slate-300">
+            Edit hero, SEO, publish status
+          </span>
+        </div>
       </div>
       <PageEditor token={token} lang={resolvedLang} />
     </div>

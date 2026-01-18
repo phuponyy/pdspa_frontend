@@ -1,5 +1,6 @@
 import Container from "@/components/common/Container";
 import { isSupportedLang } from "@/lib/i18n";
+import { getServerTranslator } from "@/lib/i18n/server";
 
 export default async function AboutPage({
   params,
@@ -8,46 +9,39 @@ export default async function AboutPage({
 }) {
   const { lang: rawLang } = await params;
   const lang = isSupportedLang(rawLang) ? rawLang : "vn";
-  const isVn = lang === "vn";
+  const i18n = await getServerTranslator(lang);
+  const t = i18n.t.bind(i18n);
 
   return (
     <div className="space-y-16 pb-16 pt-10">
       <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="space-y-6">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
-            {isVn ? "Gioi thieu" : "About us"}
+            {t("aboutPage.eyebrow")}
           </p>
           <h1 className="text-4xl font-semibold leading-tight text-[var(--ink)] md:text-5xl">
             <span className="text-accent">
-              {isVn
-                ? "Good Massage in Da Nang"
-                : "Good Massage in Da Nang"}
+              {t("aboutPage.title")}
             </span>
           </h1>
           <p className="text-base text-[var(--ink-muted)] md:text-lg">
-            {isVn
-              ? "Panda Spa la noi ket hop giua tri lieu co the va cham soc tinh than. Moi lieu trinh duoc thiet ke boi ky thuat vien chuyen nghiep voi khong gian yen tinh, huong tinh dau, va cham soc an can."
-              : "Panda Spa blends body therapy with mindful care. Each ritual is designed by experienced therapists in a serene space with aroma oils and attentive service."}
+            {t("aboutPage.description")}
           </p>
           <div className="grid gap-4 text-sm text-[var(--ink-muted)] md:grid-cols-2">
             <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
               <p className="font-semibold text-[var(--ink)]">
-                {isVn ? "Ky thuat vien" : "Therapists"}
+                {t("aboutPage.therapistsTitle")}
               </p>
               <p>
-                {isVn
-                  ? "Dao tao bai ban, tap trung vao su an toan va hieu qua."
-                  : "Trained with a focus on safety, pressure balance, and recovery."}
+                {t("aboutPage.therapistsText")}
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
               <p className="font-semibold text-[var(--ink)]">
-                {isVn ? "Khong gian" : "Atmosphere"}
+                {t("aboutPage.atmosphereTitle")}
               </p>
               <p>
-                {isVn
-                  ? "Thien nhien, am ap, ket hop huong tinh dau va am nhac."
-                  : "Warm, calm, and curated with essential oils and soft music."}
+                {t("aboutPage.atmosphereText")}
               </p>
             </div>
           </div>
@@ -67,9 +61,9 @@ export default async function AboutPage({
 
       <Container className="grid gap-6 md:grid-cols-3">
         {[
-          isVn ? "Ky thuat massage chuan spa" : "Signature massage techniques",
-          isVn ? "Tinh dau va thao moc thien nhien" : "Natural oils & herbs",
-          isVn ? "Cham soc ca nhan hoa" : "Personalized treatments",
+          t("aboutPage.highlight1"),
+          t("aboutPage.highlight2"),
+          t("aboutPage.highlight3"),
         ].map((item) => (
           <div
             key={item}
@@ -77,9 +71,7 @@ export default async function AboutPage({
           >
             <p className="text-base font-semibold text-[var(--ink)]">{item}</p>
             <p className="mt-2">
-              {isVn
-                ? "Truc tiep tu doi ngu Panda Spa, dieu chinh theo nhu cau cua ban."
-                : "Crafted by Panda Spa specialists and tailored to your needs."}
+              {t("aboutPage.highlightText")}
             </p>
           </div>
         ))}

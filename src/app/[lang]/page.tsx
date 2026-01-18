@@ -1,6 +1,7 @@
 import { getHomePage, getServices } from "@/lib/api/public";
 import { SITE_DESCRIPTION, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
-import { getDictionary, isSupportedLang } from "@/lib/i18n";
+import { isSupportedLang } from "@/lib/i18n";
+import { getServerTranslator } from "@/lib/i18n/server";
 import HeroSection from "@/components/home/HeroSection";
 import SectionRenderer from "@/components/home/SectionRenderer";
 import ContactForm from "@/components/home/ContactForm";
@@ -46,7 +47,8 @@ export default async function HomePage({
 }) {
   const { lang: rawLang } = await params;
   const lang = isSupportedLang(rawLang) ? rawLang : "vn";
-  const dict = getDictionary(lang);
+  const i18n = await getServerTranslator(lang);
+  const t = i18n.t.bind(i18n);
   const [homeData, servicesResponse] = await Promise.all([
     getHomePage(lang).catch(() => null),
     getServices(lang).catch(() => null),
@@ -60,14 +62,14 @@ export default async function HomePage({
   return (
     <div className="home-dark space-y-16 pb-16">
       <HeroSection
-        badge={dict.hero.badge}
-        heading={(heroSection?.heading as string) || dict.hero.title}
-        subheading={(heroSection?.subheading as string) || dict.hero.subtitle}
+        badge={t("hero.badge")}
+        heading={(heroSection?.heading as string) || t("hero.title")}
+        subheading={(heroSection?.subheading as string) || t("hero.subtitle")}
         imageUrl={heroSection?.imageUrl as string | undefined}
         images={heroSection?.images}
         slides={heroSection?.slides}
-        primaryCta={dict.hero.ctaPrimary}
-        secondaryCta={dict.hero.ctaSecondary}
+        primaryCta={t("hero.ctaPrimary")}
+        secondaryCta={t("hero.ctaSecondary")}
       />
       <SectionRenderer sections={homeData?.sections} lang={lang} />
 
@@ -78,7 +80,7 @@ export default async function HomePage({
               Concierge
             </span>
             <h2 className="text-3xl font-semibold text-[var(--ink)] md:text-4xl">
-              {dict.sections.contact}
+              {t("sections.contact")}
             </h2>
             <p className="text-sm text-[var(--ink-muted)] md:text-base">
               Share your preferences and we will tailor a ritual and schedule
@@ -92,7 +94,7 @@ export default async function HomePage({
               <p>Working Time: {SPA_HOURS}</p>
             </div>
           </div>
-          <ContactForm lang={lang} services={services} labels={dict.form} />
+          <ContactForm lang={lang} services={services} />
         </Container>
       </section>
     </div>

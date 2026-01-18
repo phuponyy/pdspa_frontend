@@ -2,6 +2,7 @@ import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import { getServices } from "@/lib/api/public";
 import { isSupportedLang } from "@/lib/i18n";
+import { getServerTranslator } from "@/lib/i18n/server";
 
 export default async function PriceListPage({
   params,
@@ -10,7 +11,8 @@ export default async function PriceListPage({
 }) {
   const { lang: rawLang } = await params;
   const lang = isSupportedLang(rawLang) ? rawLang : "vn";
-  const isVn = lang === "vn";
+  const i18n = await getServerTranslator(lang);
+  const t = i18n.t.bind(i18n);
   const servicesResponse = await getServices(lang).catch(() => null);
   const services = servicesResponse?.data ?? [];
 
@@ -18,13 +20,9 @@ export default async function PriceListPage({
     <div className="space-y-16 pb-16 pt-10">
       <Container>
         <SectionHeading
-          eyebrow={isVn ? "Bang gia" : "Price list"}
-          title={isVn ? "Bang gia dich vu" : "Service pricing"}
-          description={
-            isVn
-              ? "Gia niem yet co the thay doi theo tung chuong trinh."
-              : "Prices may vary depending on seasonal offers."
-          }
+          eyebrow={t("pricePage.eyebrow")}
+          title={t("pricePage.title")}
+          description={t("pricePage.description")}
         />
       </Container>
 
@@ -41,7 +39,7 @@ export default async function PriceListPage({
                     {service.name}
                   </h3>
                   <p className="text-sm text-[var(--ink-muted)]">
-                    {service.description || (isVn ? "Lieu trinh cao cap." : "Premium therapy ritual.")}
+                    {service.description || t("pricePage.serviceFallback")}
                   </p>
                 </div>
                 <span className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
@@ -67,9 +65,7 @@ export default async function PriceListPage({
           ))
         ) : (
           <div className="rounded-3xl border border-dashed border-[var(--line)] bg-white/70 p-8 text-sm text-[var(--ink-muted)]">
-            {isVn
-              ? "Bang gia dang cap nhat. Vui long lien he de biet them."
-              : "Pricing is being updated. Please contact us for details."}
+            {t("pricePage.emptyState")}
           </div>
         )}
       </Container>

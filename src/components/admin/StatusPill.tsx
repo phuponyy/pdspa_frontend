@@ -11,10 +11,10 @@ export default function StatusPill({ status }: { status: LeadStatus }) {
   return (
     <span
       className={cn(
-        "rounded-full px-3 py-1 text-xs font-semibold",
-        status === "NEW" && "bg-[rgba(255,106,61,0.12)] text-[#b84522]",
-        status === "CONTACTED" && "bg-[rgba(255,182,64,0.22)] text-[#a86712]",
-        status === "DONE" && "bg-[rgba(34,197,94,0.12)] text-[#166534]"
+        "rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em]",
+        status === "NEW" && "border-sky-500/30 bg-sky-500/15 text-sky-200",
+        status === "CONTACTED" && "border-amber-500/30 bg-amber-500/15 text-amber-200",
+        status === "DONE" && "border-emerald-500/30 bg-emerald-500/15 text-emerald-200"
       )}
     >
       {statusMap[status] || status}

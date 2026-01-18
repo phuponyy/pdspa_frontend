@@ -21,6 +21,7 @@ import type {
   HomeHeroResponse,
   HomeMetaResponse,
   HomeStatusResponse,
+  SiteConfigResponse,
 } from "@/types/api.types";
 
 export const loginAdmin = async (payload: AdminLoginRequest) =>
@@ -102,6 +103,13 @@ export const getHomeStatus = async (token: string) =>
   apiFetch<HomeStatusResponse>("/admin/pages/home/status", {
     token,
     cache: "no-store",
+  });
+
+export const updateSiteConfig = async (token: string, payload: Record<string, string>) =>
+  apiFetch<SiteConfigResponse>("/admin/config", {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 
 export const uploadHeroImage = async (token: string, file: File) => {
@@ -210,6 +218,25 @@ export const uploadMedia = async (token: string, file: File) => {
 
   if (!response.ok) {
     throw new Error("Upload failed");
+  }
+
+  return (await response.json()) as MediaUploadResponse;
+};
+
+export const updateMedia = async (token: string, id: number, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${API_BASE_URL}/admin/cms/media/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Update failed");
   }
 
   return (await response.json()) as MediaUploadResponse;

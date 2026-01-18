@@ -10,7 +10,8 @@ import { useAuthStore } from "@/lib/stores/authStore";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { ApiError } from "@/lib/api/client";
-import { getDefaultLang, getDictionary } from "@/lib/i18n";
+import { getDefaultLang } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function AdminLogin() {
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
   const resolvedLang = lang ?? getDefaultLang();
-  const dict = getDictionary(resolvedLang);
+  const { t } = useTranslation();
   const setToken = useAuthStore((state) => state.setToken);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,27 +55,27 @@ export default function AdminLogin() {
     <div className="flex min-h-screen items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-3xl border border-[var(--line)] bg-white p-8 shadow-[var(--shadow)]">
         <h1 className="text-2xl font-semibold text-[var(--ink)]">
-          {dict.admin.loginTitle}
+          {t("admin.loginTitle")}
         </h1>
         <p className="mt-2 text-sm text-[var(--ink-muted)]">
           Secure access for Panda Spa administrators.
         </p>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
           <Input
-            label={dict.admin.email}
+            label={t("admin.email")}
             type="email"
             error={errors.email?.message}
             {...register("email")}
           />
           <Input
-            label={dict.admin.password}
+            label={t("admin.password")}
             type="password"
             error={errors.password?.message}
             {...register("password")}
           />
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Signing in..." : dict.admin.signIn}
+            {isSubmitting ? "Signing in..." : t("admin.signIn")}
           </Button>
         </form>
       </div>

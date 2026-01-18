@@ -9,26 +9,19 @@ import Input from "@/components/common/Input";
 import Textarea from "@/components/common/Textarea";
 import type { PublicService } from "@/types/api.types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ContactForm({
   lang,
   services,
-  labels,
 }: {
   lang: string;
   services?: PublicService[];
-  labels: {
-    fullName: string;
-    phone: string;
-    email: string;
-    note: string;
-    submit: string;
-    pickServices: string;
-  };
 }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
+  const { t } = useTranslation();
 
   const {
     register,
@@ -91,30 +84,30 @@ export default function ContactForm({
     >
       <div className="grid gap-4 md:grid-cols-2">
         <Input
-          label={labels.fullName}
+          label={t("form.fullName")}
           error={errors.fullName?.message}
           {...register("fullName")}
         />
         <Input
-          label={labels.phone}
+          label={t("form.phone")}
           error={errors.phone?.message}
           {...register("phone")}
         />
       </div>
       <Input
-        label={labels.email}
+        label={t("form.email")}
         error={errors.email?.message}
         type="email"
         {...register("email")}
       />
       <Textarea
-        label={labels.note}
+        label={t("form.note")}
         error={errors.note?.message}
         {...register("note")}
       />
       <div className="space-y-3">
         <p className="text-sm font-semibold text-[var(--ink)]">
-          {labels.pickServices}
+          {t("form.pickServices")}
         </p>
         <div className="grid gap-3 md:grid-cols-2">
           {serviceList.length ? (
@@ -152,11 +145,11 @@ export default function ContactForm({
                     {service.name}
                   </div>
                   <p className="text-xs text-[var(--ink-muted)]">
-                    {service.description || "Tailored recommendation with our team."}
+                    {service.description || t("form.serviceDescriptionFallback")}
                   </p>
                   {service.priceOptions.length ? (
                     <div className="text-xs text-[var(--ink-muted)]">
-                      Price from{" "}
+                      {t("form.priceFrom")}{" "}
                       <span className="font-semibold text-[var(--ink)]">
                         {service.priceOptions[0].price.toLocaleString("vi-VN")}₫
                       </span>
@@ -166,7 +159,9 @@ export default function ContactForm({
                     <div className="flex flex-wrap items-center gap-3 text-xs">
                       {service.priceOptions.length ? (
                         <label className="flex items-center gap-2">
-                          <span className="text-[var(--ink-muted)]">Option</span>
+                          <span className="text-[var(--ink-muted)]">
+                            {t("form.optionLabel")}
+                          </span>
                           <select
                             className="h-8 rounded-full border border-[var(--line)] bg-white px-2 text-xs"
                             value={selectedOptionId}
@@ -187,7 +182,9 @@ export default function ContactForm({
                         </label>
                       ) : null}
                       <label className="flex items-center gap-2">
-                        <span className="text-[var(--ink-muted)]">Qty</span>
+                        <span className="text-[var(--ink-muted)]">
+                          {t("form.qtyLabel")}
+                        </span>
                         <input
                           type="number"
                           min={1}
@@ -200,7 +197,7 @@ export default function ContactForm({
                       </label>
                       {selectedOption ? (
                         <span className="text-[var(--ink-muted)]">
-                          Total{" "}
+                          {t("form.total")}{" "}
                           <span className="font-semibold text-[var(--ink)]">
                             {(selectedOption.price * (selectedItem?.qty || 1)).toLocaleString(
                               "vi-VN"
@@ -217,7 +214,7 @@ export default function ContactForm({
             })
           ) : (
             <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--mist)] p-6 text-sm text-[var(--ink-muted)]">
-              Services are being updated. Please contact us directly.
+              {t("form.servicesEmpty")}
             </div>
           )}
         </div>
@@ -226,17 +223,13 @@ export default function ContactForm({
         ) : null}
       </div>
       <Button type="submit" disabled={status === "loading"}>
-        {status === "loading" ? "Sending..." : labels.submit}
+        {status === "loading" ? t("form.sending") : t("form.submit")}
       </Button>
       {status === "success" ? (
-        <p className="text-sm text-[var(--jade)]">
-          We received your request. Our team will reach out shortly.
-        </p>
+        <p className="text-sm text-[var(--jade)]">{t("form.success")}</p>
       ) : null}
       {status === "error" ? (
-        <p className="text-sm text-red-500">
-          Unable to submit right now. Please try again.
-        </p>
+        <p className="text-sm text-red-500">{t("form.error")}</p>
       ) : null}
     </form>
   );

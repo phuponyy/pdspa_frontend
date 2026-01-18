@@ -1,7 +1,7 @@
 import ServicesSection from "./ServicesSection";
 import FeatureGrid from "./FeatureGrid";
 import type { HomeSection } from "@/types/page.types";
-import { getDictionary } from "@/lib/i18n";
+import { getServerTranslator } from "@/lib/i18n/server";
 
 const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
   sections?.find((section) =>
@@ -12,26 +12,27 @@ const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
     )
   );
 
-export default function SectionRenderer({
+export default async function SectionRenderer({
   sections,
   lang,
 }: {
   sections?: HomeSection[];
   lang: string;
 }) {
-  const dict = getDictionary(lang);
+  const i18n = await getServerTranslator(lang);
+  const t = i18n.t.bind(i18n);
   const services = findSection(sections, ["services", "service"]);
   const features = findSection(sections, ["features", "why", "highlights"]);
 
   return (
     <>
       <ServicesSection
-        title={services?.heading || dict.sections.services}
+        title={services?.heading || t("sections.services")}
         description={services?.description || services?.subheading}
         items={services?.items}
       />
       <FeatureGrid
-        title={features?.heading || dict.sections.features}
+        title={features?.heading || t("sections.features")}
         description={features?.description || features?.subheading}
         items={features?.items}
       />

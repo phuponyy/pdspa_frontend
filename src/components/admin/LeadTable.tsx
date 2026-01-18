@@ -2,6 +2,7 @@ import Link from "next/link";
 import StatusPill from "./StatusPill";
 import type { Lead } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function LeadTable({
   lang,
@@ -11,51 +12,35 @@ export default function LeadTable({
   leads: Lead[];
 }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-[var(--line)] bg-white shadow-[var(--shadow)]">
-      <table className="w-full border-collapse text-sm">
-        <thead className="bg-[var(--mist)] text-left text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-          <tr>
-            <th className="px-6 py-4">Customer</th>
-            <th className="px-6 py-4">Phone</th>
-            <th className="px-6 py-4">Status</th>
-            <th className="px-6 py-4">Created</th>
-            <th className="px-6 py-4">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leads.length ? (
-            leads.map((lead) => (
-              <tr
-                key={lead.id}
-                className="border-t border-[var(--line)] text-[var(--ink-muted)]"
-              >
-                <td className="px-6 py-4 text-[var(--ink)]">
+    <div className="space-y-4">
+      {leads.length ? (
+        leads.map((lead) => (
+          <Card key={lead.id}>
+            <CardContent className="flex items-center justify-between gap-4 py-5">
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-white">
                   {lead.fullName}
-                </td>
-                <td className="px-6 py-4">{lead.phone}</td>
-                <td className="px-6 py-4">
+                </h3>
+                <p className="text-sm text-slate-400">{lead.phone}</p>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
                   <StatusPill status={lead.status} />
-                </td>
-                <td className="px-6 py-4">{formatDateTime(lead.createdAt)}</td>
-                <td className="px-6 py-4">
-                  <Link
-                    href={`/${lang}/admin/leads/${lead.id}`}
-                    className="text-[var(--accent-strong)] hover:underline"
-                  >
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td className="px-6 py-6 text-[var(--ink-muted)]" colSpan={5}>
-                No leads found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                  <span>{formatDateTime(lead.createdAt)}</span>
+                </div>
+              </div>
+              <Link
+                href={`/${lang}/admin/leads/${lead.id}`}
+                className="text-white/60 hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </Link>
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <p className="text-sm text-slate-400">Chưa có leads.</p>
+      )}
     </div>
   );
 }

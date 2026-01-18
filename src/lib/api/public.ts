@@ -5,6 +5,7 @@ import type {
   LeadCreateRequest,
   LeadCreateResponse,
   PublicServicesResponse,
+  SiteConfigResponse,
 } from "@/types/api.types";
 import type { HeroSlide, HomeSection } from "@/types/page.types";
 
@@ -102,4 +103,9 @@ export const submitLead = async (payload: LeadCreateRequest) =>
   apiFetch<LeadCreateResponse>("/public/leads", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+
+export const getSiteConfig = async () =>
+  apiFetch<SiteConfigResponse>("/public/config", {
+    cache: "no-store",
   });

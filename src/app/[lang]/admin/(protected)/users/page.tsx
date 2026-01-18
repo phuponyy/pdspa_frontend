@@ -9,12 +9,13 @@ import {
   resetAdminUserPassword,
   updateAdminUser,
 } from "@/lib/api/admin";
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
 import Loading from "@/components/common/Loading";
 import { useToast } from "@/components/common/ToastProvider";
 import { ApiError } from "@/lib/api/client";
 import type { AdminUser, UserRole } from "@/types/api.types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const ROLE_OPTIONS: UserRole[] = ["ADMIN", "EDITOR", "VIEWER"];
 
@@ -54,61 +55,69 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
-          Users
-        </p>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">
-          Manage users
-        </h1>
-        <p className="text-sm text-[var(--ink-muted)]">
-          Admin can create, update roles, and reset passwords.
-        </p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-white">Quản lý Users</h1>
       </div>
 
-      <div className="rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
-        <h2 className="text-lg font-semibold text-[var(--ink)]">
-          Create user
-        </h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Input
-            label="Email"
-            value={form.email}
-            onChange={(event) => setForm({ ...form, email: event.target.value })}
-          />
-          <Input
-            label="Name"
-            value={form.name}
-            onChange={(event) => setForm({ ...form, name: event.target.value })}
-          />
-          <Input
-            label="Password"
-            type="password"
-            value={form.password}
-            onChange={(event) =>
-              setForm({ ...form, password: event.target.value })
-            }
-          />
-          <label className="space-y-2 text-sm text-[var(--ink)]">
-            <span className="block text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-              Role
-            </span>
-            <select
-              className="h-12 w-full rounded-2xl border border-[var(--line)] bg-white px-3 text-sm"
-              value={form.role}
-              onChange={(event) =>
-                setForm({ ...form, role: event.target.value as UserRole })
-              }
-            >
-              {ROLE_OPTIONS.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="mt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Tạo user</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
+                Email
+              </span>
+              <Input
+                value={form.email}
+                onChange={(event) =>
+                  setForm({ ...form, email: event.target.value })
+                }
+              />
+            </label>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
+                Name
+              </span>
+              <Input
+                value={form.name}
+                onChange={(event) =>
+                  setForm({ ...form, name: event.target.value })
+                }
+              />
+            </label>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
+                Password
+              </span>
+              <Input
+                type="password"
+                value={form.password}
+                onChange={(event) =>
+                  setForm({ ...form, password: event.target.value })
+                }
+              />
+            </label>
+            <label className="space-y-2 text-sm text-slate-300">
+              <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
+                Role
+              </span>
+              <select
+                className="h-12 w-full rounded-2xl border border-white/10 bg-[#1a2430] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7bff]"
+                value={form.role}
+                onChange={(event) =>
+                  setForm({ ...form, role: event.target.value as UserRole })
+                }
+              >
+                {ROLE_OPTIONS.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <Button
             onClick={async () => {
               try {
@@ -121,38 +130,38 @@ export default function UsersPage() {
               }
             }}
           >
-            Create user
+            Tạo user
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
-        <h2 className="text-lg font-semibold text-[var(--ink)]">
-          User list
-        </h2>
-        {isLoading ? (
-          <Loading label="Loading users" />
-        ) : (
-          <div className="mt-4 space-y-3">
-            {users.length ? (
-              users.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  token={token}
-                  onUpdated={refetch}
-                  onSuccess={notify}
-                  onError={handleError}
-                />
-              ))
-            ) : (
-              <p className="text-sm text-[var(--ink-muted)]">
-                No users found.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách users</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <Loading label="Loading users" />
+          ) : (
+            <div className="space-y-3">
+              {users.length ? (
+                users.map((user) => (
+                  <UserRow
+                    key={user.id}
+                    user={user}
+                    token={token}
+                    onUpdated={refetch}
+                    onSuccess={notify}
+                    onError={handleError}
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-slate-400">No users found.</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -175,17 +184,17 @@ function UserRow({
   const [password, setPassword] = useState("");
 
   return (
-    <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[var(--mist)] p-4 text-sm md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div className="grid gap-3 rounded-2xl border border-white/10 bg-[#16202c] p-4 text-sm md:grid-cols-[1.4fr_1fr_1fr_1fr]">
       <div>
-        <p className="font-semibold text-[var(--ink)]">{user.email}</p>
-        <p className="text-xs text-[var(--ink-muted)]">{user.name || "-"}</p>
+        <p className="font-semibold text-white">{user.email}</p>
+        <p className="text-xs text-slate-400">{user.name || "-"}</p>
       </div>
       <label className="space-y-1">
-        <span className="block text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+        <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
           Role
         </span>
         <select
-          className="h-10 w-full rounded-xl border border-[var(--line)] bg-white px-2 text-xs"
+          className="h-10 w-full rounded-xl border border-white/10 bg-[#1a2430] px-2 text-xs text-white"
           value={role}
           onChange={(event) => setRole(event.target.value as UserRole)}
         >
@@ -197,11 +206,11 @@ function UserRow({
         </select>
       </label>
       <label className="space-y-1">
-        <span className="block text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+        <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
           Status
         </span>
         <select
-          className="h-10 w-full rounded-xl border border-[var(--line)] bg-white px-2 text-xs"
+          className="h-10 w-full rounded-xl border border-white/10 bg-[#1a2430] px-2 text-xs text-white"
           value={isActive ? "ACTIVE" : "DISABLED"}
           onChange={(event) => setIsActive(event.target.value === "ACTIVE")}
         >
@@ -210,15 +219,17 @@ function UserRow({
         </select>
       </label>
       <div className="flex flex-col gap-2">
-        <Input
-          label="Reset password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
+        <label className="space-y-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+          <span className="block">Reset password</span>
+          <Input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </label>
         <div className="flex flex-wrap gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={async () => {
               try {
                 await updateAdminUser(token, user.id, { role, isActive });
@@ -232,7 +243,7 @@ function UserRow({
             Update
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={async () => {
               if (!password) return;
               try {
