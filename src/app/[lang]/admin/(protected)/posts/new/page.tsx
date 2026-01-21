@@ -1,24 +1,16 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/stores/authStore";
 import CmsPostForm from "@/components/admin/CmsPostForm";
 import { createCmsPost } from "@/lib/api/admin";
 import { getDefaultLang } from "@/lib/i18n";
 
 export default function NewPostPage() {
-  const token = useAuthStore((state) => state.token);
   const router = useRouter();
   const params = useParams<{ lang?: string }>();
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
   const resolvedLang = lang ?? getDefaultLang();
-
-  if (!token) {
-    return (
-      <p className="text-sm text-[var(--ink-muted)]">Please sign in.</p>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -33,7 +25,7 @@ export default function NewPostPage() {
       <CmsPostForm
         langCode={resolvedLang}
         onSave={async (payload) => {
-          const response = await createCmsPost(token, payload);
+          const response = await createCmsPost(undefined, payload);
           const id = response?.data?.id;
           if (id) {
             router.replace(`/${resolvedLang}/admin/posts/${id}?lang=${resolvedLang}`);

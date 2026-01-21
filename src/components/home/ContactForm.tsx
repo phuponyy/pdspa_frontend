@@ -48,21 +48,21 @@ export default function ContactForm({
     const nextItems = existing
       ? items.filter((item) => item.serviceId !== serviceId)
       : [...(items || []), { serviceId, priceOptionId, qty: 1 }];
-    setValue("items", nextItems, { shouldValidate: true });
+    setValue("items", nextItems, { shouldValidate: false, shouldDirty: true });
   };
 
   const updateQty = (serviceId: number, qty: number) => {
     const nextItems = (items || []).map((item) =>
       item.serviceId === serviceId ? { ...item, qty } : item
     );
-    setValue("items", nextItems, { shouldValidate: true });
+    setValue("items", nextItems, { shouldValidate: false, shouldDirty: true });
   };
 
   const updatePriceOption = (serviceId: number, priceOptionId: number) => {
     const nextItems = (items || []).map((item) =>
       item.serviceId === serviceId ? { ...item, priceOptionId } : item
     );
-    setValue("items", nextItems, { shouldValidate: true });
+    setValue("items", nextItems, { shouldValidate: false, shouldDirty: true });
   };
 
   const onSubmit = async (data: LeadFormValues) => {

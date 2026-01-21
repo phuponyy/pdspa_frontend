@@ -12,7 +12,8 @@ export default async function AdminLayout({
   const { lang } = await params;
   const cookieStore = await cookies();
   const token = cookieStore.get("pd2_token")?.value;
-  if (!token) {
+  const refresh = cookieStore.get("pd2_refresh")?.value;
+  if (!token && !refresh) {
     redirect(`/${lang}/admin/login`);
   }
   return <AdminShell lang={lang}>{children}</AdminShell>;

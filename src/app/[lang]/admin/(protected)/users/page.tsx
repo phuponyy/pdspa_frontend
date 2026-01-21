@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/stores/authStore";
 import {
   createAdminUser,
   getAdminUsers,
@@ -20,7 +19,6 @@ import { Input } from "@/components/ui/input";
 const ROLE_OPTIONS: UserRole[] = ["ADMIN", "EDITOR", "VIEWER"];
 
 export default function UsersPage() {
-  const token = useAuthStore((state) => state.token);
   const [form, setForm] = useState({
     email: "",
     name: "",
@@ -31,8 +29,7 @@ export default function UsersPage() {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["admin-users"],
-    queryFn: () => getAdminUsers(token || ""),
-    enabled: Boolean(token),
+    queryFn: () => getAdminUsers(undefined),
   });
 
   const users = data?.data || [];
@@ -48,10 +45,6 @@ export default function UsersPage() {
     }
     notify("Unable to reach the server. Please try again.", "error");
   };
-
-  if (!token) {
-    return <p className="text-sm text-[var(--ink-muted)]">Please sign in.</p>;
-  }
 
   return (
     <div className="space-y-6">
@@ -121,7 +114,7 @@ export default function UsersPage() {
           <Button
             onClick={async () => {
               try {
-                await createAdminUser(token, form);
+                await createAdminUser(undefined, form);
                 notify("User created.", "success");
                 setForm({ email: "", name: "", password: "", role: "EDITOR" });
                 await refetch();
@@ -149,7 +142,6 @@ export default function UsersPage() {
                   <UserRow
                     key={user.id}
                     user={user}
-                    token={token}
                     onUpdated={refetch}
                     onSuccess={notify}
                     onError={handleError}
@@ -168,13 +160,11 @@ export default function UsersPage() {
 
 function UserRow({
   user,
-  token,
   onUpdated,
   onSuccess,
   onError,
 }: {
   user: AdminUser;
-  token: string;
   onUpdated: () => void;
   onSuccess: (text: string, type?: "success" | "error" | "info") => void;
   onError: (err: unknown) => void;
@@ -232,7 +222,7 @@ function UserRow({
             variant="secondary"
             onClick={async () => {
               try {
-                await updateAdminUser(token, user.id, { role, isActive });
+                await updateAdminUser(undefined, user.id, { role, isActive });
                 await onUpdated();
                 onSuccess("User updated.", "success");
               } catch (err) {
@@ -247,7 +237,7 @@ function UserRow({
             onClick={async () => {
               if (!password) return;
               try {
-                await resetAdminUserPassword(token, user.id, { password });
+                await resetAdminUserPassword(undefined, user.id, { password });
                 setPassword("");
                 onSuccess("Password reset.", "success");
               } catch (err) {

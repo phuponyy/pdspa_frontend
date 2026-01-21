@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getLead, updateLeadStatus } from "@/lib/api/admin";
-import { useAuthStore } from "@/lib/stores/authStore";
 import type { LeadStatus } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
 import Button from "@/components/common/Button";
@@ -16,11 +15,10 @@ export default function LeadDetailPage() {
   const params = useParams<{ id?: string }>();
   const idParam = params?.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
-  const token = useAuthStore((state) => state.token);
   const { data, isLoading } = useQuery({
     queryKey: ["lead", id],
-    queryFn: () => getLead(token || "", id || ""),
-    enabled: Boolean(token && id),
+    queryFn: () => getLead(undefined, id || ""),
+    enabled: Boolean(id),
   });
 
   const lead = data?.data;
@@ -122,7 +120,7 @@ export default function LeadDetailPage() {
           <Button
             variant="outline"
             onClick={async () => {
-              await updateLeadStatus(token || "", lead.id, { status });
+              await updateLeadStatus(undefined, lead.id, { status });
             }}
           >
             Save status

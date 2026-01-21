@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/stores/authStore";
 import { deleteMedia, getMediaLibrary, updateMedia, uploadMedia } from "@/lib/api/admin";
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
@@ -9,22 +8,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/common/ToastProvider";
 
 export default function MediaLibraryPage() {
-  const token = useAuthStore((state) => state.token);
   const toast = useToast();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["cms-media"],
-    queryFn: () => getMediaLibrary(token || "", 1, 30),
-    enabled: Boolean(token),
+    queryFn: () => getMediaLibrary(undefined, 1, 30),
   });
 
   const items = data?.data?.items || [];
-
-  if (!token) {
-    return (
-      <p className="text-sm text-[var(--ink-muted)]">Please sign in.</p>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -39,7 +30,7 @@ export default function MediaLibraryPage() {
               const file = event.target.files?.[0];
               if (!file) return;
               try {
-                await uploadMedia(token, file);
+                await uploadMedia(file);
                 await refetch();
                 toast.push({ message: "Đã tải ảnh.", type: "success" });
               } catch {
@@ -85,7 +76,7 @@ export default function MediaLibraryPage() {
                             const file = event.target.files?.[0];
                             if (!file) return;
                             try {
-                              await updateMedia(token, item.id, file);
+                              await updateMedia(item.id, file);
                               await refetch();
                               toast.push({
                                 message: "Đã cập nhật ảnh.",
@@ -109,7 +100,7 @@ export default function MediaLibraryPage() {
                         variant="secondary"
                         onClick={async () => {
                           try {
-                            await deleteMedia(token, item.id);
+                            await deleteMedia(undefined, item.id);
                             await refetch();
                             toast.push({ message: "Đã xoá ảnh.", type: "success" });
                           } catch {

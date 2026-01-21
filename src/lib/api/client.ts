@@ -25,6 +25,40 @@ type FetchOptions = RequestInit & {
   query?: Record<string, string | number | boolean | undefined>;
 };
 
+let refreshPromise: Promise<boolean> | null = null;
+
+const refreshAccessToken = async () => {
+  if (typeof window === "undefined") return false;
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_BASE_URL}/admin/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({}),
+    })
+      .then((response) => response.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
+const clearClientToken = async () => {
+  if (typeof window === "undefined") return;
+  try {
+    await fetch(`${API_BASE_URL}/admin/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+  } catch {
+    // Best-effort logout; cookies may already be invalid/cleared.
+  }
+};
+
 const buildQuery = (query?: FetchOptions["query"]) => {
   if (!query) return "";
   const params = new URLSearchParams();
@@ -36,11 +70,16 @@ const buildQuery = (query?: FetchOptions["query"]) => {
   return qs ? `?${qs}` : "";
 };
 
-export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
+async function apiFetchInternal<T>(
+  path: string,
+  options: FetchOptions = {},
+  retried = false
+): Promise<T> {
   const { token, query, headers, ...init } = options;
   const url = `${API_BASE_URL}${path}${buildQuery(query)}`;
 
   const response = await fetch(url, {
+    credentials: "include",
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -54,6 +93,13 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   const payload = isJson ? await response.json() : null;
 
   if (!response.ok) {
+    if (response.status === 401 && !retried && !path.startsWith("/admin/auth")) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return apiFetchInternal(path, options, true);
+      }
+      await clearClientToken();
+    }
     const errorPayload = (payload?.error || payload) as ApiErrorPayload | null;
     throw new ApiError(
       errorPayload?.message || "Request failed",
@@ -64,4 +110,8 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   }
 
   return payload as T;
+}
+
+export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
+  return apiFetchInternal(path, options, false);
 }

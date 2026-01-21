@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCmsPosts } from "@/lib/api/admin";
-import { useAuthStore } from "@/lib/stores/authStore";
 import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 export default function PostsListPage() {
-  const token = useAuthStore((state) => state.token);
   const params = useParams<{ lang?: string }>();
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
@@ -24,8 +22,7 @@ export default function PostsListPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["cms-posts"],
-    queryFn: () => getCmsPosts(token || "", 1, 20),
-    enabled: Boolean(token),
+    queryFn: () => getCmsPosts(undefined, 1, 20),
   });
 
   const posts = data?.data?.items || [];

@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLeads } from "@/lib/api/admin";
-import { useAuthStore } from "@/lib/stores/authStore";
 import LeadTable from "@/components/admin/LeadTable";
 import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
@@ -15,14 +14,12 @@ export default function LeadsPage() {
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
   const resolvedLang = lang ?? getDefaultLang();
-  const token = useAuthStore((state) => state.token);
   const [page, setPage] = useState(1);
   const limit = 10;
 
   const { data, isLoading } = useQuery({
     queryKey: ["leads", page],
-    queryFn: () => getLeads(token || "", page, limit),
-    enabled: Boolean(token),
+    queryFn: () => getLeads(undefined, page, limit),
   });
 
   const payload = data?.data;

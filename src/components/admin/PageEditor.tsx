@@ -30,13 +30,7 @@ type HeroState = {
   slides: HeroSlide[];
 };
 
-export default function PageEditor({
-  token,
-  lang,
-}: {
-  token: string;
-  lang: string;
-}) {
+export default function PageEditor({ lang }: { lang: string }) {
   const languages = useMemo(() => ["vn", "en"], []);
   const searchParams = useSearchParams();
   const initialLang =
@@ -127,7 +121,6 @@ export default function PageEditor({
   };
 
   useEffect(() => {
-    if (!token) return;
     if (loadedLangs[activeLang]) return;
     let cancelled = false;
 
@@ -139,8 +132,8 @@ export default function PageEditor({
     const load = async () => {
       try {
         const [meta, hero] = await Promise.all([
-          getHomeMeta(token, activeLang),
-          getHomeHero(token, activeLang),
+          getHomeMeta(undefined, activeLang),
+          getHomeHero(undefined, activeLang),
         ]);
         if (cancelled) return;
 
@@ -190,14 +183,13 @@ export default function PageEditor({
     return () => {
       cancelled = true;
     };
-  }, [activeLang, token, loadedLangs, hasDraft]);
+  }, [activeLang, loadedLangs, hasDraft]);
 
   useEffect(() => {
-    if (!token) return;
     let cancelled = false;
     const loadStatus = async () => {
       try {
-        const response = await getHomeStatus(token);
+        const response = await getHomeStatus(undefined);
         if (cancelled) return;
         if (!isDirty) {
           setStatus(response.status);
@@ -210,7 +202,7 @@ export default function PageEditor({
     return () => {
       cancelled = true;
     };
-  }, [token, isDirty]);
+  }, [isDirty]);
 
   return (
     <div className="space-y-6">
@@ -292,7 +284,7 @@ export default function PageEditor({
           <Button
             onClick={async () => {
               try {
-                await updateHomeMeta(token, activeLang, {
+                await updateHomeMeta(undefined, activeLang, {
                   metaTitle: currentMeta.metaTitle,
                   metaDescription: currentMeta.metaDescription,
                 });
@@ -397,7 +389,7 @@ export default function PageEditor({
                       let remaining = 10 - currentHero.slides.length;
                       for (const file of files) {
                         if (remaining <= 0) break;
-                        const response = await uploadHeroImage(token, file);
+                        const response = await uploadHeroImage(file);
                         const url = response?.data?.url;
                         if (url) {
                           setIsDirty(true);
@@ -611,7 +603,7 @@ export default function PageEditor({
                   notify("Maximum 10 images.", "info");
                   return;
                 }
-                await updateHomeHero(token, activeLang, {
+                await updateHomeHero(undefined, activeLang, {
                   heading: currentHero.heading,
                   subheading: currentHero.subheading,
                   slides: normalizedSlides.slice(0, 10),
@@ -648,7 +640,7 @@ export default function PageEditor({
             variant="outline"
             onClick={async () => {
               try {
-                await updateHomeStatus(token, { status });
+                await updateHomeStatus(undefined, { status });
                 notify("Homepage status updated.", "success");
               } catch (err) {
                 handleError(err);

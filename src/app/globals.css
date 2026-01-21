@@ -68,6 +68,62 @@ body::before {
   pointer-events: none;
 }
 
+.admin-shell {
+  background: radial-gradient(circle at 15% 10%, rgba(47, 123, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 85% 20%, rgba(255, 106, 61, 0.12), transparent 40%),
+    #0b1118;
+  color: #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-shell::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.admin-panel {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 34, 0.94);
+  box-shadow: 0 20px 60px rgba(5, 10, 18, 0.45);
+  backdrop-filter: blur(12px);
+}
+
+.admin-dot-grid {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.admin-node {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(26, 36, 48, 0.92);
+  padding: 10px 12px;
+  box-shadow: 0 16px 30px rgba(5, 10, 18, 0.35);
+}
+
+.admin-node-title {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-node-meta {
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 11px;
+}
+
+.admin-node-alert {
+  border-color: rgba(244, 114, 182, 0.45);
+  background: rgba(88, 28, 45, 0.4);
+}
+
 a {
   color: inherit;
   text-decoration: none;

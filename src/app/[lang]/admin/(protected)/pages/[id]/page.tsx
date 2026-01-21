@@ -2,14 +2,12 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/stores/authStore";
 import { getCmsPage, updateCmsPage } from "@/lib/api/admin";
 import CmsPageForm from "@/components/admin/CmsPageForm";
 import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
 
 export default function EditPagePage() {
-  const token = useAuthStore((state) => state.token);
   const params = useParams<{ id?: string; lang?: string }>();
   const idParam = params?.id;
   const id = Number(Array.isArray(idParam) ? idParam[0] : idParam);
@@ -19,17 +17,11 @@ export default function EditPagePage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["cms-page", id],
-    queryFn: () => getCmsPage(token || "", id),
-    enabled: Boolean(token && id),
+    queryFn: () => getCmsPage(undefined, id),
+    enabled: Number.isFinite(id),
   });
 
   const page = data?.data;
-
-  if (!token) {
-    return (
-      <p className="text-sm text-[var(--ink-muted)]">Please sign in.</p>
-    );
-  }
 
   if (isLoading) {
     return <Loading label="Loading page" />;
@@ -52,7 +44,7 @@ export default function EditPagePage() {
       <CmsPageForm
         initial={page}
         langCode={resolvedLang}
-        onSave={(payload) => updateCmsPage(token, id, payload)}
+        onSave={(payload) => updateCmsPage(undefined, id, payload)}
       />
     </div>
   );

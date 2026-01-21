@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCmsPages } from "@/lib/api/admin";
-import { useAuthStore } from "@/lib/stores/authStore";
 import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 export default function PagesListPage() {
-  const token = useAuthStore((state) => state.token);
   const params = useParams<{ lang?: string }>();
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
@@ -23,8 +21,7 @@ export default function PagesListPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["cms-pages"],
-    queryFn: () => getCmsPages(token || "", 1, 20),
-    enabled: Boolean(token),
+    queryFn: () => getCmsPages(undefined, 1, 20),
   });
 
   const pages = data?.data?.items || [];

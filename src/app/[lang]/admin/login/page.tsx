@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authSchema, type AuthFormValues } from "@/lib/schemas/authSchema";
 import { loginAdmin } from "@/lib/api/admin";
-import { useAuthStore } from "@/lib/stores/authStore";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { ApiError } from "@/lib/api/client";
@@ -20,7 +19,6 @@ export default function AdminLogin() {
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
   const resolvedLang = lang ?? getDefaultLang();
   const { t } = useTranslation();
-  const setToken = useAuthStore((state) => state.setToken);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -34,13 +32,7 @@ export default function AdminLogin() {
   const onSubmit = async (data: AuthFormValues) => {
     setError(null);
     try {
-      const response = await loginAdmin(data);
-      const accessToken = response?.data?.accessToken;
-      if (!accessToken) {
-        setError("Login failed. Missing access token.");
-        return;
-      }
-      setToken(accessToken);
+      await loginAdmin(data);
       router.replace(`/${resolvedLang}/admin/dashboard`);
     } catch (err) {
       if (err instanceof ApiError) {

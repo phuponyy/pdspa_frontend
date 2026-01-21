@@ -2,23 +2,13 @@
 
 import { useParams } from "next/navigation";
 import PageEditor from "@/components/admin/PageEditor";
-import { useAuthStore } from "@/lib/stores/authStore";
 import { getDefaultLang } from "@/lib/i18n";
 
 export default function HomeEditorPage() {
-  const token = useAuthStore((state) => state.token);
   const params = useParams<{ lang?: string }>();
   const langParam = params?.lang;
   const lang = Array.isArray(langParam) ? langParam[0] : langParam;
   const resolvedLang = lang ?? getDefaultLang();
-
-  if (!token) {
-    return (
-      <p className="text-sm text-[var(--ink-muted)]">
-        Please sign in to edit the homepage.
-      </p>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -33,7 +23,7 @@ export default function HomeEditorPage() {
           </span>
         </div>
       </div>
-      <PageEditor token={token} lang={resolvedLang} />
+      <PageEditor lang={resolvedLang} />
     </div>
   );
 }

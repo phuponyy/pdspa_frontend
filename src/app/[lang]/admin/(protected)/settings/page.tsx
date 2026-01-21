@@ -9,7 +9,6 @@ import { useToast } from "@/components/common/ToastProvider";
 import { resources } from "@/lib/i18n";
 import { updateSiteConfig } from "@/lib/api/admin";
 import { getSiteConfig } from "@/lib/api/public";
-import { useAuthStore } from "@/lib/stores/authStore";
 import { useTranslation } from "react-i18next";
 
 type NavItem = { label: string; href: string };
@@ -34,7 +33,6 @@ export default function SettingsPage() {
     en: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
   });
   const toast = useToast();
-  const token = useAuthStore((state) => state.token);
   const { t } = useTranslation();
 
   const defaultNav = useMemo(() => {
@@ -111,10 +109,6 @@ export default function SettingsPage() {
   const currentNav = navByLang[activeLang] || [];
 
   const handleSaveNav = async () => {
-    if (!token) {
-      toast.push({ message: "Bạn chưa đăng nhập.", type: "error" });
-      return;
-    }
     const sanitizeItems = (items: NavItem[]) =>
       items
         .map((item) => ({
@@ -140,7 +134,7 @@ export default function SettingsPage() {
     };
 
     try {
-      await updateSiteConfig(token, payload);
+      await updateSiteConfig(undefined, payload);
       toast.push({ message: "Đã lưu menu.", type: "success" });
     } catch {
       toast.push({
