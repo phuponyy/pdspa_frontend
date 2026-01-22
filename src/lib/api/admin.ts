@@ -16,10 +16,14 @@ import type {
   MediaUploadResponse,
   AdminUsersResponse,
   HomeHeroUpdateRequest,
+  HomeIntroUpdateRequest,
   HomeMetaUpdateRequest,
+  HomeRecoveryUpdateRequest,
   HomeStatusUpdateRequest,
   HomeHeroResponse,
+  HomeIntroResponse,
   HomeMetaResponse,
+  HomeRecoveryResponse,
   HomeStatusResponse,
   SiteConfigResponse,
 } from "@/types/api.types";
@@ -87,6 +91,30 @@ export const updateHomeHero = async (
     body: JSON.stringify(payload),
   });
 
+export const updateHomeIntro = async (
+  token?: string,
+  lang: string,
+  payload: HomeIntroUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/intro", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
+export const updateHomeRecovery = async (
+  token?: string,
+  lang: string,
+  payload: HomeRecoveryUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/recovery", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
 export const updateHomeStatus = async (token?: string, payload: HomeStatusUpdateRequest) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/status", {
     token,
@@ -103,6 +131,20 @@ export const getHomeMeta = async (token?: string, lang: string) =>
 
 export const getHomeHero = async (token?: string, lang: string) =>
   apiFetch<HomeHeroResponse>("/admin/pages/home/hero", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeIntro = async (token?: string, lang: string) =>
+  apiFetch<HomeIntroResponse>("/admin/pages/home/intro", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeRecovery = async (token?: string, lang: string) =>
+  apiFetch<HomeRecoveryResponse>("/admin/pages/home/recovery", {
     token,
     query: { lang },
     cache: "no-store",
@@ -269,6 +311,12 @@ export const updateAdminUser = async (token?: string, id: number, payload: unkno
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
+  });
+
+export const deleteAdminUser = async (token?: string, id: number) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/users/${id}`, {
+    token,
+    method: "DELETE",
   });
 
 export const resetAdminUserPassword = async (

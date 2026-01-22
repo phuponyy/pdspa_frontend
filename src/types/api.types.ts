@@ -123,6 +123,44 @@ export type HomeHeroResponse = {
   settings?: Record<string, unknown> | null;
 };
 
+export type HomeIntroResponse = {
+  heading: string;
+  description?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  providerName?: string;
+  listingName?: string;
+  rating?: number;
+  reviews?: number;
+  rankText?: string;
+  buttonLabel?: string;
+  buttonLink?: string;
+};
+
+export type HomeIntroUpdateRequest = {
+  heading: string;
+  description?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  providerName?: string;
+  listingName?: string;
+  rating?: number;
+  reviews?: number;
+  rankText?: string;
+  buttonLabel?: string;
+  buttonLink?: string;
+};
+
+export type HomeRecoveryResponse = {
+  heading: string;
+  items?: { title?: string; description?: string; imageUrl?: string }[];
+};
+
+export type HomeRecoveryUpdateRequest = {
+  heading: string;
+  items?: { title?: string; description?: string; imageUrl?: string }[];
+};
+
 export type HeroImageUploadResponse = ApiSuccess<{
   url: string;
 }>;
@@ -191,12 +229,18 @@ export type MediaItem = {
 export type MediaListResponse = CmsListResponse<MediaItem>;
 export type MediaUploadResponse = ApiSuccess<MediaItem>;
 
-export type UserRole = "ADMIN" | "EDITOR" | "VIEWER";
+export type UserRole =
+  | "ADMIN"
+  | "EDITOR"
+  | "VIEWER"
+  | "RECEPTIONIST"
+  | "BRANCH_MANAGER";
 
 export type AdminUser = {
   id: number;
   email: string;
   name?: string | null;
+  avatarUrl?: string | null;
   role: UserRole;
   isActive: boolean;
   createdAt?: string;

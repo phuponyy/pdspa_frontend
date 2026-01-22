@@ -3,6 +3,8 @@ import { SITE_DESCRIPTION, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/const
 import { isSupportedLang } from "@/lib/i18n";
 import { getServerTranslator } from "@/lib/i18n/server";
 import HeroSection from "@/components/home/HeroSection";
+import HomeIntroSection from "@/components/home/HomeIntroSection";
+import HomeRecoverySection from "@/components/home/HomeRecoverySection";
 import SectionRenderer from "@/components/home/SectionRenderer";
 import ContactForm from "@/components/home/ContactForm";
 import Container from "@/components/common/Container";
@@ -58,6 +60,20 @@ export default async function HomePage({
   const heroFromPage = (homeData?.page as { hero?: HomeSection })?.hero;
   const heroSection =
     heroFromPage || findSection(homeData?.sections, ["hero", "banner"]) || {};
+  const introSection =
+    findSection(homeData?.sections, ["intro", "about", "highlight"]) || {};
+  const recoverySection =
+    findSection(homeData?.sections, ["recovery", "recover", "relaxation"]) || {};
+  const introBody = (introSection?.body || {}) as {
+    providerName?: string;
+    listingName?: string;
+    rating?: number;
+    reviews?: number;
+    rankText?: string;
+    videoUrl?: string;
+    buttonLabel?: string;
+    buttonLink?: string;
+  };
 
   return (
     <div className="home-dark space-y-16 pb-16">
@@ -70,6 +86,31 @@ export default async function HomePage({
         slides={heroSection?.slides}
         primaryCta={t("hero.ctaPrimary")}
         secondaryCta={t("hero.ctaSecondary")}
+      />
+      <HomeIntroSection
+        heading={
+          (introSection?.heading as string) || "Massage in Da Nang | Panda Spa"
+        }
+        description={
+          (introSection?.description as string) ||
+          "Discover a calm sanctuary in the heart of Da Nang with signature massage rituals and thoughtfully crafted wellness experiences."
+        }
+        imageUrl={introSection?.imageUrl as string | undefined}
+        videoUrl={introBody.videoUrl}
+        providerName={introBody.providerName}
+        listingName={introBody.listingName}
+        rating={introBody.rating}
+        reviews={introBody.reviews}
+        rankText={introBody.rankText}
+        buttonLabel={introBody.buttonLabel || "SPA DA NANG"}
+        buttonLink={introBody.buttonLink || "#contact"}
+      />
+      <HomeRecoverySection
+        heading={
+          (recoverySection?.heading as string) ||
+          "Recover your energy through relaxation"
+        }
+        items={recoverySection?.items}
       />
       <SectionRenderer sections={homeData?.sections} lang={lang} />
 

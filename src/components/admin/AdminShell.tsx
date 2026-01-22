@@ -1,9 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import Sidebar from "./Sidebar";
+import Sidebar, { adminNavSections } from "./Sidebar";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminShell({
   lang,
@@ -13,6 +22,7 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const isLogin = pathname.includes("/admin/login");
 
   if (isLogin) {
@@ -22,69 +32,140 @@ export default function AdminShell({
   const segments = pathname.split("/").filter(Boolean);
   const currentLang = segments[0] || lang;
   const restPath = segments.slice(1).join("/");
-  const newPostHref = `/${lang}/admin/posts/new`;
-  const breadcrumb = segments.slice(2).map((segment) => segment.replace(/-/g, " "));
+  const breadcrumb = segments
+    .slice(2)
+    .map((segment) => segment.replace(/-/g, " "));
+  const breadcrumbTrail = ["Admin", ...breadcrumb];
+  const displayTrail = breadcrumbTrail.length > 1 ? breadcrumbTrail : ["Admin", "Overview"];
+  const userName = "Admin User";
+  const [searchQuery, setSearchQuery] = useState("");
+  const navSections = useMemo(
+    () =>
+      adminNavSections(lang, (key: string) => {
+        if (key === "admin.leads") return "Leads";
+        if (key === "admin.logout") return "Logout";
+        return key;
+      }),
+    [lang]
+  );
+  const searchResults = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return navSections
+      .flatMap((section) =>
+        section.links.map((link) => ({
+          ...link,
+          section: section.title,
+        }))
+      )
+      .filter((link) => link.label.toLowerCase().includes(query));
+  }, [navSections, searchQuery]);
 
   return (
     <div className="admin-shell min-h-screen">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 lg:flex-row lg:gap-10 lg:px-10 lg:py-10">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-5 py-6 lg:flex-row lg:gap-10 lg:px-10 lg:py-8">
         <Sidebar lang={lang} />
         <main className="flex-1 space-y-8">
-          <div className="admin-panel flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-            <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-              <div className="flex items-center gap-3 text-sm font-semibold text-white/80">
-                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M4 7h16M4 12h10M4 17h7" />
-                  </svg>
+          <div className="admin-panel flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60">
+              {displayTrail.map((segment, index) => (
+                <span key={`${segment}-${index}`} className={index === 0 ? "text-white/40" : ""}>
+                  {index === 0 ? segment.toUpperCase() : `/ ${segment.toUpperCase()}`}
                 </span>
-                <span className="hidden text-white/80 lg:inline">Admin Command Center</span>
-              </div>
-              <div className="hidden items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/40 lg:flex">
-                <span>Admin</span>
-                {breadcrumb.map((segment) => (
-                  <span key={segment} className="text-white/60">
-                    / {segment}
-                  </span>
-                ))}
-              </div>
-              <div className="relative w-full max-w-xl">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20l-3.5-3.5" />
-                  </svg>
-                </span>
-                <Input
-                  placeholder="Search content, leads, or settings..."
-                  aria-label="Search admin content"
-                  autoComplete="off"
-                  className="h-11 rounded-2xl border-white/5 bg-[#111a25] pl-10 text-white/90 placeholder:text-slate-500"
-                />
-              </div>
+              ))}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={newPostHref}
-                className="inline-flex h-10 items-center gap-2 rounded-2xl bg-[#2f7bff] px-4 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)] hover:bg-[#2a6fe6]"
-              >
-                <span className="text-base">+</span>
-                New Post
-              </Link>
+            <div className="ml-auto flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Open search"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#111a25] text-white/70 transition hover:text-white"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="M20 20l-3.5-3.5" />
+                    </svg>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xl">
+                  <DialogHeader>
+                    <DialogTitle>Search</DialogTitle>
+                    <DialogDescription>Find sections, pages, or settings quickly.</DialogDescription>
+                  </DialogHeader>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-3.5-3.5" />
+                      </svg>
+                    </span>
+                    <Input
+                      placeholder="Search sections or settings..."
+                      aria-label="Search admin content"
+                      autoComplete="off"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      className="h-12 rounded-full border-white/5 bg-[#111a25] pl-10 text-white/90 placeholder:text-slate-500"
+                    />
+                  </div>
+                  <div className="mt-4 max-h-64 space-y-2 overflow-auto">
+                    {searchResults.length ? (
+                      searchResults.map((result) => (
+                        <button
+                          key={result.href}
+                          type="button"
+                          onClick={() => {
+                            router.push(result.href);
+                          }}
+                          className="flex w-full items-center justify-between rounded-2xl border border-white/5 bg-[#0f1722] px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/5"
+                        >
+                          <span>{result.label}</span>
+                          <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+                            {result.section}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="text-sm text-white/50">Type to search sidebar pages.</p>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
               <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#0f1722] p-1">
                 {["vn", "en"].map((code) => (
-                  <Link
+                  <button
                     key={code}
-                    href={`/${code}${restPath ? `/${restPath}` : ""}`}
+                    type="button"
+                    onClick={() => {
+                      const next = `/${code}${restPath ? `/${restPath}` : ""}`;
+                      router.push(next);
+                    }}
                     className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                       currentLang === code
-                        ? "bg-[#2f7bff] text-white"
+                        ? "bg-[#ff9f40] text-[#1a1410]"
                         : "text-slate-400 hover:text-white"
                     }`}
                   >
                     {code.toUpperCase()}
-                  </Link>
+                  </button>
                 ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0f1722] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/70">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.65)]" />
+                Autosaved 2m ago
+              </div>
+              <div className="group relative flex items-center gap-2">
+                <img
+                  src="/admin-avatar.svg"
+                  alt={userName}
+                  className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                />
+                <span className="pointer-events-none absolute right-0 top-12 rounded-full border border-white/10 bg-[#111a25] px-3 py-1 text-xs text-white/80 opacity-0 transition group-hover:opacity-100">
+                  {userName}
+                </span>
               </div>
             </div>
           </div>

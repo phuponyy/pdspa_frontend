@@ -7,12 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/constants";
 
-export default function Sidebar({ lang }: { lang: string }) {
-  const { t } = useTranslation();
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const navSections = [
+export const adminNavSections = (lang: string, t: (key: string) => string) => [
     {
       title: "Core",
       links: [
@@ -150,19 +145,24 @@ export default function Sidebar({ lang }: { lang: string }) {
       ],
     },
   ];
+export default function Sidebar({ lang }: { lang: string }) {
+  const { t } = useTranslation();
+  const pathname = usePathname();
+  const router = useRouter();
+  const navSections = adminNavSections(lang, t);
 
   return (
     <aside className="sticky top-8 hidden h-fit w-72 flex-col gap-6 text-white lg:flex">
       <div className="admin-panel flex flex-col gap-4 p-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#2f7bff] text-white shadow-[0_12px_24px_rgba(47,123,255,0.35)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff9f40] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.3)]">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" />
-              <path d="M12 12l8-4.5M12 12l-8-4.5M12 12v9" />
+              <path d="M12 4l7 3.5v9L12 20l-7-3.5v-9z" />
+              <path d="M12 10l7-3.5M12 10L5 6.5M12 10v10" />
             </svg>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Panda Spa</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Panda Spa</p>
             <p className="text-lg font-semibold text-white">Admin Hub</p>
           </div>
         </div>
@@ -170,37 +170,47 @@ export default function Sidebar({ lang }: { lang: string }) {
           Secure workspace for content, leads, and system health.
         </p>
       </div>
-      <div className="admin-panel flex flex-col gap-4 p-4 text-sm">
+      <div className="admin-panel flex flex-col gap-5 p-4 text-sm">
         {navSections.map((section) => (
           <div key={section.title} className="space-y-2">
-            <p className="px-3 text-xs uppercase tracking-[0.3em] text-white/40">
+            <p className="px-3 text-xs uppercase tracking-[0.35em] text-white/40">
               {section.title}
             </p>
             <div className="flex flex-col gap-2">
-              {section.links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition",
-                    pathname === link.href
-                      ? "bg-white/10 text-white"
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
-                  )}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white/80">
-                    {link.icon}
-                  </span>
-                  <span>{link.label}</span>
-                </Link>
-              ))}
+              {section.links.map((link) => {
+                const active = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition",
+                      active
+                        ? "bg-white/10 text-white"
+                        : "text-white/70 hover:bg-white/5 hover:text-white"
+                    )}
+                  >
+                    {active ? (
+                      <span className="absolute left-0 top-2 h-8 w-[3px] rounded-full bg-[#ff9f40]" />
+                    ) : null}
+                    <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white/80">
+                      {link.icon}
+                    </span>
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         ))}
       </div>
       <div className="admin-panel flex flex-col gap-4 p-5 text-sm">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-white/10" />
+          <img
+            src="/admin-avatar.svg"
+            alt="Admin"
+            className="h-10 w-10 rounded-full border border-white/10"
+          />
           <div>
             <p className="font-semibold text-white">Admin Panel</p>
             <p className="text-xs text-white/60">Secure session enabled</p>
