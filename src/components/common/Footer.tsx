@@ -8,10 +8,14 @@ import { HOTLINE, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
 export default function Footer({
   hotline,
   siteName = "Panda Spa",
+  address,
+  hours,
   lang = "vn",
 }: {
   hotline?: string;
   siteName?: string;
+  address?: string;
+  hours?: string;
   lang?: string;
 }) {
   const pathname = usePathname();
@@ -40,7 +44,9 @@ export default function Footer({
             A calming spa retreat in the heart of Da Nang, blending aroma, massage,
             and restorative rituals.
           </p>
-          <p className="text-[rgba(255,255,255,0.75)]">{SPA_ADDRESS}</p>
+          <p className="text-[rgba(255,255,255,0.75)]">
+            {address || SPA_ADDRESS}
+          </p>
         </div>
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-[rgba(255,255,255,0.6)]">
@@ -82,7 +88,7 @@ export default function Footer({
           </p>
           <p className="text-2xl font-semibold">{hotline || HOTLINE}</p>
           <p className="text-[rgba(255,255,255,0.75)]">
-            Working Time: {SPA_HOURS}
+            Working Time: {hours || SPA_HOURS}
           </p>
         </div>
       </Container>

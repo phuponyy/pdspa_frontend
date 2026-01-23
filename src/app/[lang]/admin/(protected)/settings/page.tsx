@@ -35,7 +35,7 @@ export default function SettingsPage() {
   const toast = useToast();
   const { t } = useTranslation();
 
-  const defaultNav = useMemo(() => {
+  const defaultNav = useMemo<Record<string, NavItem[]>>(() => {
     const vnDict = resources.vn.translation;
     const enDict = resources.en.translation;
     return {

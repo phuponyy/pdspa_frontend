@@ -1,4 +1,4 @@
-import { getHomePage, getServices } from "@/lib/api/public";
+import { getHomePage, getServices, getSiteConfig } from "@/lib/api/public";
 import { SITE_DESCRIPTION, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
 import { isSupportedLang } from "@/lib/i18n";
 import { getServerTranslator } from "@/lib/i18n/server";
@@ -51,15 +51,27 @@ export default async function HomePage({
   const lang = isSupportedLang(rawLang) ? rawLang : "vn";
   const i18n = await getServerTranslator(lang);
   const t = i18n.t.bind(i18n);
-  const [homeData, servicesResponse] = await Promise.all([
+  const [homeData, servicesResponse, siteConfigResponse] = await Promise.all([
     getHomePage(lang).catch(() => null),
     getServices(lang).catch(() => null),
+    getSiteConfig().catch(() => null),
   ]);
   const services = servicesResponse?.data ?? [];
+  const config = siteConfigResponse?.data ?? {};
 
   const heroFromPage = (homeData?.page as { hero?: HomeSection })?.hero;
   const heroSection =
     heroFromPage || findSection(homeData?.sections, ["hero", "banner"]) || {};
+  const heroBody = heroSection?.body as {
+    slides?: HomeSection["slides"];
+    images?: HomeSection["images"];
+  } | null;
+  const heroSlides =
+    heroSection?.slides ??
+    (Array.isArray(heroBody?.slides) ? heroBody?.slides : undefined);
+  const heroImages =
+    heroSection?.images ??
+    (Array.isArray(heroBody?.images) ? heroBody?.images : undefined);
   const introSection =
     findSection(homeData?.sections, ["intro", "about", "highlight"]) || {};
   const recoverySection =
@@ -74,6 +86,12 @@ export default async function HomePage({
     buttonLabel?: string;
     buttonLink?: string;
   };
+  const contactName =
+    config[`site_name_${lang}`] || config.site_name || SITE_NAME;
+  const contactAddress =
+    config[`topbar_address_${lang}`] || SPA_ADDRESS;
+  const contactHours =
+    config[`topbar_hours_${lang}`] || SPA_HOURS;
 
   return (
     <div className="home-dark space-y-16 pb-16">
@@ -82,8 +100,8 @@ export default async function HomePage({
         heading={(heroSection?.heading as string) || t("hero.title")}
         subheading={(heroSection?.subheading as string) || t("hero.subtitle")}
         imageUrl={heroSection?.imageUrl as string | undefined}
-        images={heroSection?.images}
-        slides={heroSection?.slides}
+        images={heroImages}
+        slides={heroSlides}
         primaryCta={t("hero.ctaPrimary")}
         secondaryCta={t("hero.ctaSecondary")}
       />
@@ -129,10 +147,10 @@ export default async function HomePage({
             </p>
             <div className="rounded-3xl border border-[var(--line)] bg-white p-6 text-sm text-[var(--ink-muted)]">
               <p className="text-base font-semibold text-[var(--ink)]">
-                {SITE_NAME}
+                {contactName}
               </p>
-              <p>{SPA_ADDRESS}</p>
-              <p>Working Time: {SPA_HOURS}</p>
+              <p>{contactAddress}</p>
+              <p>Working Time: {contactHours}</p>
             </div>
           </div>
           <ContactForm lang={lang} services={services} />

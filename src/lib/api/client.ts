@@ -77,12 +77,13 @@ async function apiFetchInternal<T>(
 ): Promise<T> {
   const { token, query, headers, ...init } = options;
   const url = `${API_BASE_URL}${path}${buildQuery(query)}`;
+  const hasBody = typeof init.body !== "undefined" && init.body !== null;
 
   const response = await fetch(url, {
     credentials: "include",
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
@@ -93,7 +94,11 @@ async function apiFetchInternal<T>(
   const payload = isJson ? await response.json() : null;
 
   if (!response.ok) {
-    if (response.status === 401 && !retried && !path.startsWith("/admin/auth")) {
+    const skipRefresh =
+      path.startsWith("/admin/auth/login") ||
+      path.startsWith("/admin/auth/refresh") ||
+      path.startsWith("/admin/auth/logout");
+    if (response.status === 401 && !retried && !skipRefresh) {
       const refreshed = await refreshAccessToken();
       if (refreshed) {
         return apiFetchInternal(path, options, true);

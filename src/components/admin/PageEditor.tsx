@@ -141,6 +141,7 @@ export default function PageEditor({ lang }: { lang: string }) {
   const [hasDraft, setHasDraft] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const storageKey = "home-editor-draft";
   const toast = useToast();
 
@@ -155,6 +156,10 @@ export default function PageEditor({ lang }: { lang: string }) {
     }
     notify("Unable to reach the server. Please try again.", "error");
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -469,18 +474,28 @@ export default function PageEditor({ lang }: { lang: string }) {
               }}
             />
             <div className="flex flex-wrap items-center gap-3">
-              <Button
-                onClick={async () => {
-                  try {
-                    await updateHomeMeta(undefined, activeLang, {
-                      metaTitle: currentMeta.metaTitle,
-                      metaDescription: currentMeta.metaDescription,
-                    });
-                    notify("SEO metadata updated.", "success");
-                    setIsDirty(false);
-                    if (typeof window !== "undefined") {
-                      window.localStorage.removeItem(storageKey);
-                    }
+            <Button
+              onClick={async () => {
+                try {
+                  await updateHomeMeta(undefined, activeLang, {
+                    metaTitle: currentMeta.metaTitle,
+                    metaDescription: currentMeta.metaDescription,
+                  });
+                  const fresh = await getHomeMeta(undefined, activeLang);
+                  if (fresh) {
+                    setMetaByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        metaTitle: fresh.metaTitle ?? "",
+                        metaDescription: fresh.metaDescription ?? "",
+                      },
+                    }));
+                  }
+                  notify("SEO metadata updated.", "success");
+                  setIsDirty(false);
+                  if (typeof window !== "undefined") {
+                    window.localStorage.removeItem(storageKey);
+                  }
                   } catch (err) {
                     handleError(err);
                   }
@@ -1036,6 +1051,25 @@ export default function PageEditor({ lang }: { lang: string }) {
                     buttonLabel: currentIntro.buttonLabel,
                     buttonLink: currentIntro.buttonLink,
                   });
+                  const fresh = await getHomeIntro(undefined, activeLang);
+                  if (fresh) {
+                    setIntroByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        heading: fresh.heading ?? "",
+                        description: fresh.description ?? "",
+                        imageUrl: fresh.imageUrl ?? "",
+                        videoUrl: fresh.videoUrl ?? "",
+                        providerName: fresh.providerName ?? "Tripadvisor",
+                        listingName: fresh.listingName ?? "Panda Spa",
+                        rating: fresh.rating ? String(fresh.rating) : "5",
+                        reviews: fresh.reviews ? String(fresh.reviews) : "",
+                        rankText: fresh.rankText ?? "",
+                        buttonLabel: fresh.buttonLabel ?? "SPA DA NANG",
+                        buttonLink: fresh.buttonLink ?? "",
+                      },
+                    }));
+                  }
                   notify("Intro section updated.", "success");
                   setIsDirty(false);
                   if (typeof window !== "undefined") {
@@ -1152,6 +1186,22 @@ export default function PageEditor({ lang }: { lang: string }) {
                     heading: currentRecovery.heading,
                     items: normalizedItems,
                   });
+                  const fresh = await getHomeRecovery(undefined, activeLang);
+                  if (fresh) {
+                    setRecoveryByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        heading: fresh.heading ?? "",
+                        items: Array.isArray(fresh.items)
+                          ? fresh.items.map((item) => ({
+                              title: item?.title ?? "",
+                              description: item?.description ?? "",
+                              imageUrl: item?.imageUrl ?? "",
+                            }))
+                          : [],
+                      },
+                    }));
+                  }
                   notify("Recovery section updated.", "success");
                   setIsDirty(false);
                   if (typeof window !== "undefined") {
@@ -1181,25 +1231,27 @@ export default function PageEditor({ lang }: { lang: string }) {
             <span>Changes will be live instantly upon publishing.</span>
           </div>
           <div className="flex items-center gap-3">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <UiButton variant="outline" size="sm">
-                  Discard
-                </UiButton>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogTitle>Discard draft changes?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This clears your local draft and reloads the last saved version.
-                </AlertDialogDescription>
-                <div className="mt-5 flex items-center justify-end gap-3">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={discardChanges}>
-                    Discard changes
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
+            {mounted ? (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <UiButton variant="outline" size="sm">
+                    Discard
+                  </UiButton>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>Discard draft changes?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This clears your local draft and reloads the last saved version.
+                  </AlertDialogDescription>
+                  <div className="mt-5 flex items-center justify-end gap-3">
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={discardChanges}>
+                      Discard changes
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
             <UiButton
               size="sm"
               onClick={() => persistStatus("PUBLISHED")}

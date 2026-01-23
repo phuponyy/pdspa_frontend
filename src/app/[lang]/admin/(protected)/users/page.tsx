@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   createAdminUser,
   deleteAdminUser,
+  getAdminRoles,
   getAdminUsers,
   resetAdminUserPassword,
   updateAdminUser,
@@ -12,7 +13,7 @@ import {
 import Loading from "@/components/common/Loading";
 import { useToast } from "@/components/common/ToastProvider";
 import { ApiError } from "@/lib/api/client";
-import type { AdminUser, UserRole } from "@/types/api.types";
+import type { AdminRole, AdminUser } from "@/types/api.types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,41 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-const ROLE_OPTIONS: UserRole[] = [
-  "ADMIN",
-  "EDITOR",
-  "VIEWER",
-  "RECEPTIONIST",
-  "BRANCH_MANAGER",
-];
-const ROLE_DETAILS: Record<UserRole, { label: string; permissions: string[] }> = {
-  ADMIN: {
-    label: "Full access",
-    permissions: [
-      "Users & settings",
-      "Pages, posts, media",
-      "Overview, analytics, live",
-      "Bookings & customers",
-      "Exports",
-    ],
-  },
-  EDITOR: {
-    label: "Content editor",
-    permissions: ["Pages", "Posts", "Media"],
-  },
-  VIEWER: {
-    label: "Read only",
-    permissions: ["Overview", "Analytics"],
-  },
-  RECEPTIONIST: {
-    label: "Front desk",
-    permissions: ["Bookings", "Customers"],
-  },
-  BRANCH_MANAGER: {
-    label: "Branch manager",
-    permissions: ["Overview", "Analytics", "Live", "Bookings", "Customers", "Exports"],
-  },
-};
+const DEFAULT_ROLE_KEY = "EDITOR";
 
 export default function UsersPage() {
   const [form, setForm] = useState({
@@ -69,9 +36,14 @@ export default function UsersPage() {
     name: "",
     avatarUrl: "",
     password: "",
-    role: "EDITOR" as UserRole,
+    roleKey: DEFAULT_ROLE_KEY,
   });
   const toast = useToast();
+
+  const rolesQuery = useQuery({
+    queryKey: ["admin-roles"],
+    queryFn: () => getAdminRoles(undefined),
+  });
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -79,10 +51,16 @@ export default function UsersPage() {
   });
 
   const users = data?.data || [];
+  const roles = rolesQuery.data?.data || [];
+  const roleMap = useMemo(
+    () => new Map(roles.map((role) => [role.key, role])),
+    [roles]
+  );
 
   const notify = (text: string, type: "success" | "error" | "info" = "info") => {
     toast.push({ message: text, type });
   };
+
 
   const handleError = (err: unknown) => {
     if (err instanceof ApiError) {
@@ -161,14 +139,14 @@ export default function UsersPage() {
               </span>
               <select
                 className="h-12 w-full rounded-2xl border border-white/10 bg-[#1a2430] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7bff]"
-                value={form.role}
+                value={form.roleKey}
                 onChange={(event) =>
-                  setForm({ ...form, role: event.target.value as UserRole })
+                  setForm({ ...form, roleKey: event.target.value })
                 }
               >
-                {ROLE_OPTIONS.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
+                {roles.map((role) => (
+                  <option key={role.key} value={role.key}>
+                    {role.name}
                   </option>
                 ))}
               </select>
@@ -176,15 +154,13 @@ export default function UsersPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-[0.2em] text-white/60">
-              {(ROLE_DETAILS[form.role] || { label: "Custom", permissions: [] }).label}
+              {(roleMap.get(form.roleKey) || { name: "Custom" }).name}
             </span>
-            {(ROLE_DETAILS[form.role] || { label: "Custom", permissions: [] }).permissions.map(
-              (permission) => (
+            {(roleMap.get(form.roleKey)?.permissions || []).map((permission) => (
               <span key={permission} className="rounded-full border border-white/10 px-3 py-1">
                 {permission}
               </span>
-              )
-            )}
+            ))}
           </div>
           <Button
             onClick={async () => {
@@ -196,9 +172,10 @@ export default function UsersPage() {
                   name: "",
                   avatarUrl: "",
                   password: "",
-                  role: "EDITOR",
+                  roleKey: DEFAULT_ROLE_KEY,
                 });
                 await refetch();
+                await rolesQuery.refetch();
               } catch (err) {
                 handleError(err);
               }
@@ -223,6 +200,7 @@ export default function UsersPage() {
                   <UserRow
                     key={user.id}
                     user={user}
+                    roles={roles}
                     onUpdated={refetch}
                     onSuccess={notify}
                     onError={handleError}
@@ -241,24 +219,28 @@ export default function UsersPage() {
 
 function UserRow({
   user,
+  roles,
   onUpdated,
   onSuccess,
   onError,
 }: {
   user: AdminUser;
+  roles: AdminRole[];
   onUpdated: () => void;
   onSuccess: (text: string, type?: "success" | "error" | "info") => void;
   onError: (err: unknown) => void;
 }) {
   const [name, setName] = useState(user.name || "");
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || "");
-  const [role, setRole] = useState<UserRole>(user.role);
+  const [roleKey, setRoleKey] = useState(user.roleKey);
   const [isActive, setIsActive] = useState(user.isActive);
   const [password, setPassword] = useState("");
-  const roleMeta = useMemo(
-    () => ROLE_DETAILS[role] || { label: "Custom", permissions: [] },
-    [role]
-  );
+  const roleMeta = useMemo(() => {
+    if (roleKey === user.roleKey && user.role) {
+      return user.role;
+    }
+    return roles.find((role) => role.key === roleKey) || null;
+  }, [roleKey, roles, user.role, user.roleKey]);
 
   return (
     <div className="rounded-3xl border border-white/10 bg-[#16202c] p-5 text-sm">
@@ -279,7 +261,9 @@ function UserRow({
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70">
-          <span className="uppercase tracking-[0.2em]">{roleMeta.label}</span>
+          <span className="uppercase tracking-[0.2em]">
+            {roleMeta?.name || roleKey}
+          </span>
         </div>
       </div>
 
@@ -299,12 +283,12 @@ function UserRow({
         <div className="space-y-3">
           <select
             className="h-12 w-full rounded-2xl border border-white/10 bg-[#1a2430] px-3 text-sm text-white"
-            value={role}
-            onChange={(event) => setRole(event.target.value as UserRole)}
+            value={roleKey}
+            onChange={(event) => setRoleKey(event.target.value)}
           >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
+            {roles.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.name}
               </option>
             ))}
           </select>
@@ -325,7 +309,12 @@ function UserRow({
               variant="secondary"
               onClick={async () => {
                 try {
-                  await updateAdminUser(undefined, user.id, { name, avatarUrl, role, isActive });
+                  await updateAdminUser(undefined, user.id, {
+                    name,
+                    avatarUrl,
+                    roleKey,
+                    isActive,
+                  });
                   await onUpdated();
                   onSuccess("User updated.", "success");
                 } catch (err) {

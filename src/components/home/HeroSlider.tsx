@@ -20,7 +20,7 @@ export default function HeroSlider({
   intervalMs?: number;
   className?: string;
 }) {
-  const slideItems = useMemo(() => {
+  const slideItems = useMemo<HeroSlide[]>(() => {
     if (slides?.length) {
       return slides.filter((slide) => slide?.imageUrl).slice(0, 10);
     }

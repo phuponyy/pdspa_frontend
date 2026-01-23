@@ -229,22 +229,36 @@ export type MediaItem = {
 export type MediaListResponse = CmsListResponse<MediaItem>;
 export type MediaUploadResponse = ApiSuccess<MediaItem>;
 
-export type UserRole =
-  | "ADMIN"
-  | "EDITOR"
-  | "VIEWER"
-  | "RECEPTIONIST"
-  | "BRANCH_MANAGER";
+export type AdminRole = {
+  id: number;
+  key: string;
+  name: string;
+  description?: string | null;
+  permissions: string[];
+  isSystem: boolean;
+};
 
 export type AdminUser = {
   id: number;
   email: string;
   name?: string | null;
   avatarUrl?: string | null;
-  role: UserRole;
+  roleKey: string;
+  role?: AdminRole | null;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
 
 export type AdminUsersResponse = ApiSuccess<AdminUser[]>;
+export type AdminUserResponse = ApiSuccess<AdminUser>;
+
+export type AdminRolesResponse = ApiSuccess<AdminRole[]>;
+export type AdminRoleResponse = ApiSuccess<AdminRole>;
+
+export type AdminMeResponse = ApiSuccess<{
+  id?: number;
+  email?: string;
+  roleKey?: string;
+  permissions: string[];
+}>;

@@ -14,7 +14,11 @@ import type {
   LeadStatusUpdateRequest,
   MediaListResponse,
   MediaUploadResponse,
+  AdminMeResponse,
+  AdminUserResponse,
   AdminUsersResponse,
+  AdminRoleResponse,
+  AdminRolesResponse,
   HomeHeroUpdateRequest,
   HomeIntroUpdateRequest,
   HomeMetaUpdateRequest,
@@ -299,15 +303,41 @@ export const getAdminUsers = async (token?: string) =>
     cache: "no-store",
   });
 
+export const getAdminMe = async (token?: string) =>
+  apiFetch<AdminMeResponse>("/admin/auth/me", {
+    token,
+    cache: "no-store",
+  });
+
+export const getAdminRoles = async (token?: string) =>
+  apiFetch<AdminRolesResponse>("/admin/roles", {
+    token,
+    cache: "no-store",
+  });
+
 export const createAdminUser = async (token?: string, payload: unknown) =>
-  apiFetch<AdminUsersResponse>("/admin/users", {
+  apiFetch<AdminUserResponse>("/admin/users", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const createAdminRole = async (token?: string, payload: unknown) =>
+  apiFetch<AdminRoleResponse>("/admin/roles", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
 export const updateAdminUser = async (token?: string, id: number, payload: unknown) =>
-  apiFetch<AdminUsersResponse>(`/admin/users/${id}`, {
+  apiFetch<AdminUserResponse>(`/admin/users/${id}`, {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const updateAdminRole = async (token?: string, id: number, payload: unknown) =>
+  apiFetch<AdminRoleResponse>(`/admin/roles/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -315,6 +345,12 @@ export const updateAdminUser = async (token?: string, id: number, payload: unkno
 
 export const deleteAdminUser = async (token?: string, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/users/${id}`, {
+    token,
+    method: "DELETE",
+  });
+
+export const deleteAdminRole = async (token?: string, id: number) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/roles/${id}`, {
     token,
     method: "DELETE",
   });
