@@ -19,7 +19,7 @@ export default function CmsPostForm({
   langCode: string;
   onSave: (payload: Record<string, unknown>) => Promise<void>;
 }) {
-  const languages = useMemo(() => ["vn", "en"], []);
+  const languages = useMemo(() => ["vi", "en"], []);
   const searchParams = useSearchParams();
   const initialLang =
     searchParams.get("lang") && languages.includes(searchParams.get("lang") || "")

@@ -10,6 +10,7 @@ import {
   HOTLINE_SECONDARY,
   SPA_ADDRESS,
   SPA_HOURS,
+  SUPPORTED_LANGS,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import { getSiteConfig } from "@/lib/api/public";
@@ -39,14 +40,20 @@ export default function Header({
   const lastScroll = useRef(0);
   const lastToggle = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const buildPublicHref = (path: string) => {
+    if (lang === "en") {
+      return `/${path}`.replace(/\/+$/, "") || "/";
+    }
+    return `/${lang}${path ? `/${path}` : ""}`;
+  };
   const defaultLinks = useMemo(
     () => [
-      { href: `/${lang}`, label: fixedT("nav.home") },
-      { href: `/${lang}/good-massage-in-da-nang`, label: fixedT("nav.about") },
-      { href: `/${lang}/dich-vu`, label: fixedT("nav.services") },
-      { href: `/${lang}/price-list`, label: fixedT("nav.price") },
-      { href: `/${lang}/news`, label: fixedT("nav.news") },
-      { href: `/${lang}/contact`, label: fixedT("nav.contact") },
+      { href: buildPublicHref(""), label: fixedT("nav.home") },
+      { href: buildPublicHref("good-massage-in-da-nang"), label: fixedT("nav.about") },
+      { href: buildPublicHref("dich-vu"), label: fixedT("nav.services") },
+      { href: buildPublicHref("price-list"), label: fixedT("nav.price") },
+      { href: buildPublicHref("news"), label: fixedT("nav.news") },
+      { href: buildPublicHref("contact"), label: fixedT("nav.contact") },
     ],
     [lang, fixedT]
   );
@@ -97,7 +104,8 @@ export default function Header({
         setLinks(defaultLinks);
         const response = await getSiteConfig();
         const config = response?.data ?? {};
-        const raw = config[`navbar_${lang}`];
+        const raw =
+          config[`navbar_${lang}`] || (lang === "vi" ? config.navbar_vn : undefined);
         if (!raw) {
           setLinks(defaultLinks);
         } else {
@@ -116,11 +124,22 @@ export default function Header({
 
         if (active) {
           setTopBar({
-            address: config[`topbar_address_${lang}`] || SPA_ADDRESS,
-            hours: config[`topbar_hours_${lang}`] || SPA_HOURS,
-            phonePrimary: config[`topbar_phone_primary_${lang}`] || HOTLINE,
+            address:
+              config[`topbar_address_${lang}`] ||
+              (lang === "vi" ? config.topbar_address_vn : undefined) ||
+              SPA_ADDRESS,
+            hours:
+              config[`topbar_hours_${lang}`] ||
+              (lang === "vi" ? config.topbar_hours_vn : undefined) ||
+              SPA_HOURS,
+            phonePrimary:
+              config[`topbar_phone_primary_${lang}`] ||
+              (lang === "vi" ? config.topbar_phone_primary_vn : undefined) ||
+              HOTLINE,
             phoneSecondary:
-              config[`topbar_phone_secondary_${lang}`] || HOTLINE_SECONDARY,
+              config[`topbar_phone_secondary_${lang}`] ||
+              (lang === "vi" ? config.topbar_phone_secondary_vn : undefined) ||
+              HOTLINE_SECONDARY,
           });
         }
       } catch {
@@ -143,11 +162,25 @@ export default function Header({
   }, [lang, defaultLinks, isAdminRoute]);
 
   const segments = pathname.split("/").filter(Boolean);
-  const currentLang = segments[0] || lang;
-  const restPath = segments.slice(1).join("/");
+  const currentLang = SUPPORTED_LANGS.includes(segments[0] as "vi" | "en")
+    ? segments[0]
+    : "en";
+  const restPath = SUPPORTED_LANGS.includes(segments[0] as "vi" | "en")
+    ? segments.slice(1).join("/")
+    : segments.join("/");
+  const buildLangSwitcherHref = (code: string) => {
+    if (code === "en") {
+      return `/${restPath}`.replace(/\/+$/, "") || "/";
+    }
+    return `/${code}${restPath ? `/${restPath}` : ""}`;
+  };
 
-  const isActive = (href: string) =>
-    href === `/${lang}` ? pathname === href : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href === "/" || href === `/${lang}`) {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
   const navLinkClass = (active: boolean) =>
     cn(
       "transition",
@@ -234,16 +267,16 @@ export default function Header({
             <span>{topBar.phoneSecondary || HOTLINE_SECONDARY}</span>
           </div>
           <div className="flex items-center gap-2">
-            {[
-              { code: "vn", label: "VN" },
-              { code: "en", label: "EN" },
-            ].map((item) => (
-              <Link
-                key={item.code}
-                href={`/${item.code}${restPath ? `/${restPath}` : ""}`}
-                className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition",
-                  item.code === currentLang
+              {[
+                { code: "vi", label: "VI" },
+                { code: "en", label: "EN" },
+              ].map((item) => (
+                <Link
+                  key={item.code}
+                  href={buildLangSwitcherHref(item.code)}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition",
+                    item.code === currentLang
                     ? "border-white text-white"
                     : "border-[rgba(255,255,255,0.4)] text-[rgba(255,255,255,0.7)] hover:text-white"
                 )}
@@ -257,7 +290,7 @@ export default function Header({
       <div className="bg-transparent">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-10">
           <div className="flex flex-1 items-center justify-between gap-8 rounded-full bg-white px-8 py-2 shadow-[0_18px_40px_rgba(255,106,61,0.4)]">
-            <Link href={`/${lang}`} className="flex items-center gap-3">
+            <Link href={buildPublicHref("")} className="flex items-center gap-3">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
                 alt="Panda Spa"
@@ -308,7 +341,7 @@ export default function Header({
                 Booking
               </Button>
               <Link
-                href={`/${lang}/admin/login`}
+                href={`/${lang === "en" ? "en" : lang}/admin/login`}
                 className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
               >
                 {fixedT("nav.admin")}

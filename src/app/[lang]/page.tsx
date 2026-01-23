@@ -26,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "vn";
+  const lang = isSupportedLang(rawLang) ? rawLang : "en";
   const homeResponse = await getHomePage(lang).catch(() => null);
 
   const metaTitle = homeResponse?.meta?.metaTitle || SITE_NAME;
@@ -48,7 +48,7 @@ export default async function HomePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "vn";
+  const lang = isSupportedLang(rawLang) ? rawLang : "en";
   const i18n = await getServerTranslator(lang);
   const t = i18n.t.bind(i18n);
   const [homeData, servicesResponse, siteConfigResponse] = await Promise.all([
@@ -87,11 +87,18 @@ export default async function HomePage({
     buttonLink?: string;
   };
   const contactName =
-    config[`site_name_${lang}`] || config.site_name || SITE_NAME;
+    config[`site_name_${lang}`] ||
+    (lang === "vi" ? config.site_name_vn : undefined) ||
+    config.site_name ||
+    SITE_NAME;
   const contactAddress =
-    config[`topbar_address_${lang}`] || SPA_ADDRESS;
+    config[`topbar_address_${lang}`] ||
+    (lang === "vi" ? config.topbar_address_vn : undefined) ||
+    SPA_ADDRESS;
   const contactHours =
-    config[`topbar_hours_${lang}`] || SPA_HOURS;
+    config[`topbar_hours_${lang}`] ||
+    (lang === "vi" ? config.topbar_hours_vn : undefined) ||
+    SPA_HOURS;
 
   return (
     <div className="home-dark space-y-16 pb-16">

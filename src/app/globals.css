@@ -52,7 +52,7 @@ body {
 
 body {
   color: var(--ink);
-  font-family: var(--font-body), "Inter",sans-serif;
+  font-family: var(--font-body), "Roboto", sans-serif;
   /* background: radial-gradient(black 0.1px, transparent 0.1px) center/150px 150px #fff6ee; */
   background: black;
   position: relative;

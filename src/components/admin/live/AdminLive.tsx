@@ -73,29 +73,29 @@ export default function AdminLive() {
       <section className="admin-panel px-6 py-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Realtime</p>
-            <h1 className="mt-2 text-2xl font-semibold text-white">Live Dashboard</h1>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Thống kê trực tiếp</p>
+            <h1 className="mt-2 text-2xl font-semibold text-white">Giao diện trực tiếp</h1>
             <p className="mt-2 text-sm text-slate-400">
-              Theo doi nguoi dung online, hanh vi truy cap va nguon traffic trong 60s gan nhat.
+              Theo dõi người dùng đang online, hành vi truy cập và nguồn traffic trong 60s gần nhất.
             </p>
           </div>
-          <Badge variant="success">Live</Badge>
+          <Badge variant="success">Trực tiếp</Badge>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Active sessions</CardTitle>
+            <CardTitle className="text-sm text-white/70">Phiên hoạt động</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold text-white">{snapshot?.onlineUsers ?? 0}</p>
-            <p className="mt-2 text-xs text-white/50">Cap nhat moi 1-3s</p>
+            <p className="mt-2 text-xs text-white/50">Cập nhật mỗi 1-3s</p>
           </CardContent>
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Traffic source</CardTitle>
+            <CardTitle className="text-sm text-white/70">Nguồn lưu lượng truy cập</CardTitle>
           </CardHeader>
           <CardContent>
             <DoughnutChart
@@ -107,7 +107,7 @@ export default function AdminLive() {
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Top pages</CardTitle>
+            <CardTitle className="text-sm text-white/70">Các trang hàng đầu</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {(snapshot?.topPages || []).map((page) => (
@@ -123,7 +123,7 @@ export default function AdminLive() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle>Top pages (last 60s)</CardTitle>
+            <CardTitle>Các trang (last 60s)</CardTitle>
           </CardHeader>
           <CardContent>
             <BarChart labels={topPages.labels} data={topPages.data} label="Views" color="#22c55e" />
@@ -131,7 +131,7 @@ export default function AdminLive() {
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle>Active sessions (last 12m)</CardTitle>
+            <CardTitle>Các phiên hoạt động (last 12m)</CardTitle>
           </CardHeader>
           <CardContent>
             <LineChart
@@ -144,7 +144,7 @@ export default function AdminLive() {
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle>Heartbeats per minute</CardTitle>
+            <CardTitle>Heartbeats mỗi phút</CardTitle>
           </CardHeader>
           <CardContent>
             <BarChart
@@ -157,7 +157,7 @@ export default function AdminLive() {
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle>Device</CardTitle>
+            <CardTitle>Thiết bị</CardTitle>
           </CardHeader>
           <CardContent>
             <BarChart labels={deviceStats.labels} data={deviceStats.data} label="Device" color="#2f7bff" />

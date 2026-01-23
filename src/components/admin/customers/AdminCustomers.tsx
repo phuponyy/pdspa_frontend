@@ -17,11 +17,11 @@ export default function AdminCustomers() {
 
   const columns = useMemo<ColumnDef<Customer>[]>(
     () => [
-      { accessorKey: "name", header: "Name" },
-      { accessorKey: "phone", header: "Phone" },
+      { accessorKey: "name", header: "Tên" },
+      { accessorKey: "phone", header: "Điện Thoại" },
       { accessorKey: "email", header: "Email" },
       { accessorKey: "lastVisit", header: "Last visit" },
-      { accessorKey: "totalSpend", header: "Total spend" },
+      { accessorKey: "totalSpend", header: "Tổng chi tiêu" },
       {
         accessorKey: "tags",
         header: "Tags",
@@ -46,16 +46,16 @@ export default function AdminCustomers() {
     <div className="space-y-8">
       <Card className="border-white/5">
         <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+          <div className="py-2">
             <CardTitle>Customers</CardTitle>
-            <p className="text-sm text-white/60">Search, filter, tag va ghi chu khach hang.</p>
+            <p className="text-sm text-white/60">Tìm kiếm, lọc, tags, và ghi chú của khách hàng</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => handleExport("csv")}>
-              Export CSV
+              Xuất CSV
             </Button>
             <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
-              Export Excel
+              Xuất Excel
             </Button>
           </div>
         </CardHeader>

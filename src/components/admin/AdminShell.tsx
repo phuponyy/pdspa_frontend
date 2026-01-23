@@ -11,10 +11,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getAdminMe } from "@/lib/api/admin";
+import { getAdminMe, getBookings } from "@/lib/api/admin";
+import AdminRequestFeedback from "./AdminRequestFeedback";
+
+type AccessRule = {
+  prefix: string;
+  permissions?: string[];
+  roles?: string[];
+};
 
 export default function AdminShell({
   lang,
@@ -39,9 +46,11 @@ export default function AdminShell({
     .map((segment) => segment.replace(/-/g, " "));
   const breadcrumbTrail = ["Admin", ...breadcrumb];
   const displayTrail = breadcrumbTrail.length > 1 ? breadcrumbTrail : ["Admin", "Overview"];
-  const userName = "Admin User";
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
   const navSections = useMemo(
     () =>
       adminNavSections(lang, (key: string) => {
@@ -55,8 +64,11 @@ export default function AdminShell({
     queryKey: ["admin-me"],
     queryFn: () => getAdminMe(undefined),
   });
+  const userName = data?.data?.name || data?.data?.email || "Admin User";
+  const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
   const permissions = data?.data?.permissions || [];
   const roleKey = data?.data?.roleKey;
+  const canViewBookings = permissions.includes("manage_bookings");
   const filteredSections = useMemo(
     () => filterAdminSections(navSections, permissions, roleKey),
     [navSections, permissions, roleKey]
@@ -78,7 +90,7 @@ export default function AdminShell({
 
   const isAllowed = useMemo(() => {
     if (!roleKey) return false;
-    const rules = [
+    const rules: AccessRule[] = [
       { prefix: "/admin", permissions: ["view_dashboard"] },
       { prefix: "/admin/overview", permissions: ["view_dashboard"] },
       { prefix: "/admin/dashboard", permissions: ["view_dashboard"] },
@@ -98,12 +110,30 @@ export default function AdminShell({
     if (!rule) return false;
     if (rule.roles?.length && !rule.roles.includes(roleKey)) return false;
     if (rule.permissions?.length) {
-      return rule.permissions.every((permission) =>
-        permissions.includes(permission)
-      );
+      return rule.permissions.every((permission) => permissions.includes(permission));
     }
     return true;
   }, [adminPath, permissions, roleKey]);
+
+  const bookingsQuery = useQuery({
+    queryKey: ["admin-booking-notifications"],
+    queryFn: () => getBookings(undefined, { status: "NEW", page: 1, limit: 5 }),
+    enabled: canViewBookings,
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
+  });
+
+  const newBookings = bookingsQuery.data?.items ?? [];
+  const totalNewBookings = bookingsQuery.data?.pagination.total ?? newBookings.length;
+  const badgeCount = totalNewBookings > 99 ? "99+" : totalNewBookings.toString();
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat("vi-VN", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    []
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -117,6 +147,19 @@ export default function AdminShell({
       router.replace(`/${lang}/admin/overview`);
     }
   }, [allowedLinks, fullLinks, pathname, roleKey, router, lang, isAllowed]);
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      if (!notificationsRef.current) return;
+      if (!notificationsRef.current.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, []);
   const searchResults = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return [];
@@ -129,6 +172,14 @@ export default function AdminShell({
       )
       .filter((link) => link.label.toLowerCase().includes(query));
   }, [navSections, searchQuery]);
+  const suggestedResults = useMemo(() => {
+    return filteredSections.flatMap((section) =>
+      section.links.slice(0, 2).map((link) => ({
+        ...link,
+        section: section.title,
+      }))
+    );
+  }, [filteredSections]);
 
   if (isLoading || !roleKey) {
     return <div className="min-h-screen bg-[var(--mist)]" />;
@@ -140,10 +191,11 @@ export default function AdminShell({
 
   return (
     <div className="admin-shell min-h-screen">
+      <AdminRequestFeedback />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-5 py-6 lg:flex-row lg:gap-10 lg:px-10 lg:py-8">
         <Sidebar lang={lang} />
         <main className="flex-1 space-y-8">
-          <div className="admin-panel flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="admin-panel relative z-10 flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60">
               {displayTrail.map((segment, index) => (
                 <span key={`${segment}-${index}`} className={index === 0 ? "text-white/40" : ""}>
@@ -153,7 +205,7 @@ export default function AdminShell({
             </div>
             <div className="ml-auto flex items-center gap-2">
               {mounted ? (
-                <Dialog>
+                <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                   <DialogTrigger asChild>
                     <button
                       type="button"
@@ -168,8 +220,8 @@ export default function AdminShell({
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
                     <DialogHeader>
-                      <DialogTitle>Search</DialogTitle>
-                      <DialogDescription>Find sections, pages, or settings quickly.</DialogDescription>
+                      <DialogTitle>Tìm kiếm nhanh</DialogTitle>
+                      <DialogDescription>Tìm kiếm nhanh các mục, trang hoặc cài đặt.</DialogDescription>
                     </DialogHeader>
                     <div className="relative">
                       <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
@@ -179,7 +231,7 @@ export default function AdminShell({
                         </svg>
                       </span>
                       <Input
-                        placeholder="Search sections or settings..."
+                        placeholder="Tìm kiếm các mục hoặc cài đặt..."
                         aria-label="Search admin content"
                         autoComplete="off"
                         value={searchQuery}
@@ -195,8 +247,9 @@ export default function AdminShell({
                             type="button"
                             onClick={() => {
                               router.push(result.href);
+                              setIsSearchOpen(false);
                             }}
-                            className="flex w-full items-center justify-between rounded-2xl border border-white/5 bg-[#0f1722] px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/5"
+                            className="flex w-full cursor-auto items-center justify-between rounded-2xl border border-white/5 bg-[#0f1722] px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/5"
                           >
                             <span>{result.label}</span>
                             <span className="text-xs uppercase tracking-[0.2em] text-white/40">
@@ -204,15 +257,35 @@ export default function AdminShell({
                             </span>
                           </button>
                         ))
+                      ) : searchQuery.trim() ? (
+                        <p className="text-sm text-white/50">Không tìm thấy kết quả phù hợp.</p>
                       ) : (
-                        <p className="text-sm text-white/50">Type to search sidebar pages.</p>
+                        <>
+                          <p className="text-xs uppercase tracking-[0.2em] text-white/40">Gợi ý</p>
+                          {suggestedResults.map((result) => (
+                            <button
+                              key={`suggested-${result.href}`}
+                              type="button"
+                              onClick={() => {
+                                router.push(result.href);
+                                setIsSearchOpen(false);
+                              }}
+                              className="flex w-full cursor-auto items-center justify-between rounded-2xl border border-white/5 bg-[#0f1722] px-4 py-3 text-left text-sm text-white/80 transition hover:bg-white/5"
+                            >
+                              <span>{result.label}</span>
+                              <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+                                {result.section}
+                              </span>
+                            </button>
+                          ))}
+                        </>
                       )}
                     </div>
                   </DialogContent>
                 </Dialog>
               ) : null}
               <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#0f1722] p-1">
-                {["vn", "en"].map((code) => (
+                {["vi", "en"].map((code) => (
                   <button
                     key={code}
                     type="button"
@@ -234,11 +307,85 @@ export default function AdminShell({
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0f1722] px-3 py-2 text-xs uppercase tracking-[0.2em] text-white/70">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.65)]" />
-                Autosaved 2m ago
+                TRỰC TIẾP
               </div>
+              {canViewBookings ? (
+                <div ref={notificationsRef} className="relative">
+                  <button
+                    type="button"
+                    aria-label="Booking notifications"
+                    onClick={() => setIsNotificationsOpen((open) => !open)}
+                    className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#111a25] text-white/70 transition hover:text-white"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                      <path d="M9 17a3 3 0 0 0 6 0" />
+                    </svg>
+                    {totalNewBookings > 0 ? (
+                      <span className="absolute -right-1 -top-1 rounded-full bg-[#ff9f40] px-1.5 py-0.5 text-[10px] font-semibold text-[#1a1410]">
+                        {badgeCount}
+                      </span>
+                    ) : null}
+                  </button>
+                  {isNotificationsOpen ? (
+                    <div className="absolute right-0 top-12 z-[100] w-72 rounded-2xl border border-white/10 bg-[#0f1722] p-3 text-sm text-white/80 shadow-[0_20px_60px_rgba(8,12,20,0.45)]">
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-xs uppercase tracking-[0.25em] text-white/50">
+                          Thông báo
+                        </span>
+                        <span className="text-xs text-white/40">
+                          {totalNewBookings} tin mới
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {bookingsQuery.isLoading ? (
+                          <div className="rounded-xl border border-white/5 bg-white/5 px-3 py-3 text-white/60">
+                            Loading new bookings...
+                          </div>
+                        ) : newBookings.length ? (
+                          newBookings.map((booking) => (
+                            <div
+                              key={booking.id}
+                              className="rounded-xl border border-white/5 bg-white/5 px-3 py-2"
+                            >
+                              <div className="text-sm font-semibold text-white">
+                                {booking.customer?.name || "New customer"}
+                              </div>
+                              <div className="text-xs text-white/60">
+                                {booking.service?.key || "Service"} ·{" "}
+                                {dateFormatter.format(new Date(booking.scheduledAt))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="rounded-xl border border-white/5 bg-white/5 px-3 py-3 text-white/60">
+                            No new bookings yet.
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsNotificationsOpen(false);
+                          router.push(`/${lang}/admin/bookings`);
+                        }}
+                        className="mt-3 cursor-pointer flex w-full items-center justify-center rounded-full border border-white/10 bg-[#111a25] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 transition hover:text-white"
+                      >
+                        Xem
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="group relative flex items-center gap-2">
                 <img
-                  src="/admin-avatar.svg"
+                  src={avatarUrl}
                   alt={userName}
                   className="h-10 w-10 rounded-full border border-white/10 object-cover"
                 />

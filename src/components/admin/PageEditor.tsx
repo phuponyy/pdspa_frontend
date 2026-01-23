@@ -71,7 +71,7 @@ type RecoveryState = {
 };
 
 export default function PageEditor({ lang }: { lang: string }) {
-  const languages = useMemo(() => ["vn", "en"], []);
+  const languages = useMemo(() => ["vi", "en"], []);
   const searchParams = useSearchParams();
   const initialLang =
     searchParams.get("lang") && languages.includes(searchParams.get("lang") || "")
@@ -79,15 +79,15 @@ export default function PageEditor({ lang }: { lang: string }) {
       : lang;
   const [activeLang, setActiveLang] = useState(initialLang);
   const [metaByLang, setMetaByLang] = useState<Record<string, MetaState>>({
-    vn: { metaTitle: "", metaDescription: "" },
+    vi: { metaTitle: "", metaDescription: "" },
     en: { metaTitle: "", metaDescription: "" },
   });
   const [heroByLang, setHeroByLang] = useState<Record<string, HeroState>>({
-    vn: { heading: "", subheading: "", slides: [] },
+    vi: { heading: "", subheading: "", slides: [] },
     en: { heading: "", subheading: "", slides: [] },
   });
   const [introByLang, setIntroByLang] = useState<Record<string, IntroState>>({
-    vn: {
+    vi: {
       heading: "",
       description: "",
       imageUrl: "",
@@ -115,7 +115,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     },
   });
   const [recoveryByLang, setRecoveryByLang] = useState<Record<string, RecoveryState>>({
-    vn: {
+    vi: {
       heading: "Recover your energy through relaxation",
       items: [
         { title: "Deep Massage Therapy", description: "", imageUrl: "" },
@@ -135,7 +135,7 @@ export default function PageEditor({ lang }: { lang: string }) {
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
   const [loadedLangs, setLoadedLangs] = useState<Record<string, boolean>>({
-    vn: false,
+    vi: false,
     en: false,
   });
   const [hasDraft, setHasDraft] = useState(false);
@@ -425,7 +425,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               </span>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">SEO Metadata</p>
-                <p className="text-sm text-slate-500">Optimize search visibility.</p>
+                <p className="text-sm text-slate-500">Tối ưu hóa khả năng hiển thị tìm kiếm.</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-slate-400">
@@ -539,7 +539,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               </span>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Hero Section</p>
-                <p className="text-sm text-slate-500">Update the main hero message.</p>
+                <p className="text-sm text-slate-500">Cập nhật thông điệp chính cho heros.</p>
               </div>
             </div>
           </div>
@@ -582,11 +582,11 @@ export default function PageEditor({ lang }: { lang: string }) {
                 </svg>
               </div>
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Background Media
+                Ảnh thumb
               </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
                 <label className="cursor-pointer rounded-full bg-[#111827] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white">
-                  {isUploading ? "Uploading..." : "Replace"}
+                  {isUploading ? "Uploading..." : "Upload"}
                   <input
                     type="file"
                     accept="image/*"
@@ -642,7 +642,7 @@ export default function PageEditor({ lang }: { lang: string }) {
                   Library
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-slate-400">Recommended: 1920x1080px</p>
+              <p className="mt-2 text-[11px] text-slate-400">Tối thiểu: 1920x1080px</p>
             </div>
           </div>
 
@@ -650,7 +650,7 @@ export default function PageEditor({ lang }: { lang: string }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-600">Hero slides (max 10)</p>
-                <p className="text-xs text-slate-400">Keep it minimal; expand a slide to edit full details.</p>
+                <p className="text-xs text-slate-400">Hãy giữ mọi thứ ở mức tối giản, mở rộng slide để chỉnh sửa chi tiết đầy đủ.</p>
               </div>
               <Button
                 variant="outline"
@@ -901,7 +901,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               </span>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Intro Section</p>
-                <p className="text-sm text-slate-500">Homepage highlight below hero.</p>
+                <p className="text-sm text-slate-500">Điểm nổi bật trên trang chủ nằm bên dưới phần hero.</p>
               </div>
             </div>
           </div>
@@ -1100,7 +1100,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               </span>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Recovery Section</p>
-                <p className="text-sm text-slate-500">Highlight three key services.</p>
+                <p className="text-sm text-slate-500">Hãy nêu bật ba dịch vụ chính.</p>
               </div>
             </div>
           </div>
@@ -1266,7 +1266,7 @@ export default function PageEditor({ lang }: { lang: string }) {
 
       <aside className="space-y-6">
         <div className="admin-panel p-5 text-sm">
-          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Quick Navigation</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Điều hướng nhanh</p>
           <div className="mt-4 space-y-2">
             {sectionNav.map((item) => (
               <a
@@ -1287,7 +1287,7 @@ export default function PageEditor({ lang }: { lang: string }) {
         </div>
 
         <div className="admin-panel p-5 text-sm">
-          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Page Configuration</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-white/50">Cấu hình trang chủ</p>
           <div className="mt-4 space-y-4">
             <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
               <div className="flex items-center gap-3 text-white/80">
@@ -1300,8 +1300,8 @@ export default function PageEditor({ lang }: { lang: string }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Language</p>
-                  <p className="text-sm font-semibold text-white">Content locale</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Ngôn Ngữ</p>
+                  <p className="text-sm font-semibold text-white">Nội dung</p>
                 </div>
               </div>
               <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#0f1722] p-1">
@@ -1338,7 +1338,7 @@ export default function PageEditor({ lang }: { lang: string }) {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Live Status</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Trạng thái</p>
                   <p className="text-sm font-semibold text-white">{status}</p>
                 </div>
               </div>

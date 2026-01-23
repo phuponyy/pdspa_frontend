@@ -25,11 +25,11 @@ type AdminNavSection = {
 
 export const adminNavSections = (lang: string, t: (key: string) => string): AdminNavSection[] => [
     {
-      title: "Core",
+      title: "Số Liệu",
       links: [
         {
           href: `/${lang}/admin/overview`,
-          label: "Overview",
+          label: "Tổng Quan",
           requiredPermissions: ["view_dashboard"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -39,7 +39,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/live`,
-          label: "Realtime",
+          label: "Live",
           requiredPermissions: ["view_live"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -49,7 +49,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/analytics`,
-          label: "Analytics",
+          label: "Thống Kê",
           requiredPermissions: ["view_dashboard"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -60,11 +60,11 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       ],
     },
     {
-      title: "Operations",
+      title: "Quản lý khách",
       links: [
         {
           href: `/${lang}/admin/customers`,
-          label: "Customers",
+          label: "Khách hàng",
           requiredPermissions: ["manage_customers"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -75,7 +75,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/bookings`,
-          label: "Bookings",
+          label: "Đặt lịch",
           requiredPermissions: ["manage_bookings"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -98,11 +98,11 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       ],
     },
     {
-      title: "Content",
+      title: "Nội dung",
       links: [
         {
           href: `/${lang}/admin/posts`,
-          label: "Posts",
+          label: "Bài viết",
           requiredPermissions: ["manage_posts"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -112,7 +112,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/pages`,
-          label: "Pages",
+          label: "Trang",
           requiredPermissions: ["manage_pages"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -123,7 +123,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/media`,
-          label: "Media",
+          label: "Ảnh",
           requiredPermissions: ["manage_media"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -134,7 +134,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/pages/home`,
-          label: "Homepage",
+          label: "Trang Chủ",
           requiredPermissions: ["manage_pages"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -145,11 +145,11 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       ],
     },
     {
-      title: "Settings",
+      title: "Cài Đặt Chung",
       links: [
         {
           href: `/${lang}/admin/settings`,
-          label: "Settings",
+          label: "Cài đặt",
           requiredPermissions: ["manage_users"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -159,7 +159,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/settings/roles`,
-          label: "Roles",
+          label: "Quyền",
           requiredPermissions: ["manage_users"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -170,7 +170,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         },
         {
           href: `/${lang}/admin/users`,
-          label: "Users",
+          label: "Người dùng",
           requiredPermissions: ["manage_users"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -218,6 +218,8 @@ export default function Sidebar({ lang }: { lang: string }) {
   });
   const permissions = data?.data?.permissions || [];
   const roleKey = data?.data?.roleKey;
+  const userName = data?.data?.name || data?.data?.email || "Admin";
+  const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
   const filteredSections = roleKey
     ? filterAdminSections(navSections, permissions, roleKey)
     : [];
@@ -234,21 +236,21 @@ export default function Sidebar({ lang }: { lang: string }) {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">Panda Spa</p>
-            <p className="text-lg font-semibold text-white">Admin Hub</p>
+            <p className="text-lg font-semibold text-white">Quản Trị Website</p>
           </div>
         </div>
         <p className="text-xs text-white/60">
-          Secure workspace for content, leads, and system health.
+          Bảo mật không gian làm việc cho nội dung, khách hàng tiềm năng và tình trạng hệ thống.
         </p>
       </div>
       <div className="admin-panel flex flex-col gap-5 p-4 text-sm">
         {isLoading ? (
           <p className="px-3 text-xs uppercase tracking-[0.35em] text-white/40">
-            Loading menu...
+            Đăng Tải...
           </p>
         ) : filteredSections.length === 0 ? (
           <p className="px-3 text-xs uppercase tracking-[0.35em] text-white/40">
-            No access
+            Không có quyền!
           </p>
         ) : (
           filteredSections.map((section) => (
@@ -288,13 +290,13 @@ export default function Sidebar({ lang }: { lang: string }) {
       <div className="admin-panel flex flex-col gap-4 p-5 text-sm">
         <div className="flex items-center gap-3">
           <img
-            src="/admin-avatar.svg"
-            alt="Admin"
-            className="h-10 w-10 rounded-full border border-white/10"
+            src={avatarUrl}
+            alt={userName}
+            className="h-10 w-10 rounded-full border border-white/10 object-cover"
           />
           <div>
-            <p className="font-semibold text-white">Admin Panel</p>
-            <p className="text-xs text-white/60">Secure session enabled</p>
+            <p className="font-semibold text-white">{userName}</p>
+            <p className="text-xs text-white/60">Phiên bảo mật đã được kích hoạt</p>
           </div>
         </div>
         <Button

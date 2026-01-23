@@ -10,7 +10,7 @@ export default function Footer({
   siteName = "Panda Spa",
   address,
   hours,
-  lang = "vn",
+  lang = "en",
 }: {
   hotline?: string;
   siteName?: string;
@@ -22,6 +22,12 @@ export default function Footer({
   if (pathname.includes("/admin")) {
     return null;
   }
+  const buildPublicHref = (path: string) => {
+    if (lang === "en") {
+      return `/${path}`.replace(/\/+$/, "") || "/";
+    }
+    return `/${lang}${path ? `/${path}` : ""}`;
+  };
 
   return (
     <footer className="mt-20 border-t border-[rgba(255,255,255,0.4)] bg-[var(--accent-deep)] text-white">
@@ -53,29 +59,29 @@ export default function Footer({
             Menu
           </p>
           <div className="flex flex-col gap-2">
-            <Link href={`/${lang}`} className="hover:text-[var(--accent-bright)]">
+            <Link href={buildPublicHref("")} className="hover:text-[var(--accent-bright)]">
               Trang chu
             </Link>
             <Link
-              href={`/${lang}/good-massage-in-da-nang`}
+              href={buildPublicHref("good-massage-in-da-nang")}
               className="hover:text-[var(--accent-bright)]"
             >
               Gioi thieu
             </Link>
             <Link
-              href={`/${lang}/dich-vu`}
+              href={buildPublicHref("dich-vu")}
               className="hover:text-[var(--accent-bright)]"
             >
               Dich vu
             </Link>
             <Link
-              href={`/${lang}/price-list`}
+              href={buildPublicHref("price-list")}
               className="hover:text-[var(--accent-bright)]"
             >
               Bang gia
             </Link>
             <Link
-              href={`/${lang}/contact`}
+              href={buildPublicHref("contact")}
               className="hover:text-[var(--accent-bright)]"
             >
               Lien he

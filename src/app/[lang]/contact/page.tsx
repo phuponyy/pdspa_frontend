@@ -12,7 +12,7 @@ export default async function ContactPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "vn";
+  const lang = isSupportedLang(rawLang) ? rawLang : "en";
   const i18n = await getServerTranslator(lang);
   const t = i18n.t.bind(i18n);
   const servicesResponse = await getServices(lang).catch(() => null);

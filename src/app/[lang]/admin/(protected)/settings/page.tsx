@@ -21,31 +21,31 @@ type TopBarFields = {
 
 export default function SettingsPage() {
   const [forceHttps, setForceHttps] = useState(true);
-  const [activeLang, setActiveLang] = useState("vn");
+  const [activeLang, setActiveLang] = useState("vi");
   const [navByLang, setNavByLang] = useState<Record<string, NavItem[]>>({
-    vn: [],
+    vi: [],
     en: [],
   });
   const [topBarByLang, setTopBarByLang] = useState<
     Record<string, TopBarFields>
   >({
-    vn: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
+    vi: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
     en: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
   });
   const toast = useToast();
   const { t } = useTranslation();
 
   const defaultNav = useMemo<Record<string, NavItem[]>>(() => {
-    const vnDict = resources.vn.translation;
+    const viDict = resources.vi.translation;
     const enDict = resources.en.translation;
     return {
-      vn: [
-        { label: vnDict.nav.home, href: "/vn" },
-        { label: vnDict.nav.about, href: "/vn/good-massage-in-da-nang" },
-        { label: vnDict.nav.services, href: "/vn/dich-vu" },
-        { label: vnDict.nav.price, href: "/vn/price-list" },
-        { label: vnDict.nav.news, href: "/vn/news" },
-        { label: vnDict.nav.contact, href: "/vn/contact" },
+      vi: [
+        { label: viDict.nav.home, href: "/vi" },
+        { label: viDict.nav.about, href: "/vi/good-massage-in-da-nang" },
+        { label: viDict.nav.services, href: "/vi/dich-vu" },
+        { label: viDict.nav.price, href: "/vi/price-list" },
+        { label: viDict.nav.news, href: "/vi/news" },
+        { label: viDict.nav.contact, href: "/vi/contact" },
       ],
       en: [
         { label: enDict.nav.home, href: "/en" },
@@ -65,8 +65,10 @@ export default function SettingsPage() {
         const response = await getSiteConfig();
         const config = response?.data ?? {};
         const next = { ...defaultNav };
-        (["vn", "en"] as const).forEach((code) => {
-          const raw = config[`navbar_${code}`];
+        (["vi", "en"] as const).forEach((code) => {
+          const raw =
+            config[`navbar_${code}`] ||
+            (code === "vi" ? config.navbar_vn : undefined);
           if (!raw) return;
           try {
             const parsed = JSON.parse(raw) as NavItem[];
@@ -80,11 +82,13 @@ export default function SettingsPage() {
         if (active) {
           setNavByLang(next);
           setTopBarByLang({
-            vn: {
-              address: config.topbar_address_vn || "",
-              hours: config.topbar_hours_vn || "",
-              phonePrimary: config.topbar_phone_primary_vn || "",
-              phoneSecondary: config.topbar_phone_secondary_vn || "",
+            vi: {
+              address: config.topbar_address_vi || config.topbar_address_vn || "",
+              hours: config.topbar_hours_vi || config.topbar_hours_vn || "",
+              phonePrimary:
+                config.topbar_phone_primary_vi || config.topbar_phone_primary_vn || "",
+              phoneSecondary:
+                config.topbar_phone_secondary_vi || config.topbar_phone_secondary_vn || "",
             },
             en: {
               address: config.topbar_address_en || "",
@@ -155,7 +159,7 @@ export default function SettingsPage() {
 
       <Section title={t("settings.navbar")}>
         <div className="flex flex-wrap gap-2 px-6 pt-4">
-          {["vn", "en"].map((code) => (
+          {["vi", "en"].map((code) => (
             <button
               key={code}
               type="button"

@@ -59,9 +59,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => remove(toast.id)}
-              className="text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white"
+              className="text-xs cursor-pointer uppercase tracking-[0.2em] text-white/70 hover:text-white"
             >
-              Close
+              Đóng
             </button>
           </div>
         ))}

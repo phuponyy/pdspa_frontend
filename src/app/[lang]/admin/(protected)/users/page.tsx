@@ -38,6 +38,7 @@ export default function UsersPage() {
     password: "",
     roleKey: DEFAULT_ROLE_KEY,
   });
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
   const toast = useToast();
 
   const rolesQuery = useQuery({
@@ -74,17 +75,17 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Settings</p>
-          <h1 className="text-2xl font-semibold text-white">User Management</h1>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Cấu hình</p>
+          <h1 className="text-2xl font-semibold text-white">Quản lý thành viên </h1>
         </div>
         <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70">
-          Create users, assign roles, and manage access.
+          Tạo thành viên, phân công vai trò và quản lý quyền truy cập.
         </div>
       </div>
 
       <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader>
-          <CardTitle>Create user</CardTitle>
+        <CardHeader className="py-2">
+          <CardTitle>Tạo thành viên</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -101,7 +102,7 @@ export default function UsersPage() {
             </label>
             <label className="space-y-2 text-sm text-slate-300">
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                Name
+                Tên
               </span>
               <Input
                 value={form.name}
@@ -112,10 +113,11 @@ export default function UsersPage() {
             </label>
             <label className="space-y-2 text-sm text-slate-300">
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                Avatar URL
+                Ảnh đại diện (URL)
               </span>
               <Input
                 value={form.avatarUrl}
+                placeholder="Nhập url ảnh"
                 onChange={(event) =>
                   setForm({ ...form, avatarUrl: event.target.value })
                 }
@@ -123,19 +125,42 @@ export default function UsersPage() {
             </label>
             <label className="space-y-2 text-sm text-slate-300">
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                Password
+                Mật khẩu
               </span>
-              <Input
-                type="password"
-                value={form.password}
-                onChange={(event) =>
-                  setForm({ ...form, password: event.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showCreatePassword ? "text" : "password"}
+                  className="pr-12"
+                  value={form.password}
+                  onChange={(event) =>
+                    setForm({ ...form, password: event.target.value })
+                  }
+                />
+                <button
+                  type="button"
+                  aria-label={showCreatePassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowCreatePassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+                >
+                  {showCreatePassword ? (
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                      <path d="M7.1 7.1C5 8.4 3.5 10.2 2.5 12c2.1 3.7 5.7 6 9.5 6 1.1 0 2.1-.2 3.1-.6" />
+                      <path d="M9.9 4.2C10.6 4.1 11.3 4 12 4c3.8 0 7.4 2.3 9.5 6-.5.9-1.1 1.7-1.8 2.5" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M2.5 12C4.6 8.3 8.2 6 12 6s7.4 2.3 9.5 6c-2.1 3.7-5.7 6-9.5 6s-7.4-2.3-9.5-6z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </label>
             <label className="space-y-2 text-sm text-slate-300">
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                Role
+                Quyền
               </span>
               <select
                 className="h-12 w-full rounded-2xl border border-white/10 bg-[#1a2430] px-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7bff]"
@@ -181,7 +206,7 @@ export default function UsersPage() {
               }
             }}
           >
-            Create user
+            Tạo
           </Button>
         </CardContent>
       </Card>
@@ -235,6 +260,7 @@ function UserRow({
   const [roleKey, setRoleKey] = useState(user.roleKey);
   const [isActive, setIsActive] = useState(user.isActive);
   const [password, setPassword] = useState("");
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const roleMeta = useMemo(() => {
     if (roleKey === user.roleKey && user.role) {
       return user.role;
@@ -293,17 +319,40 @@ function UserRow({
             ))}
           </select>
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#111a25] px-4 py-3 text-xs text-white/70">
-            <span className="uppercase tracking-[0.2em]">Active</span>
+            <span className="uppercase tracking-[0.2em]">Trạng thái</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </div>
         <div className="space-y-3">
-          <Input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Reset password"
-          />
+          <div className="relative">
+            <Input
+              type={showResetPassword ? "text" : "password"}
+              className="pr-12"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Đổi mật khẩu"
+            />
+            <button
+              type="button"
+              aria-label={showResetPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowResetPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+            >
+              {showResetPassword ? (
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                  <path d="M7.1 7.1C5 8.4 3.5 10.2 2.5 12c2.1 3.7 5.7 6 9.5 6 1.1 0 2.1-.2 3.1-.6" />
+                  <path d="M9.9 4.2C10.6 4.1 11.3 4 12 4c3.8 0 7.4 2.3 9.5 6-.5.9-1.1 1.7-1.8 2.5" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2.5 12C4.6 8.3 8.2 6 12 6s7.4 2.3 9.5 6c-2.1 3.7-5.7 6-9.5 6s-7.4-2.3-9.5-6z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="secondary"
@@ -322,7 +371,7 @@ function UserRow({
                 }
               }}
             >
-              Save changes
+              Lưu
             </Button>
             <Button
               variant="secondary"
@@ -337,31 +386,32 @@ function UserRow({
                 }
               }}
             >
-              Reset password
+              Đổi mật khẩu
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline">Delete</Button>
+                <Button variant="outline">Xoá</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
-                <AlertDialogTitle>Delete user?</AlertDialogTitle>
+                <AlertDialogTitle>Chắc chắn xoá thành viên này?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. The user will lose access immediately.
+                  Thao tác này không thể hoàn tác. Người dùng sẽ mất quyền truy cập ngay lập tức.
                 </AlertDialogDescription>
                 <div className="mt-5 flex items-center justify-end gap-3">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="cursor-pointer">Huỷ</AlertDialogCancel>
                   <AlertDialogAction
+                    className="cursor-pointer"
                     onClick={async () => {
                       try {
                         await deleteAdminUser(undefined, user.id);
                         await onUpdated();
-                        onSuccess("User deleted.", "success");
+                        onSuccess("User đã xoá.", "success");
                       } catch (err) {
                         onError(err);
                       }
                     }}
                   >
-                    Delete user
+                    Xoá
                   </AlertDialogAction>
                 </div>
               </AlertDialogContent>

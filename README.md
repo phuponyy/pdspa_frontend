@@ -36,7 +36,7 @@ Create `.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_DEFAULT_LANG=vn
+NEXT_PUBLIC_DEFAULT_LANG=vi
 ```
 
 ## Development

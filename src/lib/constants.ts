@@ -1,8 +1,8 @@
-export const SUPPORTED_LANGS = ["vn", "en"] as const;
+export const SUPPORTED_LANGS = ["vi", "en"] as const;
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 
 export const DEFAULT_LANG: SupportedLang =
-  (process.env.NEXT_PUBLIC_DEFAULT_LANG as SupportedLang) || "vn";
+  (process.env.NEXT_PUBLIC_DEFAULT_LANG as SupportedLang) || "en";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";

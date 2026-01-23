@@ -12,7 +12,7 @@ export default function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition",
+        "inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition",
         variant === "primary" &&
           "bg-[linear-gradient(135deg,#ff6a3d,#ffb640)] text-white shadow-[0_18px_40px_rgba(255,106,61,0.35)] hover:brightness-110",
         variant === "outline" &&

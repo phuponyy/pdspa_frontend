@@ -40,6 +40,37 @@ import type {
   PaginatedResponse,
 } from "@/types/admin-dashboard.types";
 
+type AdminRequestEvent = {
+  phase: "start" | "end";
+  id: string;
+  method: string;
+  path: string;
+  ok?: boolean;
+  status?: number;
+};
+
+const dispatchAdminRequest = (detail: AdminRequestEvent) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<AdminRequestEvent>("admin-request", { detail }));
+};
+
+const withAdminRequest = async <T,>(
+  path: string,
+  method: string,
+  run: () => Promise<T>
+) => {
+  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  dispatchAdminRequest({ phase: "start", id: requestId, method, path });
+  try {
+    const result = await run();
+    dispatchAdminRequest({ phase: "end", id: requestId, method, path, ok: true, status: 200 });
+    return result;
+  } catch (err) {
+    dispatchAdminRequest({ phase: "end", id: requestId, method, path, ok: false, status: 0 });
+    throw err;
+  }
+};
+
 export const loginAdmin = async (payload: AdminLoginRequest) =>
   apiFetch<AdminLoginResponse>("/admin/auth/login", {
     method: "POST",
@@ -168,20 +199,22 @@ export const updateSiteConfig = async (token?: string, payload: Record<string, s
   });
 
 export const uploadHeroImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
+  return withAdminRequest("/admin/pages/home/hero/images", "POST", async () => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/admin/pages/home/hero/images`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
+    const response = await fetch(`${API_BASE_URL}/admin/pages/home/hero/images`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Upload failed");
+    }
+
+    return (await response.json()) as HeroImageUploadResponse;
   });
-
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-
-  return (await response.json()) as HeroImageUploadResponse;
 };
 
 export const getCmsPosts = async (token?: string, page = 1, limit = 20) =>
@@ -258,37 +291,41 @@ export const getMediaLibrary = async (token?: string, page = 1, limit = 30) =>
   });
 
 export const uploadMedia = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
+  return withAdminRequest("/admin/cms/media", "POST", async () => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
+    const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Upload failed");
+    }
+
+    return (await response.json()) as MediaUploadResponse;
   });
-
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-
-  return (await response.json()) as MediaUploadResponse;
 };
 
 export const updateMedia = async (id: number, file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
+  return withAdminRequest(`/admin/cms/media/${id}`, "PATCH", async () => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/admin/cms/media/${id}`, {
-    method: "PATCH",
-    credentials: "include",
-    body: formData,
+    const response = await fetch(`${API_BASE_URL}/admin/cms/media/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("Update failed");
+    }
+
+    return (await response.json()) as MediaUploadResponse;
   });
-
-  if (!response.ok) {
-    throw new Error("Update failed");
-  }
-
-  return (await response.json()) as MediaUploadResponse;
 };
 
 export const deleteMedia = async (token?: string, id: number) =>
@@ -424,21 +461,25 @@ export const updateBookingStatus = async (
   });
 
 export const exportCustomers = async (format: "csv" | "xlsx") => {
-  const response = await fetch(`${API_BASE_URL}/admin/exports/customers?format=${format}`, {
-    credentials: "include",
+  return withAdminRequest(`/admin/exports/customers?format=${format}`, "EXPORT", async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/exports/customers?format=${format}`, {
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error("Export failed");
+    }
+    return response.blob();
   });
-  if (!response.ok) {
-    throw new Error("Export failed");
-  }
-  return response.blob();
 };
 
 export const exportBookings = async (format: "csv" | "xlsx") => {
-  const response = await fetch(`${API_BASE_URL}/admin/exports/bookings?format=${format}`, {
-    credentials: "include",
+  return withAdminRequest(`/admin/exports/bookings?format=${format}`, "EXPORT", async () => {
+    const response = await fetch(`${API_BASE_URL}/admin/exports/bookings?format=${format}`, {
+      credentials: "include",
+    });
+    if (!response.ok) {
+      throw new Error("Export failed");
+    }
+    return response.blob();
   });
-  if (!response.ok) {
-    throw new Error("Export failed");
-  }
-  return response.blob();
 };

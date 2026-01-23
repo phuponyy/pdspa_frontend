@@ -16,10 +16,10 @@ export default function NewPostPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
-          Posts
+          Bài viết
         </p>
         <h1 className="text-2xl font-semibold text-[var(--ink)]">
-          New post
+          Thêm bài viết mới
         </h1>
       </div>
       <CmsPostForm

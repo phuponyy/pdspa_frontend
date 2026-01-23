@@ -25,6 +25,20 @@ type FetchOptions = RequestInit & {
   query?: Record<string, string | number | boolean | undefined>;
 };
 
+type AdminRequestEvent = {
+  phase: "start" | "end";
+  id: string;
+  method: string;
+  path: string;
+  ok?: boolean;
+  status?: number;
+};
+
+const dispatchAdminRequest = (detail: AdminRequestEvent) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<AdminRequestEvent>("admin-request", { detail }));
+};
+
 let refreshPromise: Promise<boolean> | null = null;
 
 const refreshAccessToken = async () => {
@@ -78,16 +92,38 @@ async function apiFetchInternal<T>(
   const { token, query, headers, ...init } = options;
   const url = `${API_BASE_URL}${path}${buildQuery(query)}`;
   const hasBody = typeof init.body !== "undefined" && init.body !== null;
+  const method = (init.method || "GET").toUpperCase();
+  const shouldNotify = path.startsWith("/admin") && !path.startsWith("/admin/auth");
+  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  const response = await fetch(url, {
-    credentials: "include",
-    ...init,
-    headers: {
-      ...(hasBody ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-  });
+  if (shouldNotify) {
+    dispatchAdminRequest({ phase: "start", id: requestId, method, path });
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      credentials: "include",
+      ...init,
+      headers: {
+        ...(hasBody ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+    });
+  } catch (err) {
+    if (shouldNotify) {
+      dispatchAdminRequest({
+        phase: "end",
+        id: requestId,
+        method,
+        path,
+        ok: false,
+        status: 0,
+      });
+    }
+    throw err;
+  }
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
@@ -101,19 +137,50 @@ async function apiFetchInternal<T>(
     if (response.status === 401 && !retried && !skipRefresh) {
       const refreshed = await refreshAccessToken();
       if (refreshed) {
+        if (shouldNotify) {
+          dispatchAdminRequest({
+            phase: "end",
+            id: requestId,
+            method,
+            path,
+            ok: false,
+            status: response.status,
+          });
+        }
         return apiFetchInternal(path, options, true);
       }
       await clearClientToken();
     }
     const errorPayload = (payload?.error || payload) as ApiErrorPayload | null;
-    throw new ApiError(
+    const error = new ApiError(
       errorPayload?.message || "Request failed",
       errorPayload?.code,
       response.status,
       errorPayload?.details
     );
+    if (shouldNotify) {
+      dispatchAdminRequest({
+        phase: "end",
+        id: requestId,
+        method,
+        path,
+        ok: false,
+        status: response.status,
+      });
+    }
+    throw error;
   }
 
+  if (shouldNotify) {
+    dispatchAdminRequest({
+      phase: "end",
+      id: requestId,
+      method,
+      path,
+      ok: true,
+      status: response.status,
+    });
+  }
   return payload as T;
 }
 

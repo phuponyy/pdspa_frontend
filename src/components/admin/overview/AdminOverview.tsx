@@ -54,7 +54,7 @@ export default function AdminOverview() {
             <p className="text-xs uppercase tracking-[0.3em] text-white/60">Overview</p>
             <h1 className="mt-2 text-2xl font-semibold text-white">Tong quan hoat dong SPA</h1>
             <p className="mt-2 text-sm text-slate-400">
-              Theo doi KPI doanh thu, lich hen va hanh vi khach hang theo thoi gian thuc.
+              Theo dõi KPI doanh thu, lịch hẹn và hành vi khách hàng theo thời gian thực.
             </p>
           </div>
           <Tabs value={range} onValueChange={setRange}>
@@ -93,13 +93,13 @@ export default function AdminOverview() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Doanh thu hom nay</CardTitle>
+            <CardTitle className="text-sm text-white/70">Doanh thu hôm nay</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-semibold text-white">
               {(data?.kpis.revenue.today || 0).toLocaleString()} d
             </p>
-            <p className="mt-2 text-xs text-white/50">Tuan: {data?.kpis.revenue.week || 0} d</p>
+            <p className="mt-2 text-xs text-white/50">Tuần: {data?.kpis.revenue.week || 0} đ</p>
           </CardContent>
         </Card>
         <Card className="border-white/5">
@@ -109,24 +109,24 @@ export default function AdminOverview() {
           <CardContent className="space-y-2">
             <p className="text-2xl font-semibold text-white">{data?.kpis.bookings.total || 0}</p>
             <div className="flex flex-wrap gap-2 text-xs text-white/60">
-              <span>Moi: {data?.kpis.bookings.new || 0}</span>
-              <span>Xac nhan: {data?.kpis.bookings.confirmed || 0}</span>
-              <span>Huy: {data?.kpis.bookings.canceled || 0}</span>
+              <span>Mới: {data?.kpis.bookings.new || 0}</span>
+              <span>Xác nhận: {data?.kpis.bookings.confirmed || 0}</span>
+              <span>Huỷ: {data?.kpis.bookings.canceled || 0}</span>
             </div>
           </CardContent>
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Khach hang</CardTitle>
+            <CardTitle className="text-sm text-white/70">Khách hàng</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-2xl font-semibold text-white">{data?.kpis.customers.new || 0}</p>
-            <p className="text-xs text-white/60">Quay lai: {data?.kpis.customers.returning || 0}</p>
+            <p className="text-xs text-white/60">Quay lại: {data?.kpis.customers.returning || 0}</p>
           </CardContent>
         </Card>
         <Card className="border-white/5">
           <CardHeader>
-            <CardTitle className="text-sm text-white/70">Top dich vu</CardTitle>
+            <CardTitle className="text-sm text-white/70">Top dịch vụ</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {data?.kpis.topServices?.slice(0, 3).map((service) => (
@@ -145,7 +145,7 @@ export default function AdminOverview() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="border-white/5 lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Revenue theo ngay</CardTitle>
+            <CardTitle>Doanh thu theo ngày</CardTitle>
             <Badge variant="default">Line</Badge>
           </CardHeader>
           <CardContent>
@@ -174,7 +174,7 @@ export default function AdminOverview() {
 
       <Card className="border-white/5">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Users theo ngay</CardTitle>
+          <CardTitle>Users theo ngày</CardTitle>
           <Badge variant="default">Line</Badge>
         </CardHeader>
         <CardContent>

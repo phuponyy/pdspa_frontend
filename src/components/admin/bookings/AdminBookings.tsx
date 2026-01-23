@@ -32,13 +32,13 @@ export default function AdminBookings() {
 
   const columns = useMemo<ColumnDef<Booking>[]>(
     () => [
-      { id: "customer", header: "Customer", accessorFn: (row) => row.customer?.name || "" },
-      { id: "service", header: "Service", accessorFn: (row) => row.service?.key || "" },
-      { id: "staff", header: "Staff", accessorFn: (row) => row.staff?.name || "" },
-      { accessorKey: "scheduledAt", header: "Scheduled" },
+      { id: "customer", header: "Khách hàng", accessorFn: (row) => row.customer?.name || "" },
+      { id: "service", header: "Dịch vụ", accessorFn: (row) => row.service?.key || "" },
+      { id: "staff", header: "Nhân Viên", accessorFn: (row) => row.staff?.name || "" },
+      { accessorKey: "scheduledAt", header: "Đã lên lịch" },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "Trạng thái",
         cell: ({ row }) => (
           <span
             className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
@@ -51,7 +51,7 @@ export default function AdminBookings() {
       },
       {
         id: "actions",
-        header: "Actions",
+        header: "Hành động",
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-2">
             <Button
@@ -59,21 +59,21 @@ export default function AdminBookings() {
               size="sm"
               onClick={() => mutation.mutate({ id: row.original.id, status: "CONFIRMED" })}
             >
-              Confirm
+              Xác nhận
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => mutation.mutate({ id: row.original.id, status: "DONE" })}
             >
-              Done
+              Hoàn tất
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => mutation.mutate({ id: row.original.id, status: "CANCELED" })}
             >
-              Cancel
+              Huỷ
             </Button>
           </div>
         ),
@@ -96,16 +96,16 @@ export default function AdminBookings() {
     <div className="space-y-8">
       <Card className="border-white/5">
         <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
+          <div className="py-2">
             <CardTitle>Bookings</CardTitle>
-            <p className="text-sm text-white/60">Workflow: new &gt; confirmed &gt; done / canceled</p>
+            <p className="text-sm text-white/60">Quy trình: Mới &gt; Đã Xác Nhận &gt; Hoàn Tất / Huỷ</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => handleExport("csv")}>
-              Export CSV
+              Xuất CSV
             </Button>
             <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
-              Export Excel
+              Xuất Excel
             </Button>
           </div>
         </CardHeader>

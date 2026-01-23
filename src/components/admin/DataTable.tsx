@@ -60,7 +60,7 @@ export default function DataTable<TData>({
         <div className="w-full max-w-xs">
           {filterColumn ? (
             <Input
-              placeholder="Search..."
+              placeholder="Tìm kiếm..."
               value={(filterColumn.getFilterValue() as string) ?? ""}
               onChange={(event) => filterColumn.setFilterValue(event.target.value)}
             />
@@ -69,7 +69,7 @@ export default function DataTable<TData>({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              Columns
+              Lọc
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

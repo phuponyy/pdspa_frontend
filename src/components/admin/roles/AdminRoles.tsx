@@ -77,12 +77,12 @@ export default function AdminRoles() {
   return (
     <div className="space-y-8">
       <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader>
-          <CardTitle>Roles & permissions</CardTitle>
+        <CardHeader className="py-2">
+          <CardTitle>Cấu hình quyền</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-[#111a25] p-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Create role</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Tạo quyền</p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -98,7 +98,7 @@ export default function AdminRoles() {
               </label>
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Name
+                  Tên
                 </span>
                 <Input
                   value={form.name}
@@ -107,7 +107,7 @@ export default function AdminRoles() {
               </label>
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Description
+                  Mô tả
                 </span>
                 <Input
                   value={form.description}
@@ -147,7 +147,7 @@ export default function AdminRoles() {
                   }
                 }}
               >
-                Create role
+                Tạo quyền
               </Button>
             </div>
           </div>
@@ -180,7 +180,7 @@ function RoleRow({
   onError,
 }: {
   role: AdminRole;
-  onUpdated: () => void | Promise<void>;
+  onUpdated: () => void | Promise<unknown>;
   onSuccess: (text: string, type?: "success" | "error" | "info") => void;
   onError: (err: unknown) => void;
 }) {
@@ -203,19 +203,19 @@ function RoleRow({
         </div>
         {role.isSystem ? (
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
-            System
+            Hệ thống
           </span>
         ) : null}
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm text-slate-300">
-          <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">Name</span>
+          <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">Tên</span>
           <Input value={name} onChange={(event) => setName(event.target.value)} />
         </label>
         <label className="space-y-2 text-sm text-slate-300">
           <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-            Description
+            Mô tả
           </span>
           <Input
             value={description}
@@ -261,7 +261,7 @@ function RoleRow({
             }
           }}
         >
-          Save role
+          Lưu quyền
         </Button>
         {!role.isSystem ? (
           <AlertDialog>

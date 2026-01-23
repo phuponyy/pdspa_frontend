@@ -7,7 +7,7 @@ type ButtonVariant = "default" | "secondary" | "outline" | "ghost";
 type ButtonSize = "sm" | "md" | "icon";
 
 const baseStyles =
-  "inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7bff] disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex cursor-pointer items-center justify-center rounded-2xl text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7bff] disabled:pointer-events-none disabled:opacity-60";
 
 const variantStyles: Record<ButtonVariant, string> = {
   default: "bg-[#2f7bff] text-white shadow-[0_10px_30px_rgba(47,123,255,0.35)] hover:bg-[#2a6fe6]",

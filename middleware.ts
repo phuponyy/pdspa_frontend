@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const SUPPORTED_LANGS = ["vn", "en"];
+const SUPPORTED_LANGS = ["vi", "en"];
+const DEFAULT_LANG = "en";
 
 type AccessRule = {
   prefix: string;
@@ -28,7 +29,7 @@ const ACCESS_RULES: AccessRule[] = [
 const getLangFromPath = (pathname: string) => {
   const segments = pathname.split("/").filter(Boolean);
   const lang = segments[0];
-  return SUPPORTED_LANGS.includes(lang) ? lang : "vn";
+  return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
 };
 
 const getAdminPath = (pathname: string) => {
@@ -42,6 +43,34 @@ const findRule = (adminPath: string) =>
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/uploads") ||
+    pathname.startsWith("/images") ||
+    pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
+  }
+  if (pathname === "/vn" || pathname.startsWith("/vn/")) {
+    const redirectUrl = new URL(request.url);
+    redirectUrl.pathname = pathname.replace(/^\/vn(\/|$)/, "/vi$1");
+    return NextResponse.redirect(redirectUrl);
+  }
+  if (pathname === "/en" || (pathname.startsWith("/en/") && !pathname.startsWith("/en/admin"))) {
+    const redirectUrl = new URL(request.url);
+    redirectUrl.pathname = pathname.replace(/^\/en(\/|$)/, "/$1");
+    redirectUrl.pathname = redirectUrl.pathname.replace(/\/+$/, "/");
+    return NextResponse.redirect(redirectUrl);
+  }
+  const segments = pathname.split("/").filter(Boolean);
+  const pathLang = segments[0];
+  const isLocalized = SUPPORTED_LANGS.includes(pathLang);
+  if (!isLocalized && pathname !== "/admin" && !pathname.startsWith("/admin/")) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = `/${DEFAULT_LANG}${pathname === "/" ? "" : pathname}`;
+    return NextResponse.rewrite(rewriteUrl);
+  }
   const lang = getLangFromPath(pathname);
   const adminPath = getAdminPath(pathname);
 
@@ -86,5 +115,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/:lang/admin/:path*"],
+  matcher: ["/((?!_next|api|uploads|images|favicon.ico).*)"],
 };
