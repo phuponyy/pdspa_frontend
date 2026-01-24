@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { usePathname } from "next/navigation";
 import {
   createAdminService,
   deleteAdminService,
@@ -42,16 +41,17 @@ type ServicePriceOptionForm = {
 
 type ServiceFormState = {
   key: string;
-  name: string;
-  description: string;
   isActive: boolean;
   priceOptions: ServicePriceOptionForm[];
 };
 
+type TranslationDraft = {
+  name: string;
+  description: string;
+};
+
 const emptyServiceForm = (): ServiceFormState => ({
   key: "",
-  name: "",
-  description: "",
   isActive: true,
   priceOptions: [
     {
@@ -66,9 +66,12 @@ const emptyServiceForm = (): ServiceFormState => ({
 export default function AdminServices() {
   const toast = useToast();
   const queryClient = useQueryClient();
-  const pathname = usePathname();
-  const lang = pathname.split("/").filter(Boolean)[0] || "vi";
   const [form, setForm] = useState<ServiceFormState>(emptyServiceForm());
+  const [activeLang, setActiveLang] = useState<"vi" | "en">("vi");
+  const [translations, setTranslations] = useState<Record<string, TranslationDraft>>({
+    vi: { name: "", description: "" },
+    en: { name: "", description: "" },
+  });
   const [editing, setEditing] = useState<AdminService | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -84,14 +87,8 @@ export default function AdminServices() {
   };
 
   const mapServiceToForm = (service: AdminService): ServiceFormState => {
-    const translation =
-      service.translations.find((item) => item.langCode === lang) ||
-      (lang === "vi" ? service.translations.find((item) => item.langCode === "vn") : undefined) ||
-      service.translations[0];
     return {
       key: service.key,
-      name: translation?.name || "",
-      description: translation?.description || "",
       isActive: service.isActive,
       priceOptions: service.priceOptions.length
         ? service.priceOptions.map((option) => ({
@@ -112,18 +109,45 @@ export default function AdminServices() {
     };
   };
 
+  const mapTranslations = (service?: AdminService) => {
+    const base = {
+      vi: { name: "", description: "" },
+      en: { name: "", description: "" },
+    };
+    if (!service) return base;
+    service.translations.forEach((item) => {
+      const code = item.langCode === "vn" ? "vi" : item.langCode;
+      if (code !== "vi" && code !== "en") return;
+      base[code] = {
+        name: item.name || "",
+        description: item.description || "",
+      };
+    });
+    return base;
+  };
+
+  const translationList = useMemo(
+    () =>
+      Object.entries(translations)
+        .map(([langCode, value]) => ({
+          langCode,
+          name: value.name.trim(),
+          description: value.description.trim(),
+        }))
+        .filter((item) => item.name.length > 0),
+    [translations]
+  );
+
   const createMutation = useMutation({
     mutationFn: () =>
       createAdminService(undefined, {
         key: form.key,
         isActive: form.isActive,
-        translations: [
-          {
-            langCode: lang,
-            name: form.name,
-            description: form.description || undefined,
-          },
-        ],
+        translations: translationList.map((item) => ({
+          langCode: item.langCode,
+          name: item.name,
+          description: item.description || undefined,
+        })),
         priceOptions: form.priceOptions.map((option) => ({
           code: option.code,
           price: option.price,
@@ -135,6 +159,7 @@ export default function AdminServices() {
       await queryClient.invalidateQueries({ queryKey: ["admin-services"] });
       setDialogOpen(false);
       setForm(emptyServiceForm());
+      setTranslations(mapTranslations());
       notify("Service created.", "success");
     },
     onError: (err: unknown) => handleError(err),
@@ -145,13 +170,11 @@ export default function AdminServices() {
       updateAdminService(undefined, editing?.id as number, {
         key: form.key,
         isActive: form.isActive,
-        translations: [
-          {
-            langCode: lang,
-            name: form.name,
-            description: form.description || undefined,
-          },
-        ],
+        translations: translationList.map((item) => ({
+          langCode: item.langCode,
+          name: item.name,
+          description: item.description || undefined,
+        })),
         priceOptions: form.priceOptions.map((option) => ({
           code: option.code,
           price: option.price,
@@ -164,6 +187,7 @@ export default function AdminServices() {
       setDialogOpen(false);
       setEditing(null);
       setForm(emptyServiceForm());
+      setTranslations(mapTranslations());
       notify("Service updated.", "success");
     },
     onError: (err: unknown) => handleError(err),
@@ -189,12 +213,16 @@ export default function AdminServices() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyServiceForm());
+    setTranslations(mapTranslations());
+    setActiveLang("vi");
     setDialogOpen(true);
   };
 
   const openEdit = (service: AdminService) => {
     setEditing(service);
     setForm(mapServiceToForm(service));
+    setTranslations(mapTranslations(service));
+    setActiveLang("vi");
     setDialogOpen(true);
   };
 
@@ -224,9 +252,13 @@ export default function AdminServices() {
     }));
   };
 
+  const currentTranslation = translations[activeLang] || { name: "", description: "" };
   const canSubmit = useMemo(
-    () => form.key.trim() && form.name.trim() && form.priceOptions.length > 0,
-    [form]
+    () =>
+      form.key.trim() &&
+      currentTranslation.name.trim() &&
+      form.priceOptions.length > 0,
+    [form.key, form.priceOptions.length, currentTranslation.name]
   );
 
   return (
@@ -246,6 +278,22 @@ export default function AdminServices() {
                 <DialogTitle>{editing ? "Cập nhật dịch vụ" : "Tạo dịch vụ mới"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-6">
+                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111a25] p-1 text-xs uppercase tracking-[0.2em]">
+                  {(["vi", "en"] as const).map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => setActiveLang(code)}
+                      className={`rounded-full px-3 py-1 font-semibold ${
+                        activeLang === code
+                          ? "bg-[#ff9f40] text-[#1a1410]"
+                          : "text-white/60 hover:text-white"
+                      }`}
+                    >
+                      {code.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="space-y-2 text-sm text-slate-300">
                     <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -261,24 +309,36 @@ export default function AdminServices() {
                   </label>
                   <label className="space-y-2 text-sm text-slate-300">
                     <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                      Service name ({lang})
+                      Service name ({activeLang})
                     </span>
                     <Input
-                      value={form.name}
+                      value={currentTranslation.name}
                       onChange={(event) =>
-                        setForm((prev) => ({ ...prev, name: event.target.value }))
+                        setTranslations((prev) => ({
+                          ...prev,
+                          [activeLang]: {
+                            ...prev[activeLang],
+                            name: event.target.value,
+                          },
+                        }))
                       }
                     />
                   </label>
                 </div>
                 <label className="space-y-2 text-sm text-slate-300">
                   <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                    Description ({lang})
+                    Description ({activeLang})
                   </span>
                   <textarea
-                    value={form.description}
+                    value={currentTranslation.description}
                     onChange={(event) =>
-                      setForm((prev) => ({ ...prev, description: event.target.value }))
+                      setTranslations((prev) => ({
+                        ...prev,
+                        [activeLang]: {
+                          ...prev[activeLang],
+                          description: event.target.value,
+                        },
+                      }))
                     }
                     className="min-h-[90px] w-full rounded-xl border border-white/10 bg-[#111a25] px-4 py-3 text-sm text-white/80"
                   />
@@ -337,29 +397,30 @@ export default function AdminServices() {
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setDialogOpen(false);
-                      setEditing(null);
-                      setForm(emptyServiceForm());
-                    }}
-                  >
-                    Huỷ
-                  </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDialogOpen(false);
+                        setEditing(null);
+                        setForm(emptyServiceForm());
+                        setTranslations(mapTranslations());
+                      }}
+                    >
+                      Huỷ
+                    </Button>
                   <Button
                     onClick={() => {
                       if (!canSubmit) {
                         notify("Vui lòng nhập đầy đủ thông tin.", "error");
                         return;
                       }
-                      if (editing) {
-                        updateMutation.mutate();
-                      } else {
-                        createMutation.mutate();
-                      }
-                    }}
-                    disabled={createMutation.isPending || updateMutation.isPending}
+                  if (editing) {
+                    updateMutation.mutate();
+                  } else {
+                    createMutation.mutate();
+                  }
+                }}
+                disabled={createMutation.isPending || updateMutation.isPending}
                   >
                     {editing ? "Lưu cập nhật" : "Tạo dịch vụ"}
                   </Button>
@@ -372,7 +433,10 @@ export default function AdminServices() {
           {services.length ? (
             services.map((service) => {
               const translation =
-                service.translations.find((item) => item.langCode === lang) ??
+                service.translations.find((item) => item.langCode === activeLang) ??
+                (activeLang === "vi"
+                  ? service.translations.find((item) => item.langCode === "vn")
+                  : undefined) ??
                 service.translations[0];
               return (
                 <div

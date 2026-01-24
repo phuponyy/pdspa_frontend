@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCmsPosts } from "@/lib/api/admin";
@@ -13,10 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 export default function PostsListPage() {
-  const params = useParams<{ lang?: string }>();
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const basePath = "/admin";
+  const resolvedLang = getDefaultLang();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"ALL" | "PUBLISHED" | "DRAFT">("ALL");
 
@@ -42,7 +39,7 @@ export default function PostsListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Quản lý Bài viết</h1>
-        <Link href={`/${resolvedLang}/admin/posts/new?lang=${resolvedLang}`}>
+        <Link href={`${basePath}/posts/new?lang=${resolvedLang}`}>
           <Button size="icon">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
@@ -111,7 +108,7 @@ export default function PostsListPage() {
                       </div>
                     </div>
                     <Link
-                      href={`/${resolvedLang}/admin/posts/${post.id}?lang=${resolvedLang}`}
+                      href={`${basePath}/posts/${post.id}?lang=${resolvedLang}`}
                       className="text-white/60 hover:text-white"
                     >
                       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">

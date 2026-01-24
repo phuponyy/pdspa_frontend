@@ -66,7 +66,10 @@ export default function Header({
       { href: buildPublicHref("good-massage-in-da-nang"), label: fixedT("nav.about") },
       { href: buildPublicHref("dich-vu"), label: fixedT("nav.services") },
       { href: buildPublicHref("price-list"), label: fixedT("nav.price") },
-      { href: buildPublicHref("news"), label: fixedT("nav.news") },
+      {
+        href: buildPublicHref(lang === "vi" ? "tin-tuc" : "tin-tuc"),
+        label: fixedT("nav.news"),
+      },
       { href: buildPublicHref("contact"), label: fixedT("nav.contact") },
     ],
     [lang, fixedT]
@@ -532,7 +535,7 @@ export default function Header({
                 {fixedT("hero.ctaPrimary")}
               </Button>
               <Link
-                href={`/${lang === "en" ? "en" : lang}/admin/login`}
+                href="/admin/login"
                 className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
               >
                 {fixedT("nav.admin")}

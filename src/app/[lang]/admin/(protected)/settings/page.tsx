@@ -44,7 +44,7 @@ export default function SettingsPage() {
         { label: viDict.nav.about, href: "/vi/good-massage-in-da-nang" },
         { label: viDict.nav.services, href: "/vi/dich-vu" },
         { label: viDict.nav.price, href: "/vi/price-list" },
-        { label: viDict.nav.news, href: "/vi/news" },
+        { label: viDict.nav.news, href: "/vi/tin-tuc" },
         { label: viDict.nav.contact, href: "/vi/contact" },
       ],
       en: [

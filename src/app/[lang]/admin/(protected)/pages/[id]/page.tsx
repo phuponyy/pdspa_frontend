@@ -8,12 +8,10 @@ import Loading from "@/components/common/Loading";
 import { getDefaultLang } from "@/lib/i18n";
 
 export default function EditPagePage() {
-  const params = useParams<{ id?: string; lang?: string }>();
+  const params = useParams<{ id?: string }>();
   const idParam = params?.id;
   const id = Number(Array.isArray(idParam) ? idParam[0] : idParam);
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const resolvedLang = getDefaultLang();
 
   const { data, isLoading } = useQuery({
     queryKey: ["cms-page", id],

@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAdminMe, getBookings } from "@/lib/api/admin";
 import AdminRequestFeedback from "./AdminRequestFeedback";
 import type { Booking } from "@/types/admin-dashboard.types";
+import { useTranslation } from "react-i18next";
 
 type AccessRule = {
   prefix: string;
@@ -34,18 +35,22 @@ export default function AdminShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { i18n } = useTranslation();
   const isLogin = pathname.includes("/admin/login");
+  const segments = pathname.split("/").filter(Boolean);
+  const adminIndex = segments.indexOf("admin");
+  const adminBasePath = "/admin";
+  const currentLang = adminIndex > 0
+    ? segments[0]
+    : (i18n.language?.split("-")[0] || lang);
 
   if (isLogin) {
     return <div className="min-h-screen bg-[var(--mist)]">{children}</div>;
   }
 
-  const segments = pathname.split("/").filter(Boolean);
-  const currentLang = segments[0] || lang;
-  const restPath = segments.slice(1).join("/");
-  const breadcrumb = segments
-    .slice(2)
-    .map((segment) => segment.replace(/-/g, " "));
+  const breadcrumb = (adminIndex >= 0 ? segments.slice(adminIndex + 1) : segments.slice(2)).map(
+    (segment) => segment.replace(/-/g, " ")
+  );
   const breadcrumbTrail = ["Admin", ...breadcrumb];
   const displayTrail = breadcrumbTrail.length > 1 ? breadcrumbTrail : ["Admin", "Overview"];
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,12 +60,12 @@ export default function AdminShell({
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const navSections = useMemo(
     () =>
-      adminNavSections(lang, (key: string) => {
+      adminNavSections(adminBasePath, (key: string) => {
         if (key === "admin.leads") return "Leads";
         if (key === "admin.logout") return "Logout";
         return key;
       }),
-    [lang]
+    [adminBasePath]
   );
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
@@ -94,8 +99,9 @@ export default function AdminShell({
 
   const adminPath = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
-    if (segments.length < 2) return "";
-    return `/${segments.slice(1).join("/")}`;
+    const adminIndex = segments.indexOf("admin");
+    if (adminIndex === -1) return "";
+    return `/${segments.slice(adminIndex).join("/")}`;
   }, [pathname]);
 
   const isAllowed = useMemo(() => {
@@ -174,7 +180,7 @@ export default function AdminShell({
         router.replace(firstAllowedLink);
       }
     }
-  }, [allowedLinks, fullLinks, pathname, roleKey, router, lang, isAllowed, firstAllowedLink]);
+  }, [allowedLinks, fullLinks, pathname, roleKey, router, isAllowed, firstAllowedLink]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -247,7 +253,7 @@ export default function AdminShell({
     <div className="admin-shell min-h-screen">
       <AdminRequestFeedback />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-5 py-6 lg:flex-row lg:gap-10 lg:px-10 lg:py-8">
-        <Sidebar lang={lang} />
+        <Sidebar basePath={adminBasePath} />
         <main className="flex-1 space-y-8">
           <div className="admin-panel relative z-10 flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60">
@@ -344,8 +350,7 @@ export default function AdminShell({
                     key={code}
                     type="button"
                     onClick={() => {
-                      const next = `/${code}${restPath ? `/${restPath}` : ""}`;
-                      router.push(next);
+                      i18n.changeLanguage(code);
                     }}
                     className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                       currentLang === code
@@ -410,7 +415,7 @@ export default function AdminShell({
                               onClick={() => {
                                 openBookingPopup(booking);
                                 setIsNotificationsOpen(false);
-                                router.push(`/${lang}/admin/bookings`);
+                                router.push(`${adminBasePath}/bookings`);
                               }}
                               className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-left transition hover:bg-white/10"
                             >
@@ -433,7 +438,7 @@ export default function AdminShell({
                         type="button"
                         onClick={() => {
                           setIsNotificationsOpen(false);
-                          router.push(`/${lang}/admin/bookings`);
+                          router.push(`${adminBasePath}/bookings`);
                         }}
                         className="mt-3 cursor-pointer flex w-full items-center justify-center rounded-full border border-white/10 bg-[#111a25] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 transition hover:text-white"
                       >

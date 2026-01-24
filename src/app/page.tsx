@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   return (
     <EnglishLayout>
-      {await HomePage({ params: Promise.resolve({ lang: "en" }) })}
+      {await HomePage({ params: { lang: "en" } })}
     </EnglishLayout>
   );
 }

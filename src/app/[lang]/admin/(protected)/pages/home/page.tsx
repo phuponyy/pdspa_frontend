@@ -1,14 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import PageEditor from "@/components/admin/PageEditor";
 import { getDefaultLang } from "@/lib/i18n";
 
 export default function HomeEditorPage() {
-  const params = useParams<{ lang?: string }>();
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const resolvedLang = getDefaultLang();
 
   return (
     <div className="space-y-6">

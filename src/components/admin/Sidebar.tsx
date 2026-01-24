@@ -23,12 +23,12 @@ type AdminNavSection = {
   links: AdminNavLink[];
 };
 
-export const adminNavSections = (lang: string, t: (key: string) => string): AdminNavSection[] => [
+export const adminNavSections = (basePath: string, t: (key: string) => string): AdminNavSection[] => [
     {
       title: "Số Liệu",
       links: [
         {
-          href: `/${lang}/admin/overview`,
+          href: `${basePath}/overview`,
           label: "Tổng Quan",
           requiredPermissions: ["view_dashboard"],
           icon: (
@@ -38,7 +38,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/live`,
+          href: `${basePath}/live`,
           label: "Live",
           requiredPermissions: ["view_live"],
           icon: (
@@ -48,7 +48,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/analytics`,
+          href: `${basePath}/analytics`,
           label: "Thống Kê",
           requiredPermissions: ["view_dashboard"],
           icon: (
@@ -63,7 +63,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       title: "Quản lý khách",
       links: [
         {
-          href: `/${lang}/admin/customers`,
+          href: `${basePath}/customers`,
           label: "Khách hàng",
           requiredPermissions: ["manage_customers"],
           icon: (
@@ -74,7 +74,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/bookings`,
+          href: `${basePath}/bookings`,
           label: "Đặt lịch",
           requiredPermissions: ["view_bookings"],
           icon: (
@@ -85,7 +85,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/leads`,
+          href: `${basePath}/leads`,
           label: t("admin.leads"),
           requiredRoles: ["ADMIN"],
           icon: (
@@ -101,7 +101,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       title: "Nội dung",
       links: [
         {
-          href: `/${lang}/admin/posts`,
+          href: `${basePath}/posts`,
           label: "Bài viết",
           requiredPermissions: ["manage_posts"],
           icon: (
@@ -111,7 +111,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/services`,
+          href: `${basePath}/services`,
           label: "Dịch vụ",
           requiredPermissions: ["manage_services"],
           icon: (
@@ -123,7 +123,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/pages`,
+          href: `${basePath}/pages`,
           label: "Trang",
           requiredPermissions: ["manage_pages"],
           icon: (
@@ -134,7 +134,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/media`,
+          href: `${basePath}/media`,
           label: "Ảnh",
           requiredPermissions: ["manage_media"],
           icon: (
@@ -145,7 +145,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/pages/home`,
+          href: `${basePath}/pages/home`,
           label: "Trang Chủ",
           requiredPermissions: ["manage_pages"],
           icon: (
@@ -160,7 +160,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
       title: "Cài Đặt Chung",
       links: [
         {
-          href: `/${lang}/admin/settings`,
+          href: `${basePath}/settings`,
           label: "Cài đặt",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -170,7 +170,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/settings/roles`,
+          href: `${basePath}/settings/roles`,
           label: "Quyền",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -181,7 +181,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           ),
         },
         {
-          href: `/${lang}/admin/users`,
+          href: `${basePath}/users`,
           label: "Người dùng",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -219,11 +219,11 @@ export const filterAdminSections = (
     })
     .filter((section) => section.links.length > 0);
 };
-export default function Sidebar({ lang }: { lang: string }) {
+export default function Sidebar({ basePath }: { basePath: string }) {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  const navSections = adminNavSections(lang, t);
+  const navSections = adminNavSections(basePath, t);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
     queryFn: () => getAdminMe(undefined),
@@ -326,7 +326,7 @@ export default function Sidebar({ lang }: { lang: string }) {
             } catch {
               // ignore logout errors
             }
-            router.replace(`/${lang}/admin/login`);
+            router.replace(`${basePath}/login`);
             router.refresh();
           }}
         >

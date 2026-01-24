@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,15 +9,11 @@ import { loginAdmin } from "@/lib/api/admin";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { ApiError } from "@/lib/api/client";
-import { getDefaultLang } from "@/lib/i18n";
 import { useTranslation } from "react-i18next";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const params = useParams<{ lang?: string }>();
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const baseAdminPath = "/admin";
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +30,7 @@ export default function AdminLogin() {
     setError(null);
     try {
       await loginAdmin(data);
-      router.replace(`/${resolvedLang}/admin/dashboard`);
+      router.replace(`${baseAdminPath}/dashboard`);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message || "Login failed. Please check your credentials.");

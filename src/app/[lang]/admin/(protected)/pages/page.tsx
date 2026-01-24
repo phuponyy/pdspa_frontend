@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCmsPages } from "@/lib/api/admin";
@@ -13,10 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 export default function PagesListPage() {
-  const params = useParams<{ lang?: string }>();
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const basePath = "/admin";
+  const resolvedLang = getDefaultLang();
   const [query, setQuery] = useState("");
 
   const { data, isLoading } = useQuery({
@@ -39,7 +36,7 @@ export default function PagesListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Quản lý Trang</h1>
-        <Link href={`/${resolvedLang}/admin/pages/new?lang=${resolvedLang}`}>
+        <Link href={`${basePath}/pages/new?lang=${resolvedLang}`}>
           <Button size="icon">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
@@ -94,7 +91,7 @@ export default function PagesListPage() {
                       </Badge>
                     </div>
                     <Link
-                      href={`/${resolvedLang}/admin/pages/${page.id}?lang=${resolvedLang}`}
+                      href={`${basePath}/pages/${page.id}?lang=${resolvedLang}`}
                       className="text-white/60 hover:text-white"
                     >
                       <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">

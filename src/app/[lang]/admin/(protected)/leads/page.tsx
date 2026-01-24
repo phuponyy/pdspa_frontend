@@ -1,19 +1,14 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLeads } from "@/lib/api/admin";
 import LeadTable from "@/components/admin/LeadTable";
 import Loading from "@/components/common/Loading";
-import { getDefaultLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 
 export default function LeadsPage() {
-  const params = useParams<{ lang?: string }>();
-  const langParam = params?.lang;
-  const lang = Array.isArray(langParam) ? langParam[0] : langParam;
-  const resolvedLang = lang ?? getDefaultLang();
+  const basePath = "/admin";
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -37,7 +32,7 @@ export default function LeadsPage() {
         <Loading label="Loading leads" />
       ) : (
         <>
-          <LeadTable lang={resolvedLang} leads={leads} />
+          <LeadTable basePath={basePath} leads={leads} />
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400">
               Page {page} of {maxPage}

@@ -10,6 +10,7 @@ import ContactForm from "@/components/home/ContactForm";
 import Container from "@/components/common/Container";
 import type { HomeSection } from "@/types/page.types";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
   sections?.find((section) =>
@@ -23,10 +24,13 @@ const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }): Promise<Metadata> {
-  const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "en";
+  const { lang: rawLang } = params;
+  if (!isSupportedLang(rawLang)) {
+    return {};
+  }
+  const lang = rawLang;
   const homeResponse = await getHomePage(lang).catch(() => null);
 
   const metaTitle = homeResponse?.meta?.metaTitle || SITE_NAME;
@@ -45,10 +49,13 @@ export async function generateMetadata({
 export default async function HomePage({
   params,
 }: {
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }) {
-  const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "en";
+  const { lang: rawLang } = params;
+  if (!isSupportedLang(rawLang)) {
+    notFound();
+  }
+  const lang = rawLang;
   const i18n = await getServerTranslator(lang);
   const t = i18n.t.bind(i18n);
   const [homeData, servicesResponse, siteConfigResponse] = await Promise.all([

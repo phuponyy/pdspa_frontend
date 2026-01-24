@@ -5,10 +5,10 @@ import { formatDateTime } from "@/lib/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function LeadTable({
-  lang,
+  basePath,
   leads,
 }: {
-  lang: string;
+  basePath: string;
   leads: Lead[];
 }) {
   return (
@@ -28,7 +28,7 @@ export default function LeadTable({
                 </div>
               </div>
               <Link
-                href={`/${lang}/admin/leads/${lead.id}`}
+                href={`${basePath}/leads/${lead.id}`}
                 className="text-white/60 hover:text-white"
               >
                 <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">

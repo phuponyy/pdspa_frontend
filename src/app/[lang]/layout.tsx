@@ -5,16 +5,20 @@ import PublicHeartbeat from "@/components/common/PublicHeartbeat";
 import { getSiteConfig } from "@/lib/api/public";
 import { HOTLINE, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
 import { isSupportedLang } from "@/lib/i18n";
+import { notFound } from "next/navigation";
 
 export default async function LangLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lang: string }>;
+  params: { lang: string };
 }) {
-  const { lang: rawLang } = await params;
-  const lang = isSupportedLang(rawLang) ? rawLang : "en";
+  const { lang: rawLang } = params;
+  if (!isSupportedLang(rawLang)) {
+    notFound();
+  }
+  const lang = rawLang;
   const siteConfigResponse = await getSiteConfig().catch(() => null);
   const config = siteConfigResponse?.data ?? {};
   const hotline =
