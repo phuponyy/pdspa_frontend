@@ -21,6 +21,7 @@ type AccessRule = {
   prefix: string;
   permissions?: string[];
   roles?: string[];
+  requireAnyPermission?: boolean;
 };
 
 export default function AdminShell({
@@ -81,6 +82,10 @@ export default function AdminShell({
     () => new Set(filteredSections.flatMap((section) => section.links.map((link) => link.href))),
     [filteredSections]
   );
+  const firstAllowedLink = useMemo(() => {
+    const links = filteredSections.flatMap((section) => section.links);
+    return links.length ? links[0].href : "";
+  }, [filteredSections]);
 
   const adminPath = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
@@ -91,7 +96,7 @@ export default function AdminShell({
   const isAllowed = useMemo(() => {
     if (!roleKey) return false;
     const rules: AccessRule[] = [
-      { prefix: "/admin", permissions: ["view_dashboard"] },
+      { prefix: "/admin", requireAnyPermission: true },
       { prefix: "/admin/overview", permissions: ["view_dashboard"] },
       { prefix: "/admin/dashboard", permissions: ["view_dashboard"] },
       { prefix: "/admin/analytics", permissions: ["view_dashboard"] },
@@ -106,11 +111,16 @@ export default function AdminShell({
       { prefix: "/admin/settings", permissions: ["manage_users"] },
     ] as const;
 
-    const rule = rules.find((item) => adminPath.startsWith(item.prefix));
+    const rule = rules
+      .filter((item) => adminPath.startsWith(item.prefix))
+      .sort((a, b) => b.prefix.length - a.prefix.length)[0];
     if (!rule) return false;
     if (rule.roles?.length && !rule.roles.includes(roleKey)) return false;
     if (rule.permissions?.length) {
       return rule.permissions.every((permission) => permissions.includes(permission));
+    }
+    if (rule.requireAnyPermission) {
+      return permissions.length > 0;
     }
     return true;
   }, [adminPath, permissions, roleKey]);
@@ -142,11 +152,14 @@ export default function AdminShell({
   useEffect(() => {
     if (!roleKey) return;
     const currentLink = fullLinks.find((link) => link.href === pathname);
+    const currentAllowed = currentLink ? allowedLinks.has(currentLink.href) : false;
     if (!currentLink && isAllowed) return;
-    if (!isAllowed || (currentLink && !allowedLinks.has(currentLink.href))) {
-      router.replace(`/${lang}/admin/overview`);
+    if (!isAllowed || (currentLink && !currentAllowed)) {
+      if (firstAllowedLink && pathname !== firstAllowedLink) {
+        router.replace(firstAllowedLink);
+      }
     }
-  }, [allowedLinks, fullLinks, pathname, roleKey, router, lang, isAllowed]);
+  }, [allowedLinks, fullLinks, pathname, roleKey, router, lang, isAllowed, firstAllowedLink]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -186,7 +199,33 @@ export default function AdminShell({
   }
 
   if (!isAllowed) {
-    return <div className="min-h-screen bg-[var(--mist)]" />;
+    return (
+      <div className="min-h-screen bg-[var(--mist)] px-6 py-10 text-white">
+        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-6 rounded-3xl border border-white/10 bg-[#0f1722] p-8">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Access Denied</p>
+            <h1 className="text-2xl font-semibold text-white">Bạn chưa có quyền truy cập</h1>
+            <p className="text-sm text-white/60">
+              Tài khoản hiện tại chưa được cấp quyền cho khu vực này. Vui lòng liên hệ quản trị
+              viên để cấp thêm quyền.
+            </p>
+          </div>
+          {firstAllowedLink ? (
+            <button
+              type="button"
+              onClick={() => router.replace(firstAllowedLink)}
+              className="w-fit cursor-pointer rounded-full border border-white/10 bg-[#111a25] px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 transition hover:text-white"
+            >
+              Về trang được phép
+            </button>
+          ) : (
+            <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+              Không có quyền nào được gán cho vai trò này.
+            </p>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
