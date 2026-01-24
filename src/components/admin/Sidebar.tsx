@@ -76,7 +76,7 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
         {
           href: `/${lang}/admin/bookings`,
           label: "Đặt lịch",
-          requiredPermissions: ["manage_bookings"],
+          requiredPermissions: ["view_bookings"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -107,6 +107,18 @@ export const adminNavSections = (lang: string, t: (key: string) => string): Admi
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 5h16M4 12h16M4 19h10" />
+            </svg>
+          ),
+        },
+        {
+          href: `/${lang}/admin/services`,
+          label: "Dịch vụ",
+          requiredPermissions: ["manage_services"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 4h10l2 4v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8z" />
+              <path d="M7 8h10" />
+              <path d="M9 12h6" />
             </svg>
           ),
         },
@@ -217,11 +229,14 @@ export default function Sidebar({ lang }: { lang: string }) {
     queryFn: () => getAdminMe(undefined),
   });
   const permissions = data?.data?.permissions || [];
+  const effectivePermissions = permissions.includes("manage_bookings")
+    ? Array.from(new Set([...permissions, "view_bookings", "edit_bookings"]))
+    : permissions;
   const roleKey = data?.data?.roleKey;
   const userName = data?.data?.name || data?.data?.email || "Admin";
   const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
   const filteredSections = roleKey
-    ? filterAdminSections(navSections, permissions, roleKey)
+    ? filterAdminSections(navSections, effectivePermissions, roleKey)
     : [];
 
   return (

@@ -58,10 +58,40 @@ export type PublicService = {
     id: number;
     code: string;
     price: number;
+    durationMinutes?: number | null;
   }[];
 };
 
 export type PublicServicesResponse = ApiSuccess<PublicService[]>;
+
+export type PublicBookingItem = {
+  serviceId: number;
+  priceOptionId?: number;
+  qty?: number;
+  guests?: number;
+  duration?: string;
+};
+
+export type PublicBookingRequest = {
+  fullName: string;
+  phone: string;
+  email?: string;
+  whatsappId?: string;
+  lineId?: string;
+  wechatId?: string;
+  note?: string;
+  langCode: string;
+  scheduledAt: string;
+  paymentMethod: "cash" | "transfer" | "card";
+  paymentDetails?: {
+    accountNumber?: string;
+    bankName?: string;
+    accountName?: string;
+  };
+  items: PublicBookingItem[];
+};
+
+export type PublicBookingResponse = ApiSuccess<{ bookingId: number }>;
 
 export type SiteConfigResponse = ApiSuccess<Record<string, string>>;
 
@@ -264,3 +294,24 @@ export type AdminMeResponse = ApiSuccess<{
   roleKey?: string;
   permissions: string[];
 }>;
+
+export type AdminService = {
+  id: number;
+  key: string;
+  isActive: boolean;
+  translations: {
+    id?: number;
+    langCode: string;
+    name: string;
+    description?: string | null;
+  }[];
+  priceOptions: {
+    id?: number;
+    code: string;
+    price: number;
+    durationMinutes?: number | null;
+    isActive?: boolean;
+  }[];
+};
+
+export type AdminServicesResponse = ApiSuccess<AdminService[]>;

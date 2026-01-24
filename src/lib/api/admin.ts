@@ -19,6 +19,8 @@ import type {
   AdminUsersResponse,
   AdminRoleResponse,
   AdminRolesResponse,
+  AdminService,
+  AdminServicesResponse,
   HomeHeroUpdateRequest,
   HomeIntroUpdateRequest,
   HomeMetaUpdateRequest,
@@ -392,6 +394,32 @@ export const deleteAdminRole = async (token?: string, id: number) =>
     method: "DELETE",
   });
 
+export const getAdminServices = async (token?: string) =>
+  apiFetch<AdminServicesResponse>("/admin/services", {
+    token,
+    cache: "no-store",
+  });
+
+export const createAdminService = async (token?: string, payload: unknown) =>
+  apiFetch<ApiSuccess<AdminService>>("/admin/services", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateAdminService = async (token: string | undefined, id: number, payload: unknown) =>
+  apiFetch<ApiSuccess<AdminService>>(`/admin/services/${id}`, {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteAdminService = async (token?: string, id: number) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/services/${id}`, {
+    token,
+    method: "DELETE",
+  });
+
 export const resetAdminUserPassword = async (
   token?: string,
   id: number,
@@ -458,6 +486,13 @@ export const updateBookingStatus = async (
     token,
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+
+export const updateBooking = async (token: string | undefined, id: number, payload: unknown) =>
+  apiFetch<Booking>(`/admin/bookings/${id}`, {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 
 export const exportCustomers = async (format: "csv" | "xlsx") => {

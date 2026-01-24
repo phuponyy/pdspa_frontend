@@ -55,9 +55,31 @@ export type Booking = {
   status: "NEW" | "CONFIRMED" | "DONE" | "CANCELED";
   scheduledAt: string;
   notes?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  contactWhatsApp?: string | null;
+  contactLine?: string | null;
+  contactWeChat?: string | null;
+  paymentMethod?: string | null;
+  paymentDetails?: {
+    accountNumber?: string;
+    bankName?: string;
+    accountName?: string;
+  } | null;
+  totalAmount?: number | null;
   customer?: { name: string };
   service?: { key: string };
   staff?: { name?: string | null };
+  items?: {
+    id: number;
+    serviceId: number;
+    priceOptionId?: number | null;
+    qty: number;
+    guests: number;
+    duration?: string | null;
+    service?: { name?: string | null };
+    priceOption?: { id: number; code: string; price: number };
+  }[];
 };
 
 export type PaginatedResponse<T> = {

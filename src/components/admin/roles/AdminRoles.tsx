@@ -27,8 +27,10 @@ import type { AdminRole } from "@/types/api.types";
 const PERMISSION_OPTIONS = [
   { key: "view_dashboard", label: "Overview & Analytics" },
   { key: "view_live", label: "Live dashboard" },
-  { key: "manage_bookings", label: "Bookings" },
+  { key: "view_bookings", label: "View bookings" },
+  { key: "edit_bookings", label: "Edit bookings" },
   { key: "manage_customers", label: "Customers" },
+  { key: "manage_services", label: "Services" },
   { key: "export_data", label: "Exports" },
   { key: "manage_staff", label: "Staff" },
   { key: "manage_users", label: "Users & roles" },

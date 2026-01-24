@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMe, getBookings } from "@/lib/api/admin";
 import AdminRequestFeedback from "./AdminRequestFeedback";
+import type { Booking } from "@/types/admin-dashboard.types";
 
 type AccessRule = {
   prefix: string;
@@ -68,11 +69,15 @@ export default function AdminShell({
   const userName = data?.data?.name || data?.data?.email || "Admin User";
   const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
   const permissions = data?.data?.permissions || [];
+  const effectivePermissions = useMemo(() => {
+    if (!permissions.includes("manage_bookings")) return permissions;
+    return Array.from(new Set([...permissions, "view_bookings", "edit_bookings"]));
+  }, [permissions]);
   const roleKey = data?.data?.roleKey;
-  const canViewBookings = permissions.includes("manage_bookings");
+  const canViewBookings = effectivePermissions.includes("view_bookings");
   const filteredSections = useMemo(
-    () => filterAdminSections(navSections, permissions, roleKey),
-    [navSections, permissions, roleKey]
+    () => filterAdminSections(navSections, effectivePermissions, roleKey),
+    [navSections, effectivePermissions, roleKey]
   );
   const fullLinks = useMemo(
     () => navSections.flatMap((section) => section.links),
@@ -102,10 +107,11 @@ export default function AdminShell({
       { prefix: "/admin/analytics", permissions: ["view_dashboard"] },
       { prefix: "/admin/live", permissions: ["view_live"] },
       { prefix: "/admin/customers", permissions: ["manage_customers"] },
-      { prefix: "/admin/bookings", permissions: ["manage_bookings"] },
+      { prefix: "/admin/bookings", permissions: ["view_bookings"] },
       { prefix: "/admin/leads", roles: ["ADMIN"] },
       { prefix: "/admin/posts", permissions: ["manage_posts"] },
       { prefix: "/admin/pages", permissions: ["manage_pages"] },
+      { prefix: "/admin/services", permissions: ["manage_services"] },
       { prefix: "/admin/media", permissions: ["manage_media"] },
       { prefix: "/admin/users", permissions: ["manage_users"] },
       { prefix: "/admin/settings", permissions: ["manage_users"] },
@@ -117,13 +123,15 @@ export default function AdminShell({
     if (!rule) return false;
     if (rule.roles?.length && !rule.roles.includes(roleKey)) return false;
     if (rule.permissions?.length) {
-      return rule.permissions.every((permission) => permissions.includes(permission));
+      return rule.permissions.every((permission) =>
+        effectivePermissions.includes(permission)
+      );
     }
     if (rule.requireAnyPermission) {
-      return permissions.length > 0;
+      return effectivePermissions.length > 0;
     }
     return true;
-  }, [adminPath, permissions, roleKey]);
+  }, [adminPath, effectivePermissions, roleKey]);
 
   const bookingsQuery = useQuery({
     queryKey: ["admin-booking-notifications"],
@@ -144,6 +152,13 @@ export default function AdminShell({
       }),
     []
   );
+
+  const openBookingPopup = (booking: Booking) => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent<Booking>("admin-booking-open", { detail: booking })
+    );
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -389,9 +404,15 @@ export default function AdminShell({
                           </div>
                         ) : newBookings.length ? (
                           newBookings.map((booking) => (
-                            <div
+                            <button
                               key={booking.id}
-                              className="rounded-xl border border-white/5 bg-white/5 px-3 py-2"
+                              type="button"
+                              onClick={() => {
+                                openBookingPopup(booking);
+                                setIsNotificationsOpen(false);
+                                router.push(`/${lang}/admin/bookings`);
+                              }}
+                              className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-left transition hover:bg-white/10"
                             >
                               <div className="text-sm font-semibold text-white">
                                 {booking.customer?.name || "New customer"}
@@ -400,7 +421,7 @@ export default function AdminShell({
                                 {booking.service?.key || "Service"} ·{" "}
                                 {dateFormatter.format(new Date(booking.scheduledAt))}
                               </div>
-                            </div>
+                            </button>
                           ))
                         ) : (
                           <div className="rounded-xl border border-white/5 bg-white/5 px-3 py-3 text-white/60">

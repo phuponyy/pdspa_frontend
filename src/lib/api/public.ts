@@ -5,6 +5,8 @@ import type {
   LeadCreateRequest,
   LeadCreateResponse,
   PublicServicesResponse,
+  PublicBookingRequest,
+  PublicBookingResponse,
   SiteConfigResponse,
 } from "@/types/api.types";
 import type { HeroSlide, HomeSection } from "@/types/page.types";
@@ -108,4 +110,10 @@ export const submitLead = async (payload: LeadCreateRequest) =>
 export const getSiteConfig = async () =>
   apiFetch<SiteConfigResponse>("/public/config", {
     cache: "no-store",
+  });
+
+export const createBooking = async (payload: PublicBookingRequest) =>
+  apiFetch<PublicBookingResponse>("/public/bookings", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
