@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/overview/page";
+"use client";
 
-export default Page;
+import AdminOverview from "@/components/admin/overview/AdminOverview";
 
-
+export default function OverviewPage() {
+  return <AdminOverview />;
+}

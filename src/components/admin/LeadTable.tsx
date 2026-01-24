@@ -3,12 +3,11 @@ import StatusPill from "./StatusPill";
 import type { Lead } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
 
 export default function LeadTable({
-  basePath,
   leads,
 }: {
-  basePath: string;
   leads: Lead[];
 }) {
   return (
@@ -28,7 +27,7 @@ export default function LeadTable({
                 </div>
               </div>
               <Link
-                href={`${basePath}/leads/${lead.id}`}
+                href={`${ADMIN_ROUTES.leads}/${lead.id}`}
                 className="text-white/60 hover:text-white"
               >
                 <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">

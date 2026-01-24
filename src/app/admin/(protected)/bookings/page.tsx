@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/bookings/page";
+"use client";
 
-export default Page;
+import AdminBookings from "@/components/admin/bookings/AdminBookings";
 
-
+export default function BookingsPage() {
+  return <AdminBookings />;
+}

@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/settings/roles/page";
+"use client";
 
-export default Page;
+import AdminRoles from "@/components/admin/roles/AdminRoles";
 
-
+export default function RolesPage() {
+  return <AdminRoles />;
+}

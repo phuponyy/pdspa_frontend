@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/components/common/ToastProvider";
 import { ApiError } from "@/lib/api/client";
 import type { AdminRole } from "@/types/api.types";
+import { useTranslation } from "react-i18next";
 
 const PERMISSION_OPTIONS = [
   { key: "view_dashboard", label: "Overview & Analytics" },
@@ -41,6 +42,7 @@ const PERMISSION_OPTIONS = [
 
 export default function AdminRoles() {
   const toast = useToast();
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     key: "",
     name: "",
@@ -80,15 +82,17 @@ export default function AdminRoles() {
     <div className="space-y-8">
       <Card className="border-white/5 bg-[#0f1722]">
         <CardHeader className="py-2">
-          <CardTitle>Cấu hình quyền</CardTitle>
+          <CardTitle>{t("admin.roles.title")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-[#111a25] p-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Tạo quyền</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              {t("admin.roles.createTitle")}
+            </p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Key
+                  {t("admin.roles.key")}
                 </span>
                 <Input
                   value={form.key}
@@ -100,7 +104,7 @@ export default function AdminRoles() {
               </label>
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Tên
+                  {t("admin.roles.name")}
                 </span>
                 <Input
                   value={form.name}
@@ -109,7 +113,7 @@ export default function AdminRoles() {
               </label>
               <label className="space-y-2 text-sm text-slate-300">
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-                  Mô tả
+                  {t("admin.roles.description")}
                 </span>
                 <Input
                   value={form.description}
@@ -149,7 +153,7 @@ export default function AdminRoles() {
                   }
                 }}
               >
-                Tạo quyền
+                {t("admin.roles.create")}
               </Button>
             </div>
           </div>
@@ -163,10 +167,16 @@ export default function AdminRoles() {
                   onUpdated={rolesQuery.refetch}
                   onSuccess={notify}
                   onError={handleError}
+                  labels={{
+                    name: t("admin.roles.name"),
+                    description: t("admin.roles.description"),
+                    save: t("admin.roles.save"),
+                    system: t("admin.roles.system"),
+                  }}
                 />
               ))
             ) : (
-              <p className="text-sm text-slate-400">No roles found.</p>
+              <p className="text-sm text-slate-400">{t("admin.roles.empty")}</p>
             )}
           </div>
         </CardContent>
@@ -180,11 +190,18 @@ function RoleRow({
   onUpdated,
   onSuccess,
   onError,
+  labels,
 }: {
   role: AdminRole;
   onUpdated: () => void | Promise<unknown>;
   onSuccess: (text: string, type?: "success" | "error" | "info") => void;
   onError: (err: unknown) => void;
+  labels: {
+    name: string;
+    description: string;
+    save: string;
+    system: string;
+  };
 }) {
   const [name, setName] = useState(role.name);
   const [description, setDescription] = useState(role.description || "");
@@ -205,19 +222,21 @@ function RoleRow({
         </div>
         {role.isSystem ? (
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
-            Hệ thống
+            {labels.system}
           </span>
         ) : null}
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm text-slate-300">
-          <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">Tên</span>
+          <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
+            {labels.name}
+          </span>
           <Input value={name} onChange={(event) => setName(event.target.value)} />
         </label>
         <label className="space-y-2 text-sm text-slate-300">
           <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
-            Mô tả
+            {labels.description}
           </span>
           <Input
             value={description}
@@ -263,7 +282,7 @@ function RoleRow({
             }
           }}
         >
-          Lưu quyền
+          {labels.save}
         </Button>
         {!role.isSystem ? (
           <AlertDialog>

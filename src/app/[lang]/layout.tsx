@@ -12,9 +12,9 @@ export default async function LangLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
-  const { lang: rawLang } = params;
+  const { lang: rawLang } = await params;
   if (!isSupportedLang(rawLang)) {
     notFound();
   }

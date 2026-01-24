@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -23,6 +22,8 @@ import {
 } from "@/components/ui/dialog";
 import type { Booking } from "@/types/admin-dashboard.types";
 import type { PublicService } from "@/types/api.types";
+import { DEFAULT_LANG } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 const statusColor: Record<Booking["status"], string> = {
   NEW: "bg-sky-500/15 text-sky-200 border-sky-500/30",
@@ -59,8 +60,8 @@ const formatTimeInput = (value?: string) => {
 
 export default function AdminBookings() {
   const queryClient = useQueryClient();
-  const pathname = usePathname();
-  const lang = pathname.split("/").filter(Boolean)[0] || "vi";
+  const { i18n } = useTranslation();
+  const lang = i18n.language?.split("-")[0] || DEFAULT_LANG;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [services, setServices] = useState<BookingService[]>([]);

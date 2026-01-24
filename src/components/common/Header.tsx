@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils/cn";
 import { createBooking, getServices, getSiteConfig } from "@/lib/api/public";
 import type { PublicService } from "@/types/api.types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
 
 type NavItem = { label: string; href: string };
 type TopBarConfig = {
@@ -535,7 +536,7 @@ export default function Header({
                 {fixedT("hero.ctaPrimary")}
               </Button>
               <Link
-                href="/admin/login"
+                href={ADMIN_ROUTES.login}
                 className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
               >
                 {fixedT("nav.admin")}

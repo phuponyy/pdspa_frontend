@@ -18,6 +18,7 @@ import { getAdminMe, getBookings } from "@/lib/api/admin";
 import AdminRequestFeedback from "./AdminRequestFeedback";
 import type { Booking } from "@/types/admin-dashboard.types";
 import { useTranslation } from "react-i18next";
+import { ADMIN_BASE, ADMIN_ROUTES } from "@/lib/admin/constants";
 
 type AccessRule = {
   prefix: string;
@@ -27,22 +28,19 @@ type AccessRule = {
 };
 
 export default function AdminShell({
-  lang,
   children,
 }: {
-  lang: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const { i18n } = useTranslation();
-  const isLogin = pathname.includes("/admin/login");
+  const isLogin = pathname.startsWith(ADMIN_ROUTES.login);
   const segments = pathname.split("/").filter(Boolean);
   const adminIndex = segments.indexOf("admin");
-  const adminBasePath = "/admin";
   const currentLang = adminIndex > 0
     ? segments[0]
-    : (i18n.language?.split("-")[0] || lang);
+    : (i18n.language?.split("-")[0] || "en");
 
   if (isLogin) {
     return <div className="min-h-screen bg-[var(--mist)]">{children}</div>;
@@ -60,12 +58,12 @@ export default function AdminShell({
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const navSections = useMemo(
     () =>
-      adminNavSections(adminBasePath, (key: string) => {
+      adminNavSections((key: string) => {
         if (key === "admin.leads") return "Leads";
         if (key === "admin.logout") return "Logout";
         return key;
       }),
-    [adminBasePath]
+    []
   );
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
@@ -107,20 +105,20 @@ export default function AdminShell({
   const isAllowed = useMemo(() => {
     if (!roleKey) return false;
     const rules: AccessRule[] = [
-      { prefix: "/admin", requireAnyPermission: true },
-      { prefix: "/admin/overview", permissions: ["view_dashboard"] },
-      { prefix: "/admin/dashboard", permissions: ["view_dashboard"] },
-      { prefix: "/admin/analytics", permissions: ["view_dashboard"] },
-      { prefix: "/admin/live", permissions: ["view_live"] },
-      { prefix: "/admin/customers", permissions: ["manage_customers"] },
-      { prefix: "/admin/bookings", permissions: ["view_bookings"] },
-      { prefix: "/admin/leads", roles: ["ADMIN"] },
-      { prefix: "/admin/posts", permissions: ["manage_posts"] },
-      { prefix: "/admin/pages", permissions: ["manage_pages"] },
-      { prefix: "/admin/services", permissions: ["manage_services"] },
-      { prefix: "/admin/media", permissions: ["manage_media"] },
-      { prefix: "/admin/users", permissions: ["manage_users"] },
-      { prefix: "/admin/settings", permissions: ["manage_users"] },
+      { prefix: ADMIN_BASE, requireAnyPermission: true },
+      { prefix: ADMIN_ROUTES.overview, permissions: ["view_dashboard"] },
+      { prefix: ADMIN_ROUTES.dashboard, permissions: ["view_dashboard"] },
+      { prefix: ADMIN_ROUTES.analytics, permissions: ["view_dashboard"] },
+      { prefix: ADMIN_ROUTES.live, permissions: ["view_live"] },
+      { prefix: ADMIN_ROUTES.customers, permissions: ["manage_customers"] },
+      { prefix: ADMIN_ROUTES.bookings, permissions: ["view_bookings"] },
+      { prefix: ADMIN_ROUTES.leads, roles: ["ADMIN"] },
+      { prefix: ADMIN_ROUTES.posts, permissions: ["manage_posts"] },
+      { prefix: ADMIN_ROUTES.pages, permissions: ["manage_pages"] },
+      { prefix: ADMIN_ROUTES.services, permissions: ["manage_services"] },
+      { prefix: ADMIN_ROUTES.media, permissions: ["manage_media"] },
+      { prefix: ADMIN_ROUTES.users, permissions: ["manage_users"] },
+      { prefix: ADMIN_ROUTES.settings, permissions: ["manage_users"] },
     ] as const;
 
     const rule = rules
@@ -169,6 +167,14 @@ export default function AdminShell({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("admin_lang");
+    if (stored && stored !== i18n.language) {
+      i18n.changeLanguage(stored);
+    }
+  }, [i18n]);
 
   useEffect(() => {
     if (!roleKey) return;
@@ -253,7 +259,7 @@ export default function AdminShell({
     <div className="admin-shell min-h-screen">
       <AdminRequestFeedback />
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8 px-5 py-6 lg:flex-row lg:gap-10 lg:px-10 lg:py-8">
-        <Sidebar basePath={adminBasePath} />
+        <Sidebar />
         <main className="flex-1 space-y-8">
           <div className="admin-panel relative z-10 flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60">
@@ -351,6 +357,9 @@ export default function AdminShell({
                     type="button"
                     onClick={() => {
                       i18n.changeLanguage(code);
+                      if (typeof window !== "undefined") {
+                        window.localStorage.setItem("admin_lang", code);
+                      }
                     }}
                     className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                       currentLang === code
@@ -361,6 +370,10 @@ export default function AdminShell({
                     {code.toUpperCase()}
                   </button>
                 ))}
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0f1722] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/60">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff9f40]" />
+                {currentLang}
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -415,7 +428,7 @@ export default function AdminShell({
                               onClick={() => {
                                 openBookingPopup(booking);
                                 setIsNotificationsOpen(false);
-                                router.push(`${adminBasePath}/bookings`);
+                                router.push(ADMIN_ROUTES.bookings);
                               }}
                               className="w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2 text-left transition hover:bg-white/10"
                             >
@@ -438,7 +451,7 @@ export default function AdminShell({
                         type="button"
                         onClick={() => {
                           setIsNotificationsOpen(false);
-                          router.push(`${adminBasePath}/bookings`);
+                          router.push(ADMIN_ROUTES.bookings);
                         }}
                         className="mt-3 cursor-pointer flex w-full items-center justify-center rounded-full border border-white/10 bg-[#111a25] px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 transition hover:text-white"
                       >

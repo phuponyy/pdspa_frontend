@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/customers/page";
+"use client";
 
-export default Page;
+import AdminCustomers from "@/components/admin/customers/AdminCustomers";
 
-
+export default function CustomersPage() {
+  return <AdminCustomers />;
+}

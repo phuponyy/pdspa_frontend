@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/constants";
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMe } from "@/lib/api/admin";
 import type { ReactNode } from "react";
@@ -23,12 +24,12 @@ type AdminNavSection = {
   links: AdminNavLink[];
 };
 
-export const adminNavSections = (basePath: string, t: (key: string) => string): AdminNavSection[] => [
+export const adminNavSections = (t: (key: string) => string): AdminNavSection[] => [
     {
       title: "Số Liệu",
       links: [
         {
-          href: `${basePath}/overview`,
+          href: ADMIN_ROUTES.overview,
           label: "Tổng Quan",
           requiredPermissions: ["view_dashboard"],
           icon: (
@@ -38,7 +39,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/live`,
+          href: ADMIN_ROUTES.live,
           label: "Live",
           requiredPermissions: ["view_live"],
           icon: (
@@ -48,7 +49,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/analytics`,
+          href: ADMIN_ROUTES.analytics,
           label: "Thống Kê",
           requiredPermissions: ["view_dashboard"],
           icon: (
@@ -63,7 +64,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
       title: "Quản lý khách",
       links: [
         {
-          href: `${basePath}/customers`,
+          href: ADMIN_ROUTES.customers,
           label: "Khách hàng",
           requiredPermissions: ["manage_customers"],
           icon: (
@@ -74,7 +75,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/bookings`,
+          href: ADMIN_ROUTES.bookings,
           label: "Đặt lịch",
           requiredPermissions: ["view_bookings"],
           icon: (
@@ -85,7 +86,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/leads`,
+          href: ADMIN_ROUTES.leads,
           label: t("admin.leads"),
           requiredRoles: ["ADMIN"],
           icon: (
@@ -101,7 +102,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
       title: "Nội dung",
       links: [
         {
-          href: `${basePath}/posts`,
+          href: ADMIN_ROUTES.posts,
           label: "Bài viết",
           requiredPermissions: ["manage_posts"],
           icon: (
@@ -111,7 +112,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/services`,
+          href: ADMIN_ROUTES.services,
           label: "Dịch vụ",
           requiredPermissions: ["manage_services"],
           icon: (
@@ -123,7 +124,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/pages`,
+          href: ADMIN_ROUTES.pages,
           label: "Trang",
           requiredPermissions: ["manage_pages"],
           icon: (
@@ -134,7 +135,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/media`,
+          href: ADMIN_ROUTES.media,
           label: "Ảnh",
           requiredPermissions: ["manage_media"],
           icon: (
@@ -145,7 +146,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/pages/home`,
+          href: `${ADMIN_ROUTES.pages}/home`,
           label: "Trang Chủ",
           requiredPermissions: ["manage_pages"],
           icon: (
@@ -160,7 +161,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
       title: "Cài Đặt Chung",
       links: [
         {
-          href: `${basePath}/settings`,
+          href: ADMIN_ROUTES.settings,
           label: "Cài đặt",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -170,7 +171,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/settings/roles`,
+          href: ADMIN_ROUTES.roles,
           label: "Quyền",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -181,7 +182,7 @@ export const adminNavSections = (basePath: string, t: (key: string) => string): 
           ),
         },
         {
-          href: `${basePath}/users`,
+          href: ADMIN_ROUTES.users,
           label: "Người dùng",
           requiredPermissions: ["manage_users"],
           icon: (
@@ -219,11 +220,11 @@ export const filterAdminSections = (
     })
     .filter((section) => section.links.length > 0);
 };
-export default function Sidebar({ basePath }: { basePath: string }) {
+export default function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  const navSections = adminNavSections(basePath, t);
+  const navSections = adminNavSections(t);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
     queryFn: () => getAdminMe(undefined),
@@ -326,7 +327,7 @@ export default function Sidebar({ basePath }: { basePath: string }) {
             } catch {
               // ignore logout errors
             }
-            router.replace(`${basePath}/login`);
+            router.replace(ADMIN_ROUTES.login);
             router.refresh();
           }}
         >

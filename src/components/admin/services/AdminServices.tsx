@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createAdminService,
@@ -30,6 +30,8 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/components/common/ToastProvider";
 import type { AdminService } from "@/types/api.types";
+import { DEFAULT_LANG } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 type ServicePriceOptionForm = {
   id?: number;
@@ -67,7 +69,9 @@ export default function AdminServices() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<ServiceFormState>(emptyServiceForm());
-  const [activeLang, setActiveLang] = useState<"vi" | "en">("vi");
+  const { i18n } = useTranslation();
+  const currentLang = (i18n.language?.split("-")[0] || DEFAULT_LANG) as "vi" | "en";
+  const [activeLang, setActiveLang] = useState<"vi" | "en">(currentLang);
   const [translations, setTranslations] = useState<Record<string, TranslationDraft>>({
     vi: { name: "", description: "" },
     en: { name: "", description: "" },
@@ -214,7 +218,7 @@ export default function AdminServices() {
     setEditing(null);
     setForm(emptyServiceForm());
     setTranslations(mapTranslations());
-    setActiveLang("vi");
+    setActiveLang(currentLang);
     setDialogOpen(true);
   };
 
@@ -222,9 +226,14 @@ export default function AdminServices() {
     setEditing(service);
     setForm(mapServiceToForm(service));
     setTranslations(mapTranslations(service));
-    setActiveLang("vi");
+    setActiveLang(currentLang);
     setDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (!dialogOpen) return;
+    setActiveLang(currentLang);
+  }, [currentLang, dialogOpen]);
 
   const addOption = () => {
     setForm((prev) => ({

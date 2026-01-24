@@ -1,5 +1,38 @@
-import Page from "@/app/[lang]/admin/(protected)/posts/new/page";
+"use client";
 
-export default Page;
+import { useRouter } from "next/navigation";
+import CmsPostForm from "@/components/admin/CmsPostForm";
+import { createCmsPost } from "@/lib/api/admin";
+import { DEFAULT_LANG } from "@/lib/constants";
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import { useTranslation } from "react-i18next";
 
+export default function NewPostPage() {
+  const router = useRouter();
+  const { i18n } = useTranslation();
+  const resolvedLang = i18n.language?.split("-")[0] || DEFAULT_LANG;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
+          Bài viết
+        </p>
+        <h1 className="text-2xl font-semibold text-[var(--ink)]">
+          Thêm bài viết mới
+        </h1>
+      </div>
+      <CmsPostForm
+        langCode={resolvedLang}
+        onSave={async (payload) => {
+          const response = await createCmsPost(undefined, payload);
+          const id = response?.data?.id;
+          if (id) {
+            router.replace(`${ADMIN_ROUTES.posts}/${id}?lang=${resolvedLang}`);
+          }
+        }}
+      />
+    </div>
+  );
+}
 

@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/analytics/page";
+"use client";
 
-export default Page;
+import AdminAnalytics from "@/components/admin/analytics/AdminAnalytics";
 
-
+export default function AnalyticsPage() {
+  return <AdminAnalytics />;
+}

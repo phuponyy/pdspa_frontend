@@ -24,9 +24,9 @@ const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
 export async function generateMetadata({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
-  const { lang: rawLang } = params;
+  const { lang: rawLang } = await params;
   if (!isSupportedLang(rawLang)) {
     return {};
   }
@@ -49,9 +49,9 @@ export async function generateMetadata({
 export default async function HomePage({
   params,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
 }) {
-  const { lang: rawLang } = params;
+  const { lang: rawLang } = await params;
   if (!isSupportedLang(rawLang)) {
     notFound();
   }

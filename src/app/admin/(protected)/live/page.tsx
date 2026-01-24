@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/live/page";
+"use client";
 
-export default Page;
+import AdminLive from "@/components/admin/live/AdminLive";
 
-
+export default function LivePage() {
+  return <AdminLive />;
+}

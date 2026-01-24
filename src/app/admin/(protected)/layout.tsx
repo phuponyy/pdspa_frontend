@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
-import { DEFAULT_LANG } from "@/lib/constants";
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
 
 export default async function AdminLayout({
   children,
@@ -12,7 +12,7 @@ export default async function AdminLayout({
   const token = cookieStore.get("pd2_token")?.value;
   const refresh = cookieStore.get("pd2_refresh")?.value;
   if (!token && !refresh) {
-    redirect("/admin/login");
+    redirect(ADMIN_ROUTES.login);
   }
-  return <AdminShell lang={DEFAULT_LANG}>{children}</AdminShell>;
+  return <AdminShell>{children}</AdminShell>;
 }

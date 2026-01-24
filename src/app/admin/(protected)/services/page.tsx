@@ -1,5 +1,7 @@
-import Page from "@/app/[lang]/admin/(protected)/services/page";
+"use client";
 
-export default Page;
+import AdminServices from "@/components/admin/services/AdminServices";
 
-
+export default function ServicesPage() {
+  return <AdminServices />;
+}
