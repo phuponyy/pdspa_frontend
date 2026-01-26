@@ -127,7 +127,14 @@ async function apiFetchInternal<T>(
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
-  const payload = isJson ? await response.json() : null;
+  let payload: unknown = null;
+  if (isJson) {
+    try {
+      payload = await response.json();
+    } catch {
+      payload = null;
+    }
+  }
 
   if (!response.ok) {
     const skipRefresh =
@@ -151,7 +158,8 @@ async function apiFetchInternal<T>(
       }
       await clearClientToken();
     }
-    const errorPayload = (payload?.error || payload) as ApiErrorPayload | null;
+    const errorPayload = ((payload as { error?: ApiErrorPayload } | null)?.error ||
+      payload) as ApiErrorPayload | null;
     const error = new ApiError(
       errorPayload?.message || "Request failed",
       errorPayload?.code,
