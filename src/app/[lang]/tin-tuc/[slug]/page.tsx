@@ -40,10 +40,10 @@ export default async function PostDetailPage({
   const data = await getPublicPostBySlug(slug, rawLang).catch(() => null);
   const translation = data?.data?.translation;
   const post = data?.data?.post;
-  const thumbnail = post?.thumbnailUrl
-    ? post.thumbnailUrl.startsWith("/")
-      ? `${API_BASE_URL}${post.thumbnailUrl}`
-      : post.thumbnailUrl
+  const thumbnail = translation?.thumbnailUrl
+    ? translation.thumbnailUrl.startsWith("/")
+      ? `${API_BASE_URL}${translation.thumbnailUrl}`
+      : translation.thumbnailUrl
     : null;
   if (!translation || !post) {
     notFound();

@@ -45,7 +45,6 @@ export type PublicPostItem = {
   id: number;
   status: "DRAFT" | "PUBLISHED";
   publishedAt?: string | null;
-  thumbnailUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
   translation: CmsTranslation | null;
@@ -68,7 +67,6 @@ export type PublicPostDetailResponse = ApiSuccess<{
     id: number;
     status: "DRAFT" | "PUBLISHED";
     publishedAt?: string | null;
-    thumbnailUrl?: string | null;
     createdAt?: string;
     updatedAt?: string;
   };
@@ -262,6 +260,7 @@ export type CmsTranslation = {
   slug: string;
   excerpt?: string | null;
   content?: Record<string, unknown> | string | null;
+  thumbnailUrl?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
 };
@@ -270,7 +269,6 @@ export type CmsPost = {
   id: number;
   status: "DRAFT" | "PUBLISHED";
   publishedAt?: string | null;
-  thumbnailUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
   translations: CmsTranslation[];

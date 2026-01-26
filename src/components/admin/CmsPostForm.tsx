@@ -51,15 +51,17 @@ export default function CmsPostForm({
     slug: string;
     excerpt: string;
     content: string;
+    thumbnailUrl?: string | null;
   }>>(() => {
     const base: Record<string, {
       title: string;
       slug: string;
       excerpt: string;
       content: string;
+      thumbnailUrl?: string | null;
     }> = {};
     languages.forEach((code) => {
-      base[code] = { title: "", slug: "", excerpt: "", content: "" };
+      base[code] = { title: "", slug: "", excerpt: "", content: "", thumbnailUrl: null };
     });
     initial?.translations?.forEach((t) => {
       const code = t.language?.code || langCode;
@@ -72,6 +74,7 @@ export default function CmsPostForm({
           typeof t.content === "string"
             ? t.content
             : JSON.stringify(t.content || ""),
+        thumbnailUrl: t.thumbnailUrl ?? null,
       };
     });
     return base;
@@ -104,9 +107,6 @@ export default function CmsPostForm({
     url.startsWith(API_BASE_URL) ? url.replace(API_BASE_URL, "") : url;
   const resolveMediaUrl = (url: string) =>
     url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
-  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(
-    initial?.thumbnailUrl ? normalizeMediaUrl(initial.thumbnailUrl) : null
-  );
   const [mediaQuery, setMediaQuery] = useState("");
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
   const [thumbCropOpen, setThumbCropOpen] = useState(false);
@@ -249,6 +249,14 @@ export default function CmsPostForm({
     slug: "",
     excerpt: "",
     content: "",
+    thumbnailUrl: null,
+  };
+
+  const setCurrentTranslation = (patch: Partial<typeof current>) => {
+    setTranslations((prev) => ({
+      ...prev,
+      [activeLang]: { ...prev[activeLang], ...patch },
+    }));
   };
 
   return (
@@ -370,7 +378,6 @@ export default function CmsPostForm({
                     status,
                     categoryIds: selectedCategoryIds,
                     tagIds: selectedTagIds,
-                    thumbnailUrl,
                     translations: [
                       {
                         langCode: activeLang,
@@ -378,6 +385,7 @@ export default function CmsPostForm({
                         slug: current.slug,
                         excerpt: current.excerpt,
                         content: current.content,
+                        thumbnailUrl: current.thumbnailUrl,
                       },
                     ],
                   });
@@ -592,9 +600,13 @@ export default function CmsPostForm({
               className="mt-3 overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--mist)]"
               style={{ aspectRatio: "1 / 1" }}
             >
-              {thumbnailUrl ? (
+              {current.thumbnailUrl ? (
                 <img
-                  src={thumbnailUrl.startsWith("/") ? `${API_BASE_URL}${thumbnailUrl}` : thumbnailUrl}
+                  src={
+                    current.thumbnailUrl.startsWith("/")
+                      ? `${API_BASE_URL}${current.thumbnailUrl}`
+                      : current.thumbnailUrl
+                  }
                   alt="Thumbnail"
                   className="h-full w-full object-cover"
                 />
@@ -630,7 +642,9 @@ export default function CmsPostForm({
                               key={item.id}
                               type="button"
                               onClick={() => {
-                                setThumbnailUrl(normalizeMediaUrl(url));
+                                setCurrentTranslation({
+                                  thumbnailUrl: normalizeMediaUrl(url),
+                                });
                                 setMediaDialogOpen(false);
                               }}
                               className="group overflow-hidden rounded-xl border border-[var(--line)] bg-white"
@@ -676,11 +690,11 @@ export default function CmsPostForm({
                   }}
                 />
               </label>
-              {thumbnailUrl ? (
+              {current.thumbnailUrl ? (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setThumbnailUrl(null)}
+                  onClick={() => setCurrentTranslation({ thumbnailUrl: null })}
                 >
                   Xoá
                 </Button>
@@ -743,7 +757,9 @@ export default function CmsPostForm({
                       );
                       const url = response?.data?.url;
                       if (url) {
-                        setThumbnailUrl(normalizeMediaUrl(url));
+                        setCurrentTranslation({
+                          thumbnailUrl: normalizeMediaUrl(url),
+                        });
                       }
                       setThumbCropOpen(false);
                       setThumbCropSrc(null);

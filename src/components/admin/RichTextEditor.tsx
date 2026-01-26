@@ -2,8 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/lib/constants";
 import Cropper from "react-easy-crop";
+import { getMediaLibrary } from "@/lib/api/admin";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const Editor = dynamic(async () => {
   const mod = await import("@tinymce/tinymce-react");
@@ -17,6 +22,7 @@ export default function RichTextEditor({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const editorRef = useRef<any>(null);
   const [cropOpen, setCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -27,6 +33,21 @@ export default function RichTextEditor({
   );
   const cropFileNameRef = useRef("image.jpg");
   const insertCallbackRef = useRef<((url: string) => void) | null>(null);
+  const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
+  const [mediaQuery, setMediaQuery] = useState("");
+
+  const mediaQueryResult = useQuery({
+    queryKey: ["cms-media-library"],
+    queryFn: () => getMediaLibrary(undefined, 1, 60),
+  });
+  const mediaItems = mediaQueryResult.data?.data?.items || [];
+  const filteredMedia = useMemo(() => {
+    const normalized = mediaQuery.trim().toLowerCase();
+    if (!normalized) return mediaItems;
+    return mediaItems.filter((item) =>
+      item.filename.toLowerCase().includes(normalized)
+    );
+  }, [mediaItems, mediaQuery]);
 
   const createImage = (url: string) =>
     new Promise<HTMLImageElement>((resolve, reject) => {
@@ -85,6 +106,11 @@ export default function RichTextEditor({
     return url.startsWith("/") ? `${API_BASE_URL}${url}` : url;
   }, []);
 
+  const resolveMediaUrl = useCallback(
+    (url: string) => (url.startsWith("http") ? url : `${API_BASE_URL}${url}`),
+    []
+  );
+
   const handleCropComplete = useCallback(
     (_: unknown, croppedAreaPixels: { width: number; height: number; x: number; y: number }) => {
       croppedAreaRef.current = croppedAreaPixels;
@@ -111,6 +137,19 @@ export default function RichTextEditor({
       reader.readAsDataURL(file);
     };
     input.click();
+  }, []);
+
+  const openMediaLibrary = useCallback(() => {
+    setMediaDialogOpen(true);
+  }, []);
+
+  const insertImage = useCallback((url: string) => {
+    if (insertCallbackRef.current) {
+      insertCallbackRef.current(url);
+      insertCallbackRef.current = null;
+      return;
+    }
+    editorRef.current?.insertContent(`<img src="${url}" alt="" />`);
   }, []);
 
   const init = useMemo(
@@ -143,16 +182,25 @@ export default function RichTextEditor({
         "emoticons",
       ],
       toolbar:
-        "undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | codesample code preview fullscreen | emoticons charmap | removeformat",
+        "undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media mediaLibrary table | codesample code preview fullscreen | emoticons charmap | removeformat",
       content_style:
         "body { font-family: Roboto, Arial, sans-serif; font-size: 14px; color: #0f1722; } img { max-width: 100%; height: auto !important; display: block; object-fit: contain; }",
       image_dimensions: false,
+      image_advtab: true,
+      image_caption: true,
       automatic_uploads: false,
       paste_data_images: false,
       images_reuse_filename: false,
       file_picker_types: "image",
       file_picker_callback: (cb: (url: string) => void) => {
         handlePickImage(cb);
+      },
+      setup: (editor: any) => {
+        editorRef.current = editor;
+        editor.ui.registry.addButton("mediaLibrary", {
+          text: "Media",
+          onAction: () => openMediaLibrary(),
+        });
       },
       images_upload_handler: async (blobInfo: {
         blob: () => Blob;
@@ -162,7 +210,7 @@ export default function RichTextEditor({
         return uploadImageBlob(blob, blobInfo.filename());
       },
     }),
-    [handlePickImage, uploadImageBlob]
+    [handlePickImage, openMediaLibrary, uploadImageBlob]
   );
 
   return (
@@ -172,7 +220,54 @@ export default function RichTextEditor({
         init={init}
         value={value}
         onEditorChange={onChange}
+        onInit={(_, editor) => {
+          editorRef.current = editor;
+        }}
       />
+      <Dialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Chọn ảnh từ Media</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Tìm ảnh..."
+              value={mediaQuery}
+              onChange={(event) => setMediaQuery(event.target.value)}
+            />
+            <div className="grid max-h-[420px] grid-cols-2 gap-3 overflow-auto md:grid-cols-3">
+              {filteredMedia.length ? (
+                filteredMedia.map((item) => {
+                  const url = resolveMediaUrl(item.url);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        insertImage(url);
+                        setMediaDialogOpen(false);
+                      }}
+                      className="group overflow-hidden rounded-xl border border-white/10 bg-white"
+                    >
+                      <img src={url} alt={item.filename} className="h-28 w-full object-cover" />
+                      <div className="p-2 text-left text-[10px] text-[var(--ink-muted)]">
+                        {item.filename}
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-xs text-[var(--ink-muted)]">Không có ảnh phù hợp.</p>
+              )}
+            </div>
+            <div className="flex items-center justify-end">
+              <Button variant="secondary" onClick={() => setMediaDialogOpen(false)}>
+                Đóng
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       {cropOpen && cropSrc ? (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-6">
           <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-[#0f1722] text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]">

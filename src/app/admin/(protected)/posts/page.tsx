@@ -363,10 +363,12 @@ export default function PostsListPage() {
                 ) || post.translations?.[0];
               const isPublished = post.status === "PUBLISHED";
               const fallback = (translation?.title || `Bài viết #${post.id}`).slice(0, 1);
-              const thumbnailSrc = post.thumbnailUrl
-                ? post.thumbnailUrl.startsWith("http")
-                  ? post.thumbnailUrl
-                  : `${API_BASE_URL}${post.thumbnailUrl}`
+              const translationThumbnail =
+                translation?.thumbnailUrl || post.translations?.[0]?.thumbnailUrl || "";
+              const thumbnailSrc = translationThumbnail
+                ? translationThumbnail.startsWith("http")
+                  ? translationThumbnail
+                  : `${API_BASE_URL}${translationThumbnail}`
                 : "";
               const previewUrl = translation?.slug
                 ? resolvedLang === "vi"

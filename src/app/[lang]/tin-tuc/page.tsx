@@ -32,10 +32,11 @@ export default async function NewsPage({
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => {
               const translation = post.translation;
-              const thumbnail = post.thumbnailUrl
-                ? post.thumbnailUrl.startsWith("/")
-                  ? `${API_BASE_URL}${post.thumbnailUrl}`
-                  : post.thumbnailUrl
+              const translationThumbnail = translation?.thumbnailUrl || null;
+              const thumbnail = translationThumbnail
+                ? translationThumbnail.startsWith("/")
+                  ? `${API_BASE_URL}${translationThumbnail}`
+                  : translationThumbnail
                 : null;
               const href =
                 lang === "vi"
