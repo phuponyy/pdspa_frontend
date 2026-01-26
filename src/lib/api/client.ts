@@ -23,6 +23,8 @@ export class ApiError extends Error {
 type FetchOptions = RequestInit & {
   token?: string;
   query?: Record<string, string | number | boolean | undefined>;
+  notify?: boolean;
+  timeoutMs?: number;
 };
 
 type AdminRequestEvent = {
@@ -89,12 +91,19 @@ async function apiFetchInternal<T>(
   options: FetchOptions = {},
   retried = false
 ): Promise<T> {
-  const { token, query, headers, ...init } = options;
+  const { token, query, headers, notify, timeoutMs, ...init } = options;
   const url = `${API_BASE_URL}${path}${buildQuery(query)}`;
   const hasBody = typeof init.body !== "undefined" && init.body !== null;
   const method = (init.method || "GET").toUpperCase();
-  const shouldNotify = path.startsWith("/admin") && !path.startsWith("/admin/auth");
+  const shouldNotify =
+    notify !== false && path.startsWith("/admin") && !path.startsWith("/admin/auth");
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const controller = new AbortController();
+  const effectiveTimeoutMs = timeoutMs ?? (shouldNotify ? 20000 : undefined);
+  const timeoutId =
+    typeof effectiveTimeoutMs === "number"
+      ? setTimeout(() => controller.abort(), effectiveTimeoutMs)
+      : null;
 
   if (shouldNotify) {
     dispatchAdminRequest({ phase: "start", id: requestId, method, path });
@@ -104,6 +113,7 @@ async function apiFetchInternal<T>(
   try {
     response = await fetch(url, {
       credentials: "include",
+      signal: controller.signal,
       ...init,
       headers: {
         ...(hasBody ? { "Content-Type": "application/json" } : {}),
@@ -123,6 +133,10 @@ async function apiFetchInternal<T>(
       });
     }
     throw err;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 
   const contentType = response.headers.get("content-type") || "";

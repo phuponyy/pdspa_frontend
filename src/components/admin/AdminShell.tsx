@@ -139,7 +139,12 @@ export default function AdminShell({
 
   const bookingsQuery = useQuery({
     queryKey: ["admin-booking-notifications"],
-    queryFn: () => getBookings(undefined, { status: "NEW", page: 1, limit: 5 }),
+    queryFn: () =>
+      getBookings(
+        undefined,
+        { status: "NEW", page: 1, limit: 5 },
+        { notify: false, timeoutMs: 8000 }
+      ),
     enabled: canViewBookings,
     refetchInterval: 15000,
     refetchIntervalInBackground: true,

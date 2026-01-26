@@ -8,6 +8,8 @@ import type {
   CmsListResponse,
   CmsPage,
   CmsPost,
+  CmsCategory,
+  CmsTag,
   HeroImageUploadResponse,
   LeadDetailResponse,
   LeadListResponse,
@@ -224,6 +226,32 @@ export const getCmsPosts = async (token?: string, page = 1, limit = 20) =>
     token,
     query: { page, limit },
     cache: "no-store",
+  });
+
+export const getCmsCategories = async (token?: string) =>
+  apiFetch<ApiSuccess<CmsCategory[]>>("/admin/cms/categories", {
+    token,
+    cache: "no-store",
+  });
+
+export const createCmsCategory = async (token: string | undefined, payload: { name: string; slug?: string }) =>
+  apiFetch<ApiSuccess<CmsCategory>>("/admin/cms/categories", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const getCmsTags = async (token?: string) =>
+  apiFetch<ApiSuccess<CmsTag[]>>("/admin/cms/tags", {
+    token,
+    cache: "no-store",
+  });
+
+export const createCmsTag = async (token: string | undefined, payload: { name: string; slug?: string }) =>
+  apiFetch<ApiSuccess<CmsTag>>("/admin/cms/tags", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 
 export const getCmsPost = async (token?: string, id: number) =>
@@ -469,12 +497,15 @@ export const getCustomers = async (
 
 export const getBookings = async (
   token?: string,
-  params: Record<string, string | number | undefined>
+  params?: Record<string, string | number | undefined>,
+  options?: { notify?: boolean; timeoutMs?: number }
 ) =>
   apiFetch<PaginatedResponse<Booking>>("/admin/bookings", {
     token,
     query: params,
     cache: "no-store",
+    notify: options?.notify,
+    timeoutMs: options?.timeoutMs,
   });
 
 export const updateBookingStatus = async (

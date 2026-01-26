@@ -8,6 +8,9 @@ import type {
   PublicBookingRequest,
   PublicBookingResponse,
   SiteConfigResponse,
+  PublicCmsPageResponse,
+  PublicPostsResponse,
+  PublicPostDetailResponse,
 } from "@/types/api.types";
 import type { HeroSlide, HomeSection } from "@/types/page.types";
 
@@ -94,6 +97,28 @@ export const getHomePage = async (lang: string) => {
     sections: payload.sections?.map(mapSection) ?? [],
   } satisfies HomePageResponse;
 };
+
+export const getCmsPageBySlug = async (slug: string, lang: string) =>
+  apiFetch<PublicCmsPageResponse>(`/public/pages/slug/${slug}`, {
+    cache: "no-store",
+    query: { lang },
+  });
+
+export const getPublicPosts = async (
+  lang: string,
+  page = 1,
+  limit = 12
+) =>
+  apiFetch<PublicPostsResponse>("/public/posts", {
+    cache: "no-store",
+    query: { lang, page, limit },
+  });
+
+export const getPublicPostBySlug = async (slug: string, lang: string) =>
+  apiFetch<PublicPostDetailResponse>(`/public/posts/slug/${slug}`, {
+    cache: "no-store",
+    query: { lang },
+  });
 
 export const getServices = async (lang: string) =>
   apiFetch<PublicServicesResponse>("/public/services", {

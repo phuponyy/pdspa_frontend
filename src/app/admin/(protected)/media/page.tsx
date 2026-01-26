@@ -7,6 +7,7 @@ import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/common/ToastProvider";
+import { API_BASE_URL } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
@@ -31,17 +32,29 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / Math.pow(1024, index)).toFixed(1)} ${units[index]}`;
 };
 
+const resolveMediaUrl = (url: string) =>
+  url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+
 export default function MediaLibraryPage() {
   const toast = useToast();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(30);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["cms-media"],
-    queryFn: () => getMediaLibrary(undefined, 1, 30),
+    queryKey: ["cms-media", page, pageSize],
+    queryFn: () => getMediaLibrary(undefined, page, pageSize),
   });
 
   const items = data?.data?.items || [];
+  const totalPages = data?.data?.pagination?.totalPages || 1;
+  const totalItems = data?.data?.pagination?.total || 0;
   const selected = items.find((item) => item.id === selectedId) || null;
+
+  const handlePageSizeChange = (value: number) => {
+    setPageSize(value);
+    setPage(1);
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -94,6 +107,54 @@ export default function MediaLibraryPage() {
           </Button>
         </label>
       </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-[#0f1722] px-4 py-3 text-sm text-white/70">
+        <div>
+          {totalItems ? (
+            <span>
+              Tổng <span className="text-white">{totalItems}</span> ảnh
+            </span>
+          ) : (
+            <span>Chưa có media</span>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/50">
+            Hiển thị
+            <select
+              className="rounded-full border border-white/10 bg-transparent px-3 py-1 text-xs text-white"
+              value={pageSize}
+              onChange={(event) => handlePageSizeChange(Number(event.target.value))}
+            >
+              {[12, 24, 36, 48].map((size) => (
+                <option key={size} value={size} className="bg-[#0f1722] text-white">
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page <= 1}
+            >
+              Trước
+            </Button>
+            <span className="text-xs uppercase tracking-[0.2em] text-white/50">
+              {page} / {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={page >= totalPages}
+            >
+              Sau
+            </Button>
+          </div>
+        </div>
+      </div>
       {isLoading ? (
         <Loading label="Loading media" />
       ) : (
@@ -110,7 +171,7 @@ export default function MediaLibraryPage() {
                       aria-label={`View ${item.filename}`}
                     >
                       <img
-                        src={item.url}
+                        src={resolveMediaUrl(item.url)}
                         alt={item.filename}
                         className="h-full w-full object-cover"
                         loading="lazy"
@@ -177,7 +238,7 @@ export default function MediaLibraryPage() {
             <div className="grid gap-6 md:grid-cols-[1.2fr_1fr]">
               <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-white/5 bg-white/5">
                 <img
-                  src={selected.url}
+                  src={resolveMediaUrl(selected.url)}
                   alt={selected.filename}
                   className="h-full w-full object-cover"
                 />

@@ -29,6 +29,55 @@ export type HomePageResponse = {
   sections?: HomeSection[];
 };
 
+export type PublicCmsPageResponse = {
+  page: {
+    id: number;
+    status: "DRAFT" | "PUBLISHED";
+    publishedAt?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  translation: CmsTranslation | null;
+  seo?: HomeSeo;
+};
+
+export type PublicPostItem = {
+  id: number;
+  status: "DRAFT" | "PUBLISHED";
+  publishedAt?: string | null;
+  thumbnailUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  translation: CmsTranslation | null;
+  categories?: CmsCategory[];
+  tags?: CmsTag[];
+};
+
+export type PublicPostsResponse = ApiSuccess<{
+  items: PublicPostItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>;
+
+export type PublicPostDetailResponse = ApiSuccess<{
+  post: {
+    id: number;
+    status: "DRAFT" | "PUBLISHED";
+    publishedAt?: string | null;
+    thumbnailUrl?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  translation: CmsTranslation | null;
+  categories?: CmsCategory[];
+  tags?: CmsTag[];
+  seo?: HomeSeo;
+}>;
+
 export type LeadCreateRequest = {
   fullName: string;
   phone: string;
@@ -221,9 +270,29 @@ export type CmsPost = {
   id: number;
   status: "DRAFT" | "PUBLISHED";
   publishedAt?: string | null;
+  thumbnailUrl?: string | null;
   createdAt?: string;
   updatedAt?: string;
   translations: CmsTranslation[];
+  categories?: CmsCategory[];
+  tags?: CmsTag[];
+};
+
+export type CmsCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type CmsTag = {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type CmsPage = {

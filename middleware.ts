@@ -12,6 +12,13 @@ const ADMIN_LOGIN = "/admin/login";
 const ADMIN_DEFAULT = "/admin/overview";
 const ADMIN_ME = "/admin/auth/me";
 const PUBLIC_IGNORES = ["/_next", "/api", "/uploads", "/images"];
+const ROOT_ROUTES = new Set([
+  "contact",
+  "dich-vu",
+  "good-massage-in-da-nang",
+  "price-list",
+  "tin-tuc",
+]);
 
 const ACCESS_RULES: AccessRule[] = [
   { prefix: ADMIN_PREFIX, permissions: ["view_dashboard"] },
@@ -83,6 +90,20 @@ export async function middleware(request: NextRequest) {
       redirectUrl.pathname = "/";
     }
     return NextResponse.redirect(redirectUrl, 308);
+  }
+
+  const firstSegment = pathname.split("/").filter(Boolean)[0];
+  if (
+    pathname !== "/" &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/vi/") &&
+    pathname !== "/vi" &&
+    firstSegment &&
+    !ROOT_ROUTES.has(firstSegment)
+  ) {
+    const rewriteUrl = request.nextUrl.clone();
+    rewriteUrl.pathname = `/en${pathname}`;
+    return NextResponse.rewrite(rewriteUrl);
   }
   const adminPath = getAdminPath(pathname);
 

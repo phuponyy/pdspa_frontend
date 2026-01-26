@@ -23,6 +23,8 @@ export default function AdminLive() {
   const [sessionId] = useState(getSessionId);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.pathname.startsWith("/admin")) return;
     const heartbeat = () => {
       sendHeartbeat({
         sessionId,
