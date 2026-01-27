@@ -159,13 +159,25 @@ export type LeadStatusUpdateRequest = {
 };
 
 export type HomeMetaUpdateRequest = {
-  metaTitle: string;
-  metaDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonical?: string;
+  robots?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  schemaJson?: Record<string, unknown> | null;
 };
 
 export type HomeMetaResponse = {
-  metaTitle: string;
-  metaDescription: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonical?: string;
+  robots?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  schemaJson?: Record<string, unknown> | null;
 };
 
 export type HomeHeroUpdateRequest = {
@@ -263,6 +275,12 @@ export type CmsTranslation = {
   thumbnailUrl?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
+  canonical?: string | null;
+  robots?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImage?: string | null;
+  schemaJson?: Record<string, unknown> | null;
 };
 
 export type CmsPost = {
@@ -322,6 +340,27 @@ export type MediaItem = {
   size: number;
   createdAt?: string;
 };
+
+export type RedirectItem = {
+  id: number;
+  fromPath: string;
+  toPath: string;
+  status: number;
+  isActive: boolean;
+  hits?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type RedirectListResponse = ApiSuccess<{
+  items: RedirectItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>;
 
 export type MediaListResponse = CmsListResponse<MediaItem>;
 export type MediaUploadResponse = ApiSuccess<MediaItem>;

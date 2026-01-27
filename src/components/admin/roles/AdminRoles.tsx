@@ -38,6 +38,7 @@ const PERMISSION_OPTIONS = [
   { key: "manage_pages", label: "Pages" },
   { key: "manage_posts", label: "Posts" },
   { key: "manage_media", label: "Media" },
+  { key: "manage_redirects", label: "Redirects" },
 ];
 
 export default function AdminRoles() {

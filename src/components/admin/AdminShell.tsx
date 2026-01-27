@@ -128,6 +128,7 @@ export default function AdminShell({
       { prefix: ADMIN_ROUTES.pages, permissions: ["manage_pages"] },
       { prefix: ADMIN_ROUTES.services, permissions: ["manage_services"] },
       { prefix: ADMIN_ROUTES.media, permissions: ["manage_media"] },
+      { prefix: ADMIN_ROUTES.seoRedirects, permissions: ["manage_redirects"] },
       { prefix: ADMIN_ROUTES.users, permissions: ["manage_users"] },
       { prefix: ADMIN_ROUTES.settings, permissions: ["manage_users"] },
     ] as const;

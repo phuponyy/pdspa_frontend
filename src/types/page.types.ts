@@ -1,6 +1,13 @@
 export type HomeSeo = {
   canonical?: string;
   hreflangs?: Record<string, string>;
+  title?: string | null;
+  description?: string | null;
+  robots?: string | null;
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImage?: string | null;
+  schemaJson?: Record<string, unknown> | null;
 };
 
 export type HomeSectionItem = {

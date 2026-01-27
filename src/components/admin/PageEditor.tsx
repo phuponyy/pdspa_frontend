@@ -33,10 +33,22 @@ import {
 import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/constants";
 import type { HeroSlide } from "@/types/page.types";
+import {
+  analyzeSeo,
+  buildSchemaTemplate,
+  generateSeoFromContent,
+  type SchemaTemplateType,
+} from "@/lib/seo/seoUtils";
 
 type MetaState = {
   metaTitle: string;
   metaDescription: string;
+  canonical: string;
+  robots: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  schemaJson: string;
 };
 
 type HeroState = {
@@ -79,8 +91,26 @@ export default function PageEditor({ lang }: { lang: string }) {
       : lang;
   const [activeLang, setActiveLang] = useState(initialLang);
   const [metaByLang, setMetaByLang] = useState<Record<string, MetaState>>({
-    vi: { metaTitle: "", metaDescription: "" },
-    en: { metaTitle: "", metaDescription: "" },
+    vi: {
+      metaTitle: "",
+      metaDescription: "",
+      canonical: "",
+      robots: "index,follow",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      schemaJson: "",
+    },
+    en: {
+      metaTitle: "",
+      metaDescription: "",
+      canonical: "",
+      robots: "index,follow",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      schemaJson: "",
+    },
   });
   const [heroByLang, setHeroByLang] = useState<Record<string, HeroState>>({
     vi: { heading: "", subheading: "", slides: [] },
@@ -132,6 +162,30 @@ export default function PageEditor({ lang }: { lang: string }) {
       ],
     },
   });
+  const [focusKeywordByLang, setFocusKeywordByLang] = useState<Record<string, string>>(
+    () => ({
+      vi: "",
+      en: "",
+    })
+  );
+  const [schemaTemplateByLang, setSchemaTemplateByLang] = useState<
+    Record<string, SchemaTemplateType>
+  >(() => ({
+    vi: "WebPage",
+    en: "WebPage",
+  }));
+  const [schemaOrgByLang, setSchemaOrgByLang] = useState<Record<string, string>>(
+    () => ({
+      vi: "Panda Spa",
+      en: "Panda Spa",
+    })
+  );
+  const [schemaFaqByLang, setSchemaFaqByLang] = useState<
+    Record<string, { question: string; answer: string }[]>
+  >(() => ({
+    vi: [{ question: "", answer: "" }],
+    en: [{ question: "", answer: "" }],
+  }));
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
   const [loadedLangs, setLoadedLangs] = useState<Record<string, boolean>>({
@@ -157,6 +211,21 @@ export default function PageEditor({ lang }: { lang: string }) {
     notify("Unable to reach the server. Please try again.", "error");
   };
 
+  const parseSchemaJson = (raw?: string) => {
+    const trimmed = raw?.trim();
+    if (!trimmed) return undefined;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("invalid");
+      }
+      return parsed as Record<string, unknown>;
+    } catch {
+      notify("Schema JSON không hợp lệ. Vui lòng kiểm tra lại.", "error");
+      return null;
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -180,6 +249,10 @@ export default function PageEditor({ lang }: { lang: string }) {
         heroByLang?: Record<string, HeroState>;
         introByLang?: Record<string, IntroState>;
         recoveryByLang?: Record<string, RecoveryState>;
+        focusKeywordByLang?: Record<string, string>;
+        schemaTemplateByLang?: Record<string, SchemaTemplateType>;
+        schemaOrgByLang?: Record<string, string>;
+        schemaFaqByLang?: Record<string, { question: string; answer: string }[]>;
         activeLang?: string;
         status?: "DRAFT" | "PUBLISHED";
       };
@@ -187,6 +260,10 @@ export default function PageEditor({ lang }: { lang: string }) {
       if (parsed?.heroByLang) setHeroByLang(parsed.heroByLang);
       if (parsed?.introByLang) setIntroByLang(parsed.introByLang);
       if (parsed?.recoveryByLang) setRecoveryByLang(parsed.recoveryByLang);
+      if (parsed?.focusKeywordByLang) setFocusKeywordByLang(parsed.focusKeywordByLang);
+      if (parsed?.schemaTemplateByLang) setSchemaTemplateByLang(parsed.schemaTemplateByLang);
+      if (parsed?.schemaOrgByLang) setSchemaOrgByLang(parsed.schemaOrgByLang);
+      if (parsed?.schemaFaqByLang) setSchemaFaqByLang(parsed.schemaFaqByLang);
       if (parsed?.status) setStatus(parsed.status);
       if (parsed?.activeLang && languages.includes(parsed.activeLang)) {
         setActiveLang(parsed.activeLang);
@@ -207,16 +284,75 @@ export default function PageEditor({ lang }: { lang: string }) {
         heroByLang,
         introByLang,
         recoveryByLang,
+        focusKeywordByLang,
+        schemaTemplateByLang,
+        schemaOrgByLang,
+        schemaFaqByLang,
         activeLang,
         status,
       })
     );
-  }, [metaByLang, heroByLang, introByLang, recoveryByLang, activeLang, status, isDirty]);
+  }, [
+    metaByLang,
+    heroByLang,
+    introByLang,
+    recoveryByLang,
+    focusKeywordByLang,
+    schemaTemplateByLang,
+    schemaOrgByLang,
+    schemaFaqByLang,
+    activeLang,
+    status,
+    isDirty,
+  ]);
 
   const currentMeta = metaByLang[activeLang] || {
     metaTitle: "",
     metaDescription: "",
+    canonical: "",
+    robots: "index,follow",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    schemaJson: "",
   };
+  const focusKeyword = focusKeywordByLang[activeLang] || "";
+  const schemaTemplate = schemaTemplateByLang[activeLang] || "WebPage";
+  const schemaOrg = schemaOrgByLang[activeLang] || "";
+  const schemaFaqItems = schemaFaqByLang[activeLang] || [];
+  const siteBase =
+    typeof window !== "undefined" ? window.location.origin : "";
+  const serpUrl =
+    currentMeta.canonical ||
+    (siteBase ? `${siteBase}/` : "https://example.com");
+
+  const seoContent = useMemo(() => {
+    const hero = heroByLang[activeLang];
+    const intro = introByLang[activeLang];
+    const recovery = recoveryByLang[activeLang];
+    return [
+      hero?.heading,
+      hero?.subheading,
+      intro?.heading,
+      intro?.description,
+      recovery?.heading,
+      ...(recovery?.items || []).map((item) => item.title || item.description),
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }, [activeLang, heroByLang, introByLang, recoveryByLang]);
+
+  const seoAnalysis = useMemo(
+    () =>
+      analyzeSeo({
+        title: currentMeta.metaTitle,
+        slug: "",
+        description: currentMeta.metaDescription || "",
+        contentHtml: seoContent,
+        focusKeyword,
+      }),
+    [currentMeta.metaTitle, currentMeta.metaDescription, seoContent, focusKeyword]
+  );
   const currentHero = heroByLang[activeLang] || {
     heading: "",
     subheading: "",
@@ -245,7 +381,13 @@ export default function PageEditor({ lang }: { lang: string }) {
     let cancelled = false;
 
     const isEmptyMeta = (meta: MetaState | undefined) =>
-      !meta?.metaTitle && !meta?.metaDescription;
+      !meta?.metaTitle &&
+      !meta?.metaDescription &&
+      !meta?.canonical &&
+      !meta?.ogTitle &&
+      !meta?.ogDescription &&
+      !meta?.ogImage &&
+      !meta?.schemaJson;
     const isEmptyHero = (hero: HeroState | undefined) =>
       !hero?.heading && !hero?.subheading && !(hero?.slides?.length ?? 0);
     const isEmptyIntro = (intro: IntroState | undefined) =>
@@ -273,6 +415,12 @@ export default function PageEditor({ lang }: { lang: string }) {
             [activeLang]: {
               metaTitle: meta?.metaTitle ?? "",
               metaDescription: meta?.metaDescription ?? "",
+              canonical: meta?.canonical ?? "",
+              robots: meta?.robots ?? "index,follow",
+              ogTitle: meta?.ogTitle ?? "",
+              ogDescription: meta?.ogDescription ?? "",
+              ogImage: meta?.ogImage ?? "",
+              schemaJson: meta?.schemaJson ? JSON.stringify(meta.schemaJson, null, 2) : "",
             },
           };
         });
@@ -444,7 +592,47 @@ export default function PageEditor({ lang }: { lang: string }) {
               </button>
             </div>
           </div>
-          <div className="mt-5 grid gap-4">
+          <div className="mt-5 space-y-4">
+            <Input
+              label="Focus keyword"
+              value={focusKeyword}
+              onChange={(event) =>
+                setFocusKeywordByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: event.target.value,
+                }))
+              }
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const generated = generateSeoFromContent({
+                    title:
+                      currentMeta.metaTitle ||
+                      heroByLang[activeLang]?.heading ||
+                      "Panda Spa",
+                    contentHtml: seoContent,
+                  });
+                  setIsDirty(true);
+                  setMetaByLang((prev) => ({
+                    ...prev,
+                    [activeLang]: {
+                      ...prev[activeLang],
+                      metaTitle: generated.seoTitle,
+                      metaDescription: generated.seoDescription,
+                      ogTitle: generated.ogTitle,
+                      ogDescription: generated.ogDescription,
+                    },
+                  }));
+                }}
+              >
+                Auto generate SEO
+              </Button>
+              <span className="text-xs text-slate-400">
+                Tự động lấy từ nội dung trang
+              </span>
+            </div>
             <Input
               label="Meta title"
               value={currentMeta.metaTitle}
@@ -473,29 +661,289 @@ export default function PageEditor({ lang }: { lang: string }) {
                 }));
               }}
             />
-            <div className="flex flex-wrap items-center gap-3">
-            <Button
-              onClick={async () => {
-                try {
-                  await updateHomeMeta(undefined, activeLang, {
-                    metaTitle: currentMeta.metaTitle,
-                    metaDescription: currentMeta.metaDescription,
-                  });
-                  const fresh = await getHomeMeta(undefined, activeLang);
-                  if (fresh) {
+            <Input
+              label="Canonical URL"
+              value={currentMeta.canonical}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    canonical: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+              Robots
+              <select
+                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+                value={currentMeta.robots || "index,follow"}
+                onChange={(event) => {
+                  setIsDirty(true);
+                  setMetaByLang((prev) => ({
+                    ...prev,
+                    [activeLang]: {
+                      ...prev[activeLang],
+                      robots: event.target.value,
+                    },
+                  }));
+                }}
+              >
+                <option value="index,follow">index,follow</option>
+                <option value="noindex,follow">noindex,follow</option>
+                <option value="noindex,nofollow">noindex,nofollow</option>
+              </select>
+            </label>
+            <Input
+              label="OG Title"
+              value={currentMeta.ogTitle}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogTitle: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Textarea
+              label="OG Description"
+              value={currentMeta.ogDescription}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogDescription: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Input
+              label="OG Image"
+              value={currentMeta.ogImage}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogImage: event.target.value,
+                  },
+                }));
+              }}
+            />
+
+            <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    SEO Score
+                  </p>
+                  <p className="text-sm text-white/70">Phân tích realtime</p>
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#ff9f40] text-lg font-semibold text-[#ff9f40]">
+                  {seoAnalysis.score}
+                </div>
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                {seoAnalysis.checks.map((check) => (
+                  <div key={check.label} className="flex items-center gap-2">
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        check.ok
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-red-500/20 text-red-300"
+                      }`}
+                    >
+                      {check.ok ? "✓" : "!"}
+                    </span>
+                    <span className="text-white/80">{check.label}</span>
+                    {check.hint ? (
+                      <span className="ml-auto text-[10px] text-white/40">{check.hint}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                SERP Preview
+              </p>
+              <div className="mt-3 space-y-1">
+                <p className="text-sm font-semibold text-[#1a73e8]">
+                  {currentMeta.metaTitle || "SEO title"}
+                </p>
+                <p className="text-xs text-emerald-700">{serpUrl}</p>
+                <p className="text-xs text-slate-500">
+                  {currentMeta.metaDescription || "Meta description sẽ hiển thị ở đây."}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                Schema Builder
+              </p>
+              <div className="mt-3 grid gap-3">
+                <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+                  Template
+                  <select
+                    className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+                    value={schemaTemplate}
+                    onChange={(event) =>
+                      setSchemaTemplateByLang((prev) => ({
+                        ...prev,
+                        [activeLang]: event.target.value as SchemaTemplateType,
+                      }))
+                    }
+                  >
+                    <option value="WebPage">WebPage</option>
+                    <option value="Article">Article</option>
+                    <option value="FAQPage">FAQPage</option>
+                    <option value="LocalBusiness">LocalBusiness</option>
+                    <option value="Service">Service</option>
+                  </select>
+                </label>
+                <Input
+                  label="Organization"
+                  value={schemaOrg}
+                  onChange={(event) =>
+                    setSchemaOrgByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: event.target.value,
+                    }))
+                  }
+                />
+                {schemaTemplate === "FAQPage" ? (
+                  <div className="space-y-2">
+                    {schemaFaqItems.map((item, index) => (
+                      <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-slate-200 p-2">
+                        <Input
+                          label={`Question ${index + 1}`}
+                          value={item.question}
+                          onChange={(event) => {
+                            const next = [...schemaFaqItems];
+                            next[index] = { ...next[index], question: event.target.value };
+                            setSchemaFaqByLang((prev) => ({
+                              ...prev,
+                              [activeLang]: next,
+                            }));
+                          }}
+                        />
+                        <Textarea
+                          label="Answer"
+                          value={item.answer}
+                          onChange={(event) => {
+                            const next = [...schemaFaqItems];
+                            next[index] = { ...next[index], answer: event.target.value };
+                            setSchemaFaqByLang((prev) => ({
+                              ...prev,
+                              [activeLang]: next,
+                            }));
+                          }}
+                        />
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setSchemaFaqByLang((prev) => ({
+                          ...prev,
+                          [activeLang]: [...schemaFaqItems, { question: "", answer: "" }],
+                        }))
+                      }
+                    >
+                      Thêm câu hỏi
+                    </Button>
+                  </div>
+                ) : null}
+                <div className="rounded-xl border border-slate-200 bg-[#0f1722] p-3 text-xs text-white/80">
+                  <pre className="whitespace-pre-wrap">
+                    {JSON.stringify(
+                      buildSchemaTemplate({
+                        type: schemaTemplate,
+                        title: currentMeta.metaTitle || "Panda Spa",
+                        description: currentMeta.metaDescription || "",
+                        url: serpUrl,
+                        image: currentMeta.ogImage || "",
+                        organization: schemaOrg,
+                        faqItems: schemaFaqItems,
+                      }),
+                      null,
+                      2
+                    )}
+                  </pre>
+                </div>
+                <Button
+                  onClick={() => {
+                    const schema = buildSchemaTemplate({
+                      type: schemaTemplate,
+                      title: currentMeta.metaTitle || "Panda Spa",
+                      description: currentMeta.metaDescription || "",
+                      url: serpUrl,
+                      image: currentMeta.ogImage || "",
+                      organization: schemaOrg,
+                      faqItems: schemaFaqItems,
+                    });
+                    setIsDirty(true);
                     setMetaByLang((prev) => ({
                       ...prev,
                       [activeLang]: {
-                        metaTitle: fresh.metaTitle ?? "",
-                        metaDescription: fresh.metaDescription ?? "",
+                        ...prev[activeLang],
+                        schemaJson: JSON.stringify(schema, null, 2),
                       },
                     }));
-                  }
-                  notify("SEO metadata updated.", "success");
-                  setIsDirty(false);
-                  if (typeof window !== "undefined") {
-                    window.localStorage.removeItem(storageKey);
-                  }
+                  }}
+                >
+                  Áp dụng schema
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={async () => {
+                  try {
+                    const schemaJson = parseSchemaJson(currentMeta.schemaJson);
+                    if (schemaJson === null) return;
+                    await updateHomeMeta(undefined, activeLang, {
+                      metaTitle: currentMeta.metaTitle,
+                      metaDescription: currentMeta.metaDescription,
+                      canonical: currentMeta.canonical,
+                      robots: currentMeta.robots,
+                      ogTitle: currentMeta.ogTitle,
+                      ogDescription: currentMeta.ogDescription,
+                      ogImage: currentMeta.ogImage,
+                      schemaJson,
+                    });
+                    const fresh = await getHomeMeta(undefined, activeLang);
+                    if (fresh) {
+                      setMetaByLang((prev) => ({
+                        ...prev,
+                        [activeLang]: {
+                          metaTitle: fresh.metaTitle ?? "",
+                          metaDescription: fresh.metaDescription ?? "",
+                          canonical: fresh.canonical ?? "",
+                          robots: fresh.robots ?? "index,follow",
+                          ogTitle: fresh.ogTitle ?? "",
+                          ogDescription: fresh.ogDescription ?? "",
+                          ogImage: fresh.ogImage ?? "",
+                          schemaJson: fresh.schemaJson ? JSON.stringify(fresh.schemaJson, null, 2) : "",
+                        },
+                      }));
+                    }
+                    notify("SEO metadata updated.", "success");
+                    setIsDirty(false);
+                    if (typeof window !== "undefined") {
+                      window.localStorage.removeItem(storageKey);
+                    }
                   } catch (err) {
                     handleError(err);
                   }

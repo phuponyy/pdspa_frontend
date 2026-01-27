@@ -17,6 +17,7 @@ export const ADMIN_ROUTES = {
   users: `${ADMIN_BASE}/users`,
   settings: `${ADMIN_BASE}/settings`,
   roles: `${ADMIN_BASE}/settings/roles`,
+  seoRedirects: `${ADMIN_BASE}/seo/redirects`,
   securityWhitelist: `${ADMIN_BASE}/security/ip-whitelist`,
   securityBlacklist: `${ADMIN_BASE}/security/ip-blacklist`,
 } as const;

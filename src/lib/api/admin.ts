@@ -16,6 +16,8 @@ import type {
   LeadStatusUpdateRequest,
   MediaListResponse,
   MediaUploadResponse,
+  RedirectItem,
+  RedirectListResponse,
   AdminMeResponse,
   AdminUserResponse,
   AdminUsersResponse,
@@ -98,14 +100,14 @@ export const getLeads = async (token?: string, page = 1, limit = 20) =>
     cache: "no-store",
   });
 
-export const getLead = async (token?: string, id: string | number) =>
+export const getLead = async (token: string | undefined, id: string | number) =>
   apiFetch<LeadDetailResponse>(`/admin/leads/${id}`, {
     token,
     cache: "no-store",
   });
 
 export const updateLeadStatus = async (
-  token?: string,
+  token: string | undefined,
   id: string | number,
   payload: LeadStatusUpdateRequest
 ) =>
@@ -116,7 +118,7 @@ export const updateLeadStatus = async (
   });
 
 export const updateHomeMeta = async (
-  token?: string,
+  token: string | undefined,
   lang: string,
   payload: HomeMetaUpdateRequest
 ) =>
@@ -128,7 +130,7 @@ export const updateHomeMeta = async (
   });
 
 export const updateHomeHero = async (
-  token?: string,
+  token: string | undefined,
   lang: string,
   payload: HomeHeroUpdateRequest
 ) =>
@@ -140,7 +142,7 @@ export const updateHomeHero = async (
   });
 
 export const updateHomeIntro = async (
-  token?: string,
+  token: string | undefined,
   lang: string,
   payload: HomeIntroUpdateRequest
 ) =>
@@ -152,7 +154,7 @@ export const updateHomeIntro = async (
   });
 
 export const updateHomeRecovery = async (
-  token?: string,
+  token: string | undefined,
   lang: string,
   payload: HomeRecoveryUpdateRequest
 ) =>
@@ -163,35 +165,38 @@ export const updateHomeRecovery = async (
     body: JSON.stringify(payload),
   });
 
-export const updateHomeStatus = async (token?: string, payload: HomeStatusUpdateRequest) =>
+export const updateHomeStatus = async (
+  token: string | undefined,
+  payload: HomeStatusUpdateRequest
+) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/status", {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const getHomeMeta = async (token?: string, lang: string) =>
+export const getHomeMeta = async (token: string | undefined, lang: string) =>
   apiFetch<HomeMetaResponse>("/admin/pages/home/meta", {
     token,
     query: { lang },
     cache: "no-store",
   });
 
-export const getHomeHero = async (token?: string, lang: string) =>
+export const getHomeHero = async (token: string | undefined, lang: string) =>
   apiFetch<HomeHeroResponse>("/admin/pages/home/hero", {
     token,
     query: { lang },
     cache: "no-store",
   });
 
-export const getHomeIntro = async (token?: string, lang: string) =>
+export const getHomeIntro = async (token: string | undefined, lang: string) =>
   apiFetch<HomeIntroResponse>("/admin/pages/home/intro", {
     token,
     query: { lang },
     cache: "no-store",
   });
 
-export const getHomeRecovery = async (token?: string, lang: string) =>
+export const getHomeRecovery = async (token: string | undefined, lang: string) =>
   apiFetch<HomeRecoveryResponse>("/admin/pages/home/recovery", {
     token,
     query: { lang },
@@ -204,7 +209,10 @@ export const getHomeStatus = async (token?: string) =>
     cache: "no-store",
   });
 
-export const updateSiteConfig = async (token?: string, payload: Record<string, string>) =>
+export const updateSiteConfig = async (
+  token: string | undefined,
+  payload: Record<string, string>
+) =>
   apiFetch<SiteConfigResponse>("/admin/config", {
     token,
     method: "PATCH",
@@ -265,28 +273,81 @@ export const createCmsTag = async (token: string | undefined, payload: { name: s
     body: JSON.stringify(payload),
   });
 
-export const getCmsPost = async (token?: string, id: number) =>
+export const getCmsPost = async (token: string | undefined, id: number) =>
   apiFetch<CmsDetailResponse<CmsPost>>(`/admin/cms/posts/${id}`, {
     token,
     cache: "no-store",
   });
 
-export const createCmsPost = async (token?: string, payload: unknown) =>
+export const createCmsPost = async (token: string | undefined, payload: unknown) =>
   apiFetch<CmsDetailResponse<CmsPost>>("/admin/cms/posts", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const updateCmsPost = async (token?: string, id: number, payload: unknown) =>
+export const updateCmsPost = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<CmsDetailResponse<CmsPost>>(`/admin/cms/posts/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const deleteCmsPost = async (token?: string, id: number) =>
+export const deleteCmsPost = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/cms/posts/${id}`, {
+    token,
+    method: "DELETE",
+  });
+
+export const getRedirects = async (
+  token?: string,
+  page = 1,
+  limit = 20,
+  q?: string
+) =>
+  apiFetch<RedirectListResponse>("/admin/redirects", {
+    token,
+    cache: "no-store",
+    query: { page, limit, q },
+  });
+
+export const createRedirect = async (
+  token: string | undefined,
+  payload: {
+    fromPath: string;
+    toPath: string;
+    status?: number;
+    isActive?: boolean;
+  }
+) =>
+  apiFetch<ApiSuccess<RedirectItem>>("/admin/redirects", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateRedirect = async (
+  token: string | undefined,
+  id: number,
+  payload: {
+    fromPath?: string;
+    toPath?: string;
+    status?: number;
+    isActive?: boolean;
+  }
+) =>
+  apiFetch<ApiSuccess<RedirectItem>>(`/admin/redirects/${id}`, {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteRedirect = async (token: string | undefined, id: number) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/redirects/${id}`, {
     token,
     method: "DELETE",
   });
@@ -298,27 +359,31 @@ export const getCmsPages = async (token?: string, page = 1, limit = 20) =>
     cache: "no-store",
   });
 
-export const getCmsPage = async (token?: string, id: number) =>
+export const getCmsPage = async (token: string | undefined, id: number) =>
   apiFetch<CmsDetailResponse<CmsPage>>(`/admin/cms/pages/${id}`, {
     token,
     cache: "no-store",
   });
 
-export const createCmsPage = async (token?: string, payload: unknown) =>
+export const createCmsPage = async (token: string | undefined, payload: unknown) =>
   apiFetch<CmsDetailResponse<CmsPage>>("/admin/cms/pages", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const updateCmsPage = async (token?: string, id: number, payload: unknown) =>
+export const updateCmsPage = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<CmsDetailResponse<CmsPage>>(`/admin/cms/pages/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const deleteCmsPage = async (token?: string, id: number) =>
+export const deleteCmsPage = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/cms/pages/${id}`, {
     token,
     method: "DELETE",
@@ -393,7 +458,7 @@ export const updateMedia = async (id: number, file: File) => {
   });
 };
 
-export const deleteMedia = async (token?: string, id: number) =>
+export const deleteMedia = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/cms/media/${id}`, {
     token,
     method: "DELETE",
@@ -417,41 +482,49 @@ export const getAdminRoles = async (token?: string) =>
     cache: "no-store",
   });
 
-export const createAdminUser = async (token?: string, payload: unknown) =>
+export const createAdminUser = async (token: string | undefined, payload: unknown) =>
   apiFetch<AdminUserResponse>("/admin/users", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const createAdminRole = async (token?: string, payload: unknown) =>
+export const createAdminRole = async (token: string | undefined, payload: unknown) =>
   apiFetch<AdminRoleResponse>("/admin/roles", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const updateAdminUser = async (token?: string, id: number, payload: unknown) =>
+export const updateAdminUser = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<AdminUserResponse>(`/admin/users/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const updateAdminRole = async (token?: string, id: number, payload: unknown) =>
+export const updateAdminRole = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<AdminRoleResponse>(`/admin/roles/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const deleteAdminUser = async (token?: string, id: number) =>
+export const deleteAdminUser = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/users/${id}`, {
     token,
     method: "DELETE",
   });
 
-export const deleteAdminRole = async (token?: string, id: number) =>
+export const deleteAdminRole = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/roles/${id}`, {
     token,
     method: "DELETE",
@@ -463,28 +536,32 @@ export const getAdminServices = async (token?: string) =>
     cache: "no-store",
   });
 
-export const createAdminService = async (token?: string, payload: unknown) =>
+export const createAdminService = async (token: string | undefined, payload: unknown) =>
   apiFetch<ApiSuccess<AdminService>>("/admin/services", {
     token,
     method: "POST",
     body: JSON.stringify(payload),
   });
 
-export const updateAdminService = async (token: string | undefined, id: number, payload: unknown) =>
+export const updateAdminService = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<ApiSuccess<AdminService>>(`/admin/services/${id}`, {
     token,
     method: "PATCH",
     body: JSON.stringify(payload),
   });
 
-export const deleteAdminService = async (token?: string, id: number) =>
+export const deleteAdminService = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/services/${id}`, {
     token,
     method: "DELETE",
   });
 
 export const resetAdminUserPassword = async (
-  token?: string,
+  token: string | undefined,
   id: number,
   payload: unknown
 ) =>
@@ -505,7 +582,7 @@ export const getAdminOverview = async (
   });
 
 export const getAdminAnalytics = async (
-  token?: string,
+  token: string | undefined,
   params: { range?: string; from?: string; to?: string; interval?: string }
 ) =>
   apiFetch<AnalyticsResponse>("/admin/analytics", {
@@ -521,7 +598,7 @@ export const getAdminLive = async (token?: string) =>
   });
 
 export const getCustomers = async (
-  token?: string,
+  token: string | undefined,
   params: Record<string, string | number | undefined>
 ) =>
   apiFetch<PaginatedResponse<Customer>>("/admin/customers", {
@@ -544,7 +621,7 @@ export const getBookings = async (
   });
 
 export const updateBookingStatus = async (
-  token?: string,
+  token: string | undefined,
   id: number,
   status: Booking["status"]
 ) =>
@@ -554,7 +631,11 @@ export const updateBookingStatus = async (
     body: JSON.stringify({ status }),
   });
 
-export const updateBooking = async (token: string | undefined, id: number, payload: unknown) =>
+export const updateBooking = async (
+  token: string | undefined,
+  id: number,
+  payload: unknown
+) =>
   apiFetch<Booking>(`/admin/bookings/${id}`, {
     token,
     method: "PATCH",

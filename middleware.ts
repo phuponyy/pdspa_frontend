@@ -11,6 +11,7 @@ const ADMIN_PREFIX = "/admin";
 const ADMIN_LOGIN = "/admin/login";
 const ADMIN_DEFAULT = "/admin/overview";
 const ADMIN_ME = "/admin/auth/me";
+const REDIRECT_RESOLVE = "/public/redirects/resolve";
 const PUBLIC_IGNORES = ["/_next", "/api", "/uploads", "/images"];
 const ROOT_ROUTES = new Set([
   "contact",
@@ -35,6 +36,7 @@ const ACCESS_RULES: AccessRule[] = [
   { prefix: "/admin/media", permissions: ["manage_media"] },
   { prefix: "/admin/users", permissions: ["manage_users"] },
   { prefix: "/admin/settings", permissions: ["manage_users"] },
+  { prefix: "/admin/seo/redirects", permissions: ["manage_redirects"] },
 ];
 
 const getAdminPath = (pathname: string) => {
@@ -90,6 +92,28 @@ export async function middleware(request: NextRequest) {
       redirectUrl.pathname = "/";
     }
     return NextResponse.redirect(redirectUrl, 308);
+  }
+
+  if (request.method === "GET" && !pathname.startsWith("/admin")) {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const redirectUrl = new URL(`${apiBase}${REDIRECT_RESOLVE}`);
+    redirectUrl.searchParams.set("path", pathname);
+    const redirectResponse = await fetch(redirectUrl.toString(), {
+      cache: "no-store",
+      headers: { accept: "application/json" },
+    }).catch(() => null);
+
+    if (redirectResponse?.ok) {
+      const payload = (await redirectResponse.json().catch(() => null)) as
+        | { data?: { to?: string; status?: number } | null }
+        | null;
+      const target = payload?.data?.to;
+      const status = payload?.data?.status;
+      if (target && target !== pathname) {
+        const nextStatus = status === 301 || status === 302 ? status : 302;
+        return NextResponse.redirect(new URL(target, request.url), nextStatus);
+      }
+    }
   }
 
   const firstSegment = pathname.split("/").filter(Boolean)[0];

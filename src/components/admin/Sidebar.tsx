@@ -159,6 +159,24 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
       ],
     },
     {
+      title: "SEO",
+      links: [
+        {
+          href: ADMIN_ROUTES.seoRedirects,
+          label: "Redirects",
+          requiredPermissions: ["manage_redirects"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 7h10v4" />
+              <path d="M17 7l-3 3" />
+              <path d="M17 17H7v-4" />
+              <path d="M7 17l3-3" />
+            </svg>
+          ),
+        },
+      ],
+    },
+    {
       title: "Cài Đặt Chung",
       links: [
         {
