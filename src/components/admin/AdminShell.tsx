@@ -56,6 +56,17 @@ export default function AdminShell({
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
   const navSections = useMemo(
     () =>
       adminNavSections((key: string) => {
@@ -281,12 +292,15 @@ export default function AdminShell({
                     <button
                       type="button"
                       aria-label="Open search"
-                      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#111a25] text-white/70 transition hover:text-white"
+                      className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-[#111a25] px-3 text-white/70 transition hover:text-white"
                     >
                       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="11" cy="11" r="7" />
                         <path d="M20 20l-3.5-3.5" />
                       </svg>
+                      <span className="hidden text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40 lg:inline">
+                        Ctrl+K
+                      </span>
                     </button>
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
@@ -310,6 +324,9 @@ export default function AdminShell({
                         className="h-12 rounded-full border-white/5 bg-[#111a25] pl-10 text-white/90 placeholder:text-slate-500"
                       />
                     </div>
+                    <p className="mt-2 text-xs text-white/40">
+                      Gợi ý: nhấn <span className="font-semibold text-white/70">Ctrl+K</span> để mở nhanh.
+                    </p>
                     <div className="mt-4 max-h-64 space-y-2 overflow-auto">
                       {searchResults.length ? (
                         searchResults.map((result) => (

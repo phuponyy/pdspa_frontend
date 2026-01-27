@@ -86,6 +86,15 @@ const buildQuery = (query?: FetchOptions["query"]) => {
   return qs ? `?${qs}` : "";
 };
 
+const getCsrfToken = () => {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith("pd2_csrf="));
+  return match ? decodeURIComponent(match.split("=")[1] || "") : "";
+};
+
 async function apiFetchInternal<T>(
   path: string,
   options: FetchOptions = {},
@@ -97,6 +106,7 @@ async function apiFetchInternal<T>(
   const method = (init.method || "GET").toUpperCase();
   const shouldNotify =
     notify !== false && path.startsWith("/admin") && !path.startsWith("/admin/auth");
+  const csrfToken = getCsrfToken();
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const controller = new AbortController();
   const effectiveTimeoutMs = timeoutMs ?? (shouldNotify ? 20000 : undefined);
@@ -118,6 +128,7 @@ async function apiFetchInternal<T>(
       headers: {
         ...(hasBody ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
         ...headers,
       },
     });

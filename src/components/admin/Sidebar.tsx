@@ -9,6 +9,7 @@ import { API_BASE_URL } from "@/lib/constants";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMe } from "@/lib/api/admin";
+import { apiFetch } from "@/lib/api/client";
 import type { ReactNode } from "react";
 
 type AdminNavLink = {
@@ -193,6 +194,28 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
             </svg>
           ),
         },
+        {
+          href: ADMIN_ROUTES.securityWhitelist,
+          label: "WhiteList IP",
+          requiredPermissions: ["manage_users"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          ),
+        },
+        {
+          href: ADMIN_ROUTES.securityBlacklist,
+          label: "BlackList IP",
+          requiredPermissions: ["manage_users"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6z" />
+              <path d="M8 12h8" />
+            </svg>
+          ),
+        },
       ],
     },
   ];
@@ -239,6 +262,24 @@ export default function Sidebar() {
   const filteredSections = roleKey
     ? filterAdminSections(navSections, effectivePermissions, roleKey)
     : [];
+  const clearClientSession = () => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    } catch {
+      // ignore storage cleanup errors
+    }
+    try {
+      document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0]?.trim();
+        if (!name) return;
+        document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+      });
+    } catch {
+      // HttpOnly cookies are cleared by backend logout
+    }
+  };
 
   return (
     <aside className="sticky top-8 hidden h-fit w-72 flex-col gap-6 text-white lg:flex">
@@ -320,13 +361,11 @@ export default function Sidebar() {
           className="w-full"
           onClick={async () => {
             try {
-              await fetch(`${API_BASE_URL}/admin/auth/logout`, {
-                method: "POST",
-                credentials: "include",
-              });
+              await apiFetch("/admin/auth/logout", { method: "POST" });
             } catch {
               // ignore logout errors
             }
+            clearClientSession();
             router.replace(ADMIN_ROUTES.login);
             router.refresh();
           }}

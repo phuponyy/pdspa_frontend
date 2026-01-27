@@ -64,7 +64,8 @@ export default function CmsPostForm({
       base[code] = { title: "", slug: "", excerpt: "", content: "", thumbnailUrl: null };
     });
     initial?.translations?.forEach((t) => {
-      const code = t.language?.code || langCode;
+      const rawCode = t.language?.code || langCode;
+      const code = rawCode === "vn" ? "vi" : rawCode;
       if (!base[code]) return;
       base[code] = {
         title: t.title || "",
@@ -83,9 +84,11 @@ export default function CmsPostForm({
     const base: Record<string, boolean> = {};
     languages.forEach((code) => {
       const hasSlug =
-        initial?.translations?.some(
-          (t) => (t.language?.code || langCode) === code && t.slug
-        ) ?? false;
+        initial?.translations?.some((t) => {
+          const rawCode = t.language?.code || langCode;
+          const normalized = rawCode === "vn" ? "vi" : rawCode;
+          return normalized === code && t.slug;
+        }) ?? false;
       base[code] = hasSlug;
     });
     return base;

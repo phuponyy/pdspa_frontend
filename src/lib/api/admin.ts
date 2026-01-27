@@ -53,6 +53,15 @@ type AdminRequestEvent = {
   status?: number;
 };
 
+const getCsrfToken = () => {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith("pd2_csrf="));
+  return match ? decodeURIComponent(match.split("=")[1] || "") : "";
+};
+
 const dispatchAdminRequest = (detail: AdminRequestEvent) => {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent<AdminRequestEvent>("admin-request", { detail }));
@@ -206,11 +215,13 @@ export const uploadHeroImage = async (file: File) => {
   return withAdminRequest("/admin/pages/home/hero/images", "POST", async () => {
     const formData = new FormData();
     formData.append("file", file);
+    const csrfToken = getCsrfToken();
 
     const response = await fetch(`${API_BASE_URL}/admin/pages/home/hero/images`, {
       method: "POST",
       credentials: "include",
       body: formData,
+      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
     });
 
     if (!response.ok) {
@@ -320,15 +331,37 @@ export const getMediaLibrary = async (token?: string, page = 1, limit = 30) =>
     cache: "no-store",
   });
 
+export const getAdminIpConfig = async () =>
+  apiFetch<ApiSuccess<{ whitelist: string[]; blacklist: string[] }>>(
+    "/admin/security/ip-config",
+    {
+      cache: "no-store",
+    }
+  );
+
+export const updateAdminIpConfig = async (payload: {
+  whitelist: string[];
+  blacklist: string[];
+}) =>
+  apiFetch<ApiSuccess<{ whitelist: string[]; blacklist: string[] }>>(
+    "/admin/security/ip-config",
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+
 export const uploadMedia = async (file: File) => {
   return withAdminRequest("/admin/cms/media", "POST", async () => {
     const formData = new FormData();
     formData.append("file", file);
+    const csrfToken = getCsrfToken();
 
     const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
       method: "POST",
       credentials: "include",
       body: formData,
+      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
     });
 
     if (!response.ok) {
@@ -343,11 +376,13 @@ export const updateMedia = async (id: number, file: File) => {
   return withAdminRequest(`/admin/cms/media/${id}`, "PATCH", async () => {
     const formData = new FormData();
     formData.append("file", file);
+    const csrfToken = getCsrfToken();
 
     const response = await fetch(`${API_BASE_URL}/admin/cms/media/${id}`, {
       method: "PATCH",
       credentials: "include",
       body: formData,
+      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
     });
 
     if (!response.ok) {

@@ -86,10 +86,19 @@ export default function RichTextEditor({
   const uploadImageBlob = useCallback(async (blob: Blob, filename: string) => {
     const formData = new FormData();
     formData.append("file", blob, filename);
+    const csrfToken =
+      typeof document === "undefined"
+        ? ""
+        : document.cookie
+            .split(";")
+            .map((item) => item.trim())
+            .find((item) => item.startsWith("pd2_csrf="))
+            ?.split("=")[1] || "";
     const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
       method: "POST",
       credentials: "include",
       body: formData,
+      headers: csrfToken ? { "X-CSRF-Token": decodeURIComponent(csrfToken) } : undefined,
     });
     if (!response.ok) {
       throw new Error("Upload failed");
