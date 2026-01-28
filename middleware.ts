@@ -58,10 +58,36 @@ const hasPermission = (permissions: string[], required: string) => {
   return false;
 };
 
+const buildCspHeader = (nonce: string) =>
+  [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'self'",
+    "img-src 'self' https: data:",
+    "font-src 'self' https: data:",
+    `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https:`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' 'strict-dynamic' https:`,
+    "connect-src 'self' https: ws: wss:",
+  ].join("; ");
+
+const applyPublicCsp = (response: NextResponse, nonce: string) => {
+  response.headers.set("Content-Security-Policy", buildCspHeader(nonce));
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  return response;
+};
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const nonceBytes = new Uint8Array(16);
+  crypto.getRandomValues(nonceBytes);
+  const nonce = btoa(String.fromCharCode(...nonceBytes));
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+
   if (PUBLIC_IGNORES.some((prefix) => pathname.startsWith(prefix)) || pathname === "/favicon.ico") {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
   if (pathname.startsWith("/en/admin") || pathname.startsWith("/vi/admin")) {
     const redirectUrl = new URL(request.url);
@@ -82,7 +108,10 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/tin-tuc" || pathname.startsWith("/tin-tuc/")) {
     const rewriteUrl = request.nextUrl.clone();
     rewriteUrl.pathname = `/vi${pathname}`;
-    return NextResponse.rewrite(rewriteUrl);
+    return applyPublicCsp(
+      NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } }),
+      nonce
+    );
   }
   if (pathname === "/en" || (pathname.startsWith("/en/") && !pathname.startsWith("/en/admin"))) {
     const redirectUrl = new URL(request.url);
@@ -98,10 +127,16 @@ export async function middleware(request: NextRequest) {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
     const redirectUrl = new URL(`${apiBase}${REDIRECT_RESOLVE}`);
     redirectUrl.searchParams.set("path", pathname);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000);
     const redirectResponse = await fetch(redirectUrl.toString(), {
-      cache: "no-store",
+      cache: "force-cache",
+      next: { revalidate: 60 },
       headers: { accept: "application/json" },
-    }).catch(() => null);
+      signal: controller.signal,
+    })
+      .catch(() => null)
+      .finally(() => clearTimeout(timeoutId));
 
     if (redirectResponse?.ok) {
       const payload = (await redirectResponse.json().catch(() => null)) as
@@ -109,9 +144,19 @@ export async function middleware(request: NextRequest) {
         | null;
       const target = payload?.data?.to;
       const status = payload?.data?.status;
-      if (target && target !== pathname) {
+      const isSafeTarget =
+        typeof target === "string" &&
+        target.startsWith("/") &&
+        !target.startsWith("//") &&
+        !target.includes("://");
+      if (isSafeTarget && target !== pathname) {
         const nextStatus = status === 301 || status === 302 ? status : 302;
-        return NextResponse.redirect(new URL(target, request.url), nextStatus);
+        const response = NextResponse.redirect(
+          new URL(target, request.url),
+          nextStatus
+        );
+        response.headers.set("Cache-Control", "public, max-age=60");
+        return response;
       }
     }
   }
@@ -127,16 +172,22 @@ export async function middleware(request: NextRequest) {
   ) {
     const rewriteUrl = request.nextUrl.clone();
     rewriteUrl.pathname = `/en${pathname}`;
-    return NextResponse.rewrite(rewriteUrl);
+    return applyPublicCsp(
+      NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } }),
+      nonce
+    );
   }
   const adminPath = getAdminPath(pathname);
 
   if (!adminPath.startsWith(ADMIN_PREFIX)) {
-    return NextResponse.next();
+    return applyPublicCsp(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+      nonce
+    );
   }
 
   if (adminPath.startsWith(ADMIN_LOGIN)) {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   const cookieHeader = request.headers.get("cookie") || "";
@@ -174,7 +225,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(ADMIN_DEFAULT, request.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

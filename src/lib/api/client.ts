@@ -46,9 +46,13 @@ let refreshPromise: Promise<boolean> | null = null;
 const refreshAccessToken = async () => {
   if (typeof window === "undefined") return false;
   if (!refreshPromise) {
+    const csrfToken = getCsrfToken();
     refreshPromise = fetch(`${API_BASE_URL}/admin/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+      },
       credentials: "include",
       body: JSON.stringify({}),
     })
