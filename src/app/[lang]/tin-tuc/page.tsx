@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import { isSupportedLang } from "@/lib/i18n";
@@ -5,6 +6,20 @@ import { getServerTranslator } from "@/lib/i18n/server";
 import { getPublicPosts } from "@/lib/api/public";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/constants";
+import { buildCmsMetadata, resolveSchemaJson } from "@/lib/seo/cmsPageMeta";
+
+const CMS_SLUG = "tin-tuc";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang: rawLang } = await params;
+  if (!isSupportedLang(rawLang)) return {};
+  const { metadata } = await buildCmsMetadata(CMS_SLUG, rawLang);
+  return metadata ?? {};
+}
 
 export default async function NewsPage({
   params,
@@ -17,9 +32,17 @@ export default async function NewsPage({
   const t = i18n.t.bind(i18n);
   const postsResponse = await getPublicPosts(lang, 1, 12).catch(() => null);
   const posts = postsResponse?.data?.items ?? [];
+  const cmsMeta = await buildCmsMetadata(CMS_SLUG, lang);
+  const schema = resolveSchemaJson(cmsMeta.schemaJson);
 
   return (
     <div className="space-y-16 pb-16 pt-10">
+      {schema ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schema }}
+        />
+      ) : null}
       <Container>
         <SectionHeading
           eyebrow={t("newsPage.eyebrow")}

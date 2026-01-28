@@ -5,6 +5,7 @@ import { isSupportedLang } from "@/lib/i18n";
 import { sanitizeHtml } from "@/lib/sanitize";
 import Container from "@/components/common/Container";
 import { API_BASE_URL } from "@/lib/constants";
+import { resolveSchemaJson } from "@/lib/seo/cmsPageMeta";
 
 type PageParams = Promise<{ lang: string; slug: string }>;
 
@@ -18,12 +19,60 @@ export async function generateMetadata({
   const data = await getPublicPostBySlug(slug, rawLang).catch(() => null);
   const translation = data?.data?.translation;
   if (!translation) return {};
+  const seo = data?.data?.seo;
+  const ogImage = seo?.ogImage
+    ? seo.ogImage.startsWith("/")
+      ? `${API_BASE_URL}${seo.ogImage}`
+      : seo.ogImage
+    : undefined;
   return {
     title: translation.seoTitle || translation.title,
     description: translation.seoDescription || translation.excerpt || undefined,
     alternates: {
-      canonical: data?.data?.seo?.canonical,
-      languages: data?.data?.seo?.hreflangs,
+      canonical: seo?.canonical,
+      languages: seo?.hreflangs,
+    },
+    openGraph: {
+      type: "article",
+      locale: rawLang === "vi" ? "vi_VN" : "en_US",
+      url: seo?.canonical,
+      title: seo?.ogTitle || translation.seoTitle || translation.title,
+      description:
+        seo?.ogDescription ||
+        translation.seoDescription ||
+        translation.excerpt ||
+        undefined,
+      images: ogImage
+        ? [
+            {
+              url: ogImage,
+              width: 1200,
+              height: 630,
+              alt: seo?.ogTitle || translation.title,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo?.ogTitle || translation.seoTitle || translation.title,
+      description:
+        seo?.ogDescription ||
+        translation.seoDescription ||
+        translation.excerpt ||
+        undefined,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    robots: {
+      index: seo?.robots?.includes("noindex") ? false : true,
+      follow: seo?.robots?.includes("nofollow") ? false : true,
+      googleBot: {
+        index: seo?.robots?.includes("noindex") ? false : true,
+        follow: seo?.robots?.includes("nofollow") ? false : true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }
@@ -40,6 +89,7 @@ export default async function PostDetailPage({
   const data = await getPublicPostBySlug(slug, rawLang).catch(() => null);
   const translation = data?.data?.translation;
   const post = data?.data?.post;
+  const schema = resolveSchemaJson(data?.data?.seo?.schemaJson ?? null);
   const thumbnail = translation?.thumbnailUrl
     ? translation.thumbnailUrl.startsWith("/")
       ? `${API_BASE_URL}${translation.thumbnailUrl}`
@@ -55,6 +105,12 @@ export default async function PostDetailPage({
   return (
     <section className="py-16">
       <Container className="space-y-6">
+        {schema ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: schema }}
+          />
+        ) : null}
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
             {post.publishedAt

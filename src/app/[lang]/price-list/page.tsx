@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import Container from "@/components/common/Container";
 import SectionHeading from "@/components/common/SectionHeading";
 import { getServices } from "@/lib/api/public";
 import { isSupportedLang } from "@/lib/i18n";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { buildCmsMetadata, resolveSchemaJson } from "@/lib/seo/cmsPageMeta";
+
+const CMS_SLUG = "price-list";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang: rawLang } = await params;
+  if (!isSupportedLang(rawLang)) return {};
+  const { metadata } = await buildCmsMetadata(CMS_SLUG, rawLang);
+  return metadata ?? {};
+}
 
 export default async function PriceListPage({
   params,
@@ -15,9 +30,17 @@ export default async function PriceListPage({
   const t = i18n.t.bind(i18n);
   const servicesResponse = await getServices(lang).catch(() => null);
   const services = servicesResponse?.data ?? [];
+  const cmsMeta = await buildCmsMetadata(CMS_SLUG, lang);
+  const schema = resolveSchemaJson(cmsMeta.schemaJson);
 
   return (
     <div className="space-y-16 pb-16 pt-10">
+      {schema ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schema }}
+        />
+      ) : null}
       <Container>
         <SectionHeading
           eyebrow={t("pricePage.eyebrow")}

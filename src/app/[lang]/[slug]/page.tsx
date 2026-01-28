@@ -4,6 +4,7 @@ import { getCmsPageBySlug } from "@/lib/api/public";
 import { isSupportedLang } from "@/lib/i18n";
 import { sanitizeHtml } from "@/lib/sanitize";
 import Container from "@/components/common/Container";
+import { API_BASE_URL } from "@/lib/constants";
 
 type PageParams = Promise<{ lang: string; slug: string }>;
 
@@ -25,7 +26,11 @@ export async function generateMetadata({
   const hreflangs = data?.seo?.hreflangs;
   const ogTitle = translation.ogTitle || title;
   const ogDescription = translation.ogDescription || description;
-  const ogImage = translation.ogImage;
+  const ogImage = translation.ogImage
+    ? translation.ogImage.startsWith("/")
+      ? `${API_BASE_URL}${translation.ogImage}`
+      : translation.ogImage
+    : undefined;
 
   return {
     title,
@@ -89,10 +94,32 @@ export default async function CmsPage({
 
   const rawContent = typeof translation.content === "string" ? translation.content : "";
   const content = sanitizeHtml(rawContent);
+  const schemaJson = data?.seo?.schemaJson ?? translation.schemaJson ?? null;
+  const resolvedSchema = (() => {
+    if (!schemaJson) return "";
+    if (typeof schemaJson === "string") {
+      try {
+        return JSON.stringify(JSON.parse(schemaJson));
+      } catch {
+        return "";
+      }
+    }
+    try {
+      return JSON.stringify(schemaJson);
+    } catch {
+      return "";
+    }
+  })();
 
   return (
     <section className="py-16">
       <Container className="space-y-6">
+        {resolvedSchema ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: resolvedSchema }}
+          />
+        ) : null}
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
             Page

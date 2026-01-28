@@ -1,6 +1,21 @@
+import type { Metadata } from "next";
 import Container from "@/components/common/Container";
 import { isSupportedLang } from "@/lib/i18n";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { buildCmsMetadata, resolveSchemaJson } from "@/lib/seo/cmsPageMeta";
+
+const CMS_SLUG = "good-massage-in-da-nang";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang: rawLang } = await params;
+  if (!isSupportedLang(rawLang)) return {};
+  const { metadata } = await buildCmsMetadata(CMS_SLUG, rawLang);
+  return metadata ?? {};
+}
 
 export default async function AboutPage({
   params,
@@ -11,9 +26,17 @@ export default async function AboutPage({
   const lang = isSupportedLang(rawLang) ? rawLang : "en";
   const i18n = await getServerTranslator(lang);
   const t = i18n.t.bind(i18n);
+  const cmsMeta = await buildCmsMetadata(CMS_SLUG, lang);
+  const schema = resolveSchemaJson(cmsMeta.schemaJson);
 
   return (
     <div className="space-y-16 pb-16 pt-10">
+      {schema ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schema }}
+        />
+      ) : null}
       <Container className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="space-y-6">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">

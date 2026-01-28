@@ -110,6 +110,22 @@ export default async function HomePage({
   ]);
   const services = servicesResponse?.data ?? [];
   const config = siteConfigResponse?.data ?? {};
+  const schemaJson = homeData?.meta?.schemaJson ?? null;
+  const resolvedSchema = (() => {
+    if (!schemaJson) return "";
+    if (typeof schemaJson === "string") {
+      try {
+        return JSON.stringify(JSON.parse(schemaJson));
+      } catch {
+        return "";
+      }
+    }
+    try {
+      return JSON.stringify(schemaJson);
+    } catch {
+      return "";
+    }
+  })();
 
   const heroFromPage = (homeData?.page as { hero?: HomeSection })?.hero;
   const heroSection =
@@ -154,6 +170,12 @@ export default async function HomePage({
 
   return (
     <div className="home-dark space-y-16 pb-16">
+      {resolvedSchema ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: resolvedSchema }}
+        />
+      ) : null}
       <HeroSection
         badge={t("hero.badge")}
         heading={(heroSection?.heading as string) || t("hero.title")}
