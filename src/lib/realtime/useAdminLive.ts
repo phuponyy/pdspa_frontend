@@ -8,6 +8,7 @@ import { getAdminLive } from "@/lib/api/admin";
 
 export const useAdminLive = () => {
   const [snapshot, setSnapshot] = useState<LiveResponse | null>(null);
+  const lastSocketRef = useMemo(() => ({ ts: 0 }), []);
 
   const socket = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -20,6 +21,7 @@ export const useAdminLive = () => {
   useEffect(() => {
     let isMounted = true;
     const fetchSnapshot = () => {
+      if (Date.now() - lastSocketRef.ts < 5000) return;
       getAdminLive(undefined)
         .then((data) => {
           if (isMounted) setSnapshot(data);
@@ -32,11 +34,14 @@ export const useAdminLive = () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [lastSocketRef]);
 
   useEffect(() => {
     if (!socket) return;
-    const handleUpdate = (data: LiveResponse) => setSnapshot(data);
+    const handleUpdate = (data: LiveResponse) => {
+      lastSocketRef.ts = Date.now();
+      setSnapshot(data);
+    };
     socket.on("live:update", handleUpdate);
     return () => {
       socket.off("live:update", handleUpdate);
@@ -50,6 +55,13 @@ export const useAdminLive = () => {
     source?: string;
     device?: string;
     location?: string;
+    referrer?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
+    timezone?: string;
+    consent?: boolean;
+    timeOnPageSec?: number;
   }) => {
     if (!socket) return;
     socket.emit("heartbeat", payload);

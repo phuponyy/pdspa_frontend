@@ -34,6 +34,40 @@ export type LiveResponse = {
   devices: { device: string; count: number }[];
   locations: { location: string; count: number }[];
   timeline: { label: string; active: number; heartbeats: number }[];
+  activeSessions: {
+    sessionId: string;
+    page?: string;
+    referrer?: string;
+    device?: string;
+    source?: string;
+    utmSource?: string;
+    utmMedium?: string;
+    utmCampaign?: string;
+    lastSeen: number;
+    timeOnPageSec?: number;
+  }[];
+  funnel: { step: string; count: number }[];
+  errorRate: {
+    total: number;
+    errors: number;
+    rate: number;
+    byStatus: { "4xx": number; "5xx": number };
+    bookingFails: number;
+    paymentFails: number;
+  };
+  spike: {
+    level: "normal" | "warning" | "critical";
+    current: number;
+    average: number;
+    delta: number;
+  };
+  endpoints: {
+    path: string;
+    total: number;
+    errors4xx: number;
+    errors5xx: number;
+    errorRate: number;
+  }[];
 };
 
 export type Customer = {

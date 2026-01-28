@@ -10,6 +10,7 @@ import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMe } from "@/lib/api/admin";
 import { apiFetch } from "@/lib/api/client";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 type AdminNavLink = {
@@ -212,6 +213,11 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
             </svg>
           ),
         },
+      ],
+    },
+    {
+      title: "AUTH",
+      links: [
         {
           href: ADMIN_ROUTES.securityWhitelist,
           label: "WhiteList IP",
@@ -231,6 +237,28 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6z" />
               <path d="M8 12h8" />
+            </svg>
+          ),
+        },
+        {
+          href: ADMIN_ROUTES.securitySessions,
+          label: "Phiên đăng nhập",
+          requiredPermissions: ["manage_users"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="14" rx="2" />
+              <path d="M7 8h10M7 12h6" />
+            </svg>
+          ),
+        },
+        {
+          href: ADMIN_ROUTES.securityAudit,
+          label: "Audit Log",
+          requiredPermissions: ["manage_users"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 4h12l4 4v12a2 2 0 0 1-2 2H4z" />
+              <path d="M8 12h8M8 16h6M8 8h4" />
             </svg>
           ),
         },
@@ -265,7 +293,7 @@ export default function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  const navSections = adminNavSections(t);
+  const navSections = useMemo(() => adminNavSections(t), [t]);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
     queryFn: () => getAdminMe(undefined),
@@ -277,9 +305,36 @@ export default function Sidebar() {
   const roleKey = data?.data?.roleKey;
   const userName = data?.data?.name || data?.data?.email || "Admin";
   const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const filteredSections = roleKey
     ? filterAdminSections(navSections, effectivePermissions, roleKey)
     : [];
+  const sectionsWithActive = useMemo(
+    () =>
+      filteredSections.map((section) => ({
+        ...section,
+        hasActive: section.links.some((link) => pathname === link.href),
+      })),
+    [filteredSections, pathname]
+  );
+
+  useEffect(() => {
+    setOpenSections((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      sectionsWithActive.forEach((section) => {
+        if (!(section.title in next)) {
+          next[section.title] = true;
+          changed = true;
+        }
+        if (section.hasActive && next[section.title] === false) {
+          next[section.title] = true;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [sectionsWithActive]);
   const clearClientSession = () => {
     if (typeof window === "undefined") return;
     try {
@@ -336,38 +391,68 @@ export default function Sidebar() {
             Không có quyền!
           </p>
         ) : (
-          filteredSections.map((section) => (
-            <div key={section.title} className="space-y-2">
-              <p className="px-3 text-xs uppercase tracking-[0.35em] text-white/40">
-                {section.title}
-              </p>
-              <div className="flex flex-col gap-2">
-                {section.links.map((link) => {
-                  const active = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        "group relative flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition",
-                        active
-                          ? "bg-white/10 text-white"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"
-                      )}
-                    >
-                      {active ? (
-                        <span className="absolute left-0 top-2 h-8 w-[3px] rounded-full bg-[#ff9f40]" />
-                      ) : null}
-                      <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white/80">
-                        {link.icon}
-                      </span>
-                      <span>{link.label}</span>
-                    </Link>
-                  );
-                })}
+          sectionsWithActive.map((section) => {
+            const isOpen = openSections[section.title] ?? true;
+            return (
+              <div key={section.title} className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenSections((prev) => ({
+                      ...prev,
+                      [section.title]: !isOpen,
+                    }))
+                  }
+                  className="flex w-full items-center justify-between px-3 text-left text-xs uppercase tracking-[0.35em] text-white/40 transition hover:text-white/70"
+                  aria-expanded={isOpen}
+                >
+                  <span>{section.title}</span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={cn(
+                      "h-4 w-4 transition-transform duration-300",
+                      isOpen ? "rotate-180" : "rotate-0"
+                    )}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <div
+                  className={cn(
+                    "flex flex-col gap-2 overflow-hidden transition-all duration-300",
+                    isOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
+                  )}
+                >
+                  {section.links.map((link) => {
+                    const active = pathname === link.href;
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={cn(
+                          "group relative flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition",
+                          active
+                            ? "bg-white/10 text-white"
+                            : "text-white/70 hover:bg-white/5 hover:text-white"
+                        )}
+                      >
+                        {active ? (
+                          <span className="absolute left-0 top-2 h-8 w-[3px] rounded-full bg-[#ff9f40]" />
+                        ) : null}
+                        <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-white/80">
+                          {link.icon}
+                        </span>
+                        <span>{link.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       <div className="admin-panel flex flex-col gap-4 p-5 text-sm">

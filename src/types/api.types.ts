@@ -386,6 +386,35 @@ export type AdminUser = {
   updatedAt?: string;
 };
 
+export type AdminSession = {
+  id: number;
+  userId: number;
+  email?: string;
+  name?: string | null;
+  roleKey?: string | null;
+  ip?: string | null;
+  device?: string | null;
+  userAgent?: string | null;
+  createdAt?: string;
+  lastUsedAt?: string;
+  expiresAt?: string;
+  isActive: boolean;
+};
+
+export type AdminAuditLog = {
+  id: number;
+  userId?: number | null;
+  email?: string;
+  name?: string | null;
+  roleKey?: string | null;
+  action: string;
+  entity: string;
+  entityId?: number | null;
+  ip?: string | null;
+  metadata?: Record<string, unknown> | null;
+  createdAt?: string;
+};
+
 export type AdminUsersResponse = ApiSuccess<AdminUser[]>;
 export type AdminUserResponse = ApiSuccess<AdminUser>;
 
@@ -399,6 +428,26 @@ export type AdminMeResponse = ApiSuccess<{
   avatarUrl?: string | null;
   roleKey?: string;
   permissions: string[];
+}>;
+
+export type AdminSessionsResponse = ApiSuccess<{
+  items: AdminSession[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>;
+
+export type AdminAuditLogsResponse = ApiSuccess<{
+  items: AdminAuditLog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }>;
 
 export type AdminService = {

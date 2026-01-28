@@ -20,4 +20,6 @@ export const ADMIN_ROUTES = {
   seoRedirects: `${ADMIN_BASE}/seo/redirects`,
   securityWhitelist: `${ADMIN_BASE}/security/ip-whitelist`,
   securityBlacklist: `${ADMIN_BASE}/security/ip-blacklist`,
+  securitySessions: `${ADMIN_BASE}/security/sessions`,
+  securityAudit: `${ADMIN_BASE}/security/audit-logs`,
 } as const;

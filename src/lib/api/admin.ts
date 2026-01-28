@@ -25,6 +25,8 @@ import type {
   AdminRolesResponse,
   AdminService,
   AdminServicesResponse,
+  AdminSessionsResponse,
+  AdminAuditLogsResponse,
   HomeHeroUpdateRequest,
   HomeIntroUpdateRequest,
   HomeMetaUpdateRequest,
@@ -91,6 +93,81 @@ export const loginAdmin = async (payload: AdminLoginRequest) =>
     method: "POST",
     body: JSON.stringify(payload),
     credentials: "include",
+  });
+
+export const getAdminSessions = async (
+  token: string | undefined,
+  params?: {
+    page?: number;
+    pageSize?: number;
+    userId?: number;
+    ip?: string;
+    device?: string;
+    q?: string;
+    active?: boolean;
+  }
+) =>
+  apiFetch<AdminSessionsResponse>("/admin/security/sessions", {
+    token,
+    query: {
+      page: params?.page,
+      pageSize: params?.pageSize,
+      userId: params?.userId,
+      ip: params?.ip,
+      device: params?.device,
+      q: params?.q,
+      active:
+        typeof params?.active === "boolean" ? String(params.active) : undefined,
+    },
+    cache: "no-store",
+  });
+
+export const revokeAdminSession = async (token: string | undefined, id: number) =>
+  apiFetch<ApiSuccess<{ revoked?: number }>>(`/admin/security/sessions/${id}`, {
+    token,
+    method: "DELETE",
+  });
+
+export const revokeAdminSessions = async (
+  token: string | undefined,
+  payload: {
+    userId?: number;
+    ip?: string;
+    device?: string;
+    userAgent?: string;
+    all?: boolean;
+  }
+) =>
+  apiFetch<ApiSuccess<{ revoked: number }>>("/admin/security/sessions/revoke", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const getAdminAuditLogs = async (
+  token: string | undefined,
+  params?: {
+    page?: number;
+    pageSize?: number;
+    action?: string;
+    entity?: string;
+    userId?: number;
+    ip?: string;
+    q?: string;
+  }
+) =>
+  apiFetch<AdminAuditLogsResponse>("/admin/security/audit-logs", {
+    token,
+    query: {
+      page: params?.page,
+      pageSize: params?.pageSize,
+      action: params?.action,
+      entity: params?.entity,
+      userId: params?.userId,
+      ip: params?.ip,
+      q: params?.q,
+    },
+    cache: "no-store",
   });
 
 export const getLeads = async (token?: string, page = 1, limit = 20) =>

@@ -43,15 +43,30 @@ const dispatchAdminRequest = (detail: AdminRequestEvent) => {
 
 let refreshPromise: Promise<boolean> | null = null;
 
+const getDeviceId = () => {
+  if (typeof window === "undefined") return "";
+  const key = "pd2_device_id";
+  const existing = window.localStorage.getItem(key);
+  if (existing) return existing;
+  const generated =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  window.localStorage.setItem(key, generated);
+  return generated;
+};
+
 const refreshAccessToken = async () => {
   if (typeof window === "undefined") return false;
   if (!refreshPromise) {
     const csrfToken = getCsrfToken();
+    const deviceId = getDeviceId();
     refreshPromise = fetch(`${API_BASE_URL}/admin/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        ...(deviceId ? { "X-Device-Id": deviceId } : {}),
       },
       credentials: "include",
       body: JSON.stringify({}),
@@ -112,6 +127,9 @@ async function apiFetchInternal<T>(
     notify !== false && path.startsWith("/admin") && !path.startsWith("/admin/auth");
   const useCsrf = path.startsWith("/admin");
   const csrfToken = useCsrf ? getCsrfToken() : "";
+  const includeDeviceId =
+    path.startsWith("/admin/auth/login") || path.startsWith("/admin/auth/refresh");
+  const deviceId = includeDeviceId ? getDeviceId() : "";
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const controller = new AbortController();
   const effectiveTimeoutMs = timeoutMs ?? (shouldNotify ? 20000 : undefined);
@@ -134,6 +152,7 @@ async function apiFetchInternal<T>(
         ...(hasBody ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        ...(deviceId ? { "X-Device-Id": deviceId } : {}),
         ...headers,
       },
     });
