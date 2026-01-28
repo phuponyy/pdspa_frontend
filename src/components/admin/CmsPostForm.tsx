@@ -206,6 +206,9 @@ export default function CmsPostForm({
   );
   const thumbFileNameRef = useRef("thumbnail.jpg");
   const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [showFloatingBar, setShowFloatingBar] = useState(false);
   const storageKey = `cms-post-draft-${initial?.id ?? "new"}`;
   const toast = useToast();
 
@@ -290,6 +293,113 @@ export default function CmsPostForm({
     notify("Unable to reach the server. Please try again.", "error");
   };
 
+  const parseSchemaJson = (raw?: string) => {
+    const trimmed = raw?.trim();
+    if (!trimmed) return undefined;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("invalid");
+      }
+      return parsed as Record<string, unknown>;
+    } catch {
+      notify("Schema JSON không hợp lệ. Vui lòng kiểm tra lại.", "error");
+      return null;
+    }
+  };
+
+  const handleSave = useCallback(async () => {
+    if (isSaving) return;
+    try {
+      setIsSaving(true);
+      const payloadTranslations: {
+        langCode: string;
+        title: string;
+        slug: string;
+        excerpt: string;
+        content: string;
+        thumbnailUrl?: string | null;
+        seoTitle?: string;
+        seoDescription?: string;
+        canonical?: string;
+        robots?: string;
+        ogTitle?: string;
+        ogDescription?: string;
+        ogImage?: string;
+        schemaJson?: Record<string, unknown> | undefined;
+      }[] = [];
+
+      for (const code of languages) {
+        const translation = translations[code];
+        if (!translation) continue;
+        const hasContent = [
+          translation.title,
+          translation.slug,
+          translation.excerpt,
+          translation.content,
+          translation.seoTitle,
+          translation.seoDescription,
+          translation.canonical,
+          translation.robots,
+          translation.ogTitle,
+          translation.ogDescription,
+          translation.ogImage,
+          translation.schemaJson,
+          translation.thumbnailUrl ?? "",
+        ].some((value) => String(value || "").trim().length > 0);
+        if (!hasContent && !existingLangs.has(code)) continue;
+
+        const schemaJson = parseSchemaJson(translation.schemaJson);
+        if (schemaJson === null) return;
+
+        payloadTranslations.push({
+          langCode: code,
+          title: translation.title,
+          slug: translation.slug,
+          excerpt: translation.excerpt,
+          content: translation.content,
+          thumbnailUrl: translation.thumbnailUrl,
+          seoTitle: translation.seoTitle || undefined,
+          seoDescription: translation.seoDescription || undefined,
+          canonical: translation.canonical || undefined,
+          robots: translation.robots || undefined,
+          ogTitle: translation.ogTitle || undefined,
+          ogDescription: translation.ogDescription || undefined,
+          ogImage: translation.ogImage || undefined,
+          schemaJson: schemaJson,
+        });
+      }
+      await onSave({
+        status,
+        categoryIds: selectedCategoryIds,
+        tagIds: selectedTagIds,
+        translations: payloadTranslations,
+      });
+      notify("Saved.", "success");
+      setIsDirty(false);
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem(storageKey);
+      }
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    existingLangs,
+    handleError,
+    isSaving,
+    languages,
+    notify,
+    onSave,
+    parseSchemaJson,
+    selectedCategoryIds,
+    selectedTagIds,
+    status,
+    storageKey,
+    translations,
+  ]);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const url = new URL(window.location.href);
@@ -331,6 +441,19 @@ export default function CmsPostForm({
       JSON.stringify({ translations, status, activeLang })
     );
   }, [translations, status, activeLang, isDirty, storageKey]);
+
+  useEffect(() => {
+    const target = headerRef.current;
+    if (!target || typeof window === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingBar(!entry.isIntersecting);
+      },
+      { rootMargin: "-80px 0px 0px 0px", threshold: 0 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   const current = translations[activeLang] || {
     title: "",
@@ -388,24 +511,9 @@ export default function CmsPostForm({
     }));
   };
 
-  const parseSchemaJson = (raw?: string) => {
-    const trimmed = raw?.trim();
-    if (!trimmed) return undefined;
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        throw new Error("invalid");
-      }
-      return parsed as Record<string, unknown>;
-    } catch {
-      notify("Schema JSON không hợp lệ. Vui lòng kiểm tra lại.", "error");
-      return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div ref={headerRef} className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           {languages.map((code) => (
             <button
@@ -515,83 +623,8 @@ export default function CmsPostForm({
               <option value="DRAFT">Draft</option>
               <option value="PUBLISHED">Published</option>
             </select>
-            <Button
-              onClick={async () => {
-                try {
-                  const payloadTranslations: {
-                    langCode: string;
-                    title: string;
-                    slug: string;
-                    excerpt: string;
-                    content: string;
-                    thumbnailUrl?: string | null;
-                    seoTitle?: string;
-                    seoDescription?: string;
-                    canonical?: string;
-                    robots?: string;
-                    ogTitle?: string;
-                    ogDescription?: string;
-                    ogImage?: string;
-                    schemaJson?: Record<string, unknown> | undefined;
-                  }[] = [];
-
-                  for (const code of languages) {
-                    const translation = translations[code];
-                    if (!translation) continue;
-                    const hasContent = [
-                      translation.title,
-                      translation.slug,
-                      translation.excerpt,
-                      translation.content,
-                      translation.seoTitle,
-                      translation.seoDescription,
-                      translation.canonical,
-                      translation.robots,
-                      translation.ogTitle,
-                      translation.ogDescription,
-                      translation.ogImage,
-                      translation.schemaJson,
-                      translation.thumbnailUrl ?? "",
-                    ].some((value) => String(value || "").trim().length > 0);
-                    if (!hasContent && !existingLangs.has(code)) continue;
-
-                    const schemaJson = parseSchemaJson(translation.schemaJson);
-                    if (schemaJson === null) return;
-
-                    payloadTranslations.push({
-                      langCode: code,
-                      title: translation.title,
-                      slug: translation.slug,
-                      excerpt: translation.excerpt,
-                      content: translation.content,
-                      thumbnailUrl: translation.thumbnailUrl,
-                      seoTitle: translation.seoTitle || undefined,
-                      seoDescription: translation.seoDescription || undefined,
-                      canonical: translation.canonical || undefined,
-                      robots: translation.robots || undefined,
-                      ogTitle: translation.ogTitle || undefined,
-                      ogDescription: translation.ogDescription || undefined,
-                      ogImage: translation.ogImage || undefined,
-                      schemaJson: schemaJson,
-                    });
-                  }
-                  await onSave({
-                    status,
-                    categoryIds: selectedCategoryIds,
-                    tagIds: selectedTagIds,
-                    translations: payloadTranslations,
-                  });
-                  notify("Saved.", "success");
-                  setIsDirty(false);
-                  if (typeof window !== "undefined") {
-                    window.localStorage.removeItem(storageKey);
-                  }
-                } catch (err) {
-                  handleError(err);
-                }
-              }}
-            >
-              Save
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
           </div>
@@ -1241,6 +1274,91 @@ export default function CmsPostForm({
             </div>
           </div>
         </aside>
+      </div>
+      <div
+        className={`fixed bottom-6 left-1/2 z-[120] w-[92vw] max-w-5xl -translate-x-1/2 transition-all duration-300 ${
+          showFloatingBar
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-4 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-[#0f1722]/95 px-5 py-3 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">
+              {activeLang.toUpperCase()} · {status === "PUBLISHED" ? "Published" : "Draft"}
+            </p>
+            <p className="truncate text-sm font-semibold text-white">
+              {current.title || "Untitled post"}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 sm:flex">
+              {languages.map((code) => (
+                <button
+                  key={`float-lang-${code}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveLang(code);
+                    if (typeof window !== "undefined") {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set("lang", code);
+                      window.history.replaceState(null, "", url.toString());
+                    }
+                  }}
+                  className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                    activeLang === code
+                      ? "bg-[#ff9f40] text-[#1a1410]"
+                      : "border border-white/10 text-white/60 hover:text-white"
+                  }`}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 md:flex">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDirty(true);
+                  setStatus("DRAFT");
+                }}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                  status === "DRAFT"
+                    ? "bg-white text-[#0f1722]"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDirty(true);
+                  setStatus("PUBLISHED");
+                }}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                  status === "PUBLISHED"
+                    ? "bg-[#ff9f40] text-[#1a1410]"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Publish
+              </button>
+            </div>
+            {isDirty ? (
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/70">
+                Unsaved
+              </span>
+            ) : (
+              <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                Saved
+              </span>
+            )}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
       </div>
       {thumbCropOpen && thumbCropSrc ? (
         <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/70 p-6">

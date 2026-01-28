@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Button from "../common/Button";
 import Input from "../common/Input";
@@ -196,6 +196,8 @@ export default function PageEditor({ lang }: { lang: string }) {
   const [isDirty, setIsDirty] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [showFloatingBar, setShowFloatingBar] = useState(false);
   const storageKey = "home-editor-draft";
   const toast = useToast();
 
@@ -305,6 +307,19 @@ export default function PageEditor({ lang }: { lang: string }) {
     status,
     isDirty,
   ]);
+
+  useEffect(() => {
+    const target = headerRef.current;
+    if (!target || typeof window === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingBar(!entry.isIntersecting);
+      },
+      { rootMargin: "-80px 0px 0px 0px", threshold: 0 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   const currentMeta = metaByLang[activeLang] || {
     metaTitle: "",
@@ -564,6 +579,7 @@ export default function PageEditor({ lang }: { lang: string }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-6">
+        <div ref={headerRef} className="h-px" />
         <section
           id="seo"
           className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
@@ -1708,7 +1724,7 @@ export default function PageEditor({ lang }: { lang: string }) {
 
         <div
           id="status"
-          className="sticky bottom-6 z-20 flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-[#0b1118]/90 px-5 py-3 text-xs text-white/70 shadow-[0_20px_60px_rgba(5,10,18,0.45)] backdrop-blur"
+          className="sticky bottom-6 z-20 w-full flex flex-wrap items-center justify-between gap-3 rounded-full border border-white/10 bg-[#0b1118]/90 px-5 py-3 text-xs text-white/70 shadow-[0_20px_60px_rgba(5,10,18,0.45)] backdrop-blur"
         >
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5">
@@ -1741,6 +1757,14 @@ export default function PageEditor({ lang }: { lang: string }) {
                 </AlertDialogContent>
               </AlertDialog>
             ) : null}
+            <UiButton
+              size="sm"
+              variant="outline"
+              onClick={() => persistStatus("DRAFT")}
+              disabled={isSavingStatus}
+            >
+              Save draft
+            </UiButton>
             <UiButton
               size="sm"
               onClick={() => persistStatus("PUBLISHED")}
@@ -1842,6 +1866,100 @@ export default function PageEditor({ lang }: { lang: string }) {
           </div>
         </div>
       </aside>
+      <div
+        className={`fixed bottom-6 left-1/2 z-[120] w-[92vw] max-w-5xl -translate-x-1/2 transition-all duration-300 ${
+          showFloatingBar
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "translate-y-4 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-[#0f1722]/95 px-5 py-3 text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-white/50">
+              {activeLang.toUpperCase()} · {status === "PUBLISHED" ? "Published" : "Draft"}
+            </p>
+            <p className="truncate text-sm font-semibold text-white">
+              {currentMeta.metaTitle || "Homepage"}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 sm:flex">
+              {languages.map((code) => (
+                <button
+                  key={`float-lang-${code}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveLang(code);
+                    if (typeof window !== "undefined") {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set("lang", code);
+                      window.history.replaceState(null, "", url.toString());
+                    }
+                  }}
+                  className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                    activeLang === code
+                      ? "bg-[#ff9f40] text-[#1a1410]"
+                      : "border border-white/10 text-white/60 hover:text-white"
+                  }`}
+                >
+                  {code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 md:flex">
+              <button
+                type="button"
+                onClick={() => persistStatus("DRAFT")}
+                disabled={isSavingStatus}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                  status === "DRAFT"
+                    ? "bg-white text-[#0f1722]"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Draft
+              </button>
+              <button
+                type="button"
+                onClick={() => persistStatus("PUBLISHED")}
+                disabled={isSavingStatus}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                  status === "PUBLISHED"
+                    ? "bg-[#ff9f40] text-[#1a1410]"
+                    : "text-white/60 hover:text-white"
+                }`}
+              >
+                Publish
+              </button>
+            </div>
+            {isDirty ? (
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white/70">
+                Unsaved
+              </span>
+            ) : (
+              <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                Saved
+              </span>
+            )}
+            <UiButton
+              size="sm"
+              variant="outline"
+              onClick={() => persistStatus("DRAFT")}
+              disabled={isSavingStatus}
+            >
+              Save draft
+            </UiButton>
+            <UiButton
+              size="sm"
+              onClick={() => persistStatus("PUBLISHED")}
+              disabled={isSavingStatus}
+              className="bg-[#ff9f40] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.3)] hover:bg-[#ffb454]"
+            >
+              Publish
+            </UiButton>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
