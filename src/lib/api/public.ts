@@ -30,6 +30,9 @@ type HomePageRawResponse = {
   meta?: {
     metaTitle?: string;
     metaDescription?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: string;
   };
   seo?: {
     canonical?: string;
@@ -45,17 +48,17 @@ const mapSection = (section: HomePageRawSection): HomeSection => {
     : undefined;
   const images = Array.isArray((body as { images?: unknown }).images)
     ? ((body as { images: string[] }).images ?? []).map((src) =>
-        src && src.startsWith("/") ? `${API_BASE_URL}${src}` : src
-      )
+      src && src.startsWith("/") ? `${API_BASE_URL}${src}` : src
+    )
     : undefined;
   const slides = Array.isArray((body as { slides?: unknown }).slides)
     ? ((body as { slides: HeroSlide[] }).slides ?? []).map((slide) => ({
-        ...slide,
-        imageUrl:
-          slide.imageUrl && slide.imageUrl.startsWith("/")
-            ? `${API_BASE_URL}${slide.imageUrl}`
-            : slide.imageUrl,
-      }))
+      ...slide,
+      imageUrl:
+        slide.imageUrl && slide.imageUrl.startsWith("/")
+          ? `${API_BASE_URL}${slide.imageUrl}`
+          : slide.imageUrl,
+    }))
     : undefined;
   const description =
     typeof (body as { text?: unknown }).text === "string"

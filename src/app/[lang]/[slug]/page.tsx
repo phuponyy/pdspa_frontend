@@ -19,12 +19,54 @@ export async function generateMetadata({
   const translation = data?.translation;
   if (!translation) return {};
 
+  const title = translation.seoTitle || translation.title;
+  const description = translation.seoDescription || undefined;
+  const canonical = data?.seo?.canonical;
+  const hreflangs = data?.seo?.hreflangs;
+  const ogTitle = translation.ogTitle || title;
+  const ogDescription = translation.ogDescription || description;
+  const ogImage = translation.ogImage;
+
   return {
-    title: translation.seoTitle || translation.title,
-    description: translation.seoDescription || undefined,
+    title,
+    description,
     alternates: {
-      canonical: data?.seo?.canonical,
-      languages: data?.seo?.hreflangs,
+      canonical,
+      languages: hreflangs,
+    },
+    openGraph: {
+      type: "article",
+      locale: rawLang === "vi" ? "vi_VN" : "en_US",
+      url: canonical,
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage
+        ? [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: ogTitle,
+          },
+        ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    robots: {
+      index: translation.robots?.includes("noindex") ? false : true,
+      follow: translation.robots?.includes("nofollow") ? false : true,
+      googleBot: {
+        index: translation.robots?.includes("noindex") ? false : true,
+        follow: translation.robots?.includes("nofollow") ? false : true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }

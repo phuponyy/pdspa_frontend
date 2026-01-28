@@ -28,20 +28,65 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang: rawLang } = await params;
   if (!isSupportedLang(rawLang)) {
-    return {};
+    return {
+      title: SITE_NAME,
+      description: SITE_DESCRIPTION,
+    };
   }
   const lang = rawLang;
   const homeResponse = await getHomePage(lang).catch(() => null);
 
   const metaTitle = homeResponse?.meta?.metaTitle || SITE_NAME;
   const metaDescription = homeResponse?.meta?.metaDescription || SITE_DESCRIPTION;
+  const canonical = homeResponse?.seo?.canonical;
+  const hreflangs = homeResponse?.seo?.hreflangs;
+
+  const ogTitle = homeResponse?.meta?.ogTitle || metaTitle;
+  const ogDescription = homeResponse?.meta?.ogDescription || metaDescription;
+  const ogImage = homeResponse?.meta?.ogImage;
 
   return {
     title: metaTitle,
     description: metaDescription,
+    applicationName: SITE_NAME,
     alternates: {
-      canonical: homeResponse?.seo?.canonical,
-      languages: homeResponse?.seo?.hreflangs,
+      canonical: canonical,
+      languages: hreflangs,
+    },
+    openGraph: {
+      type: "website",
+      locale: lang === "vi" ? "vi_VN" : "en_US",
+      url: canonical,
+      siteName: SITE_NAME,
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage
+        ? [
+          {
+            url: ogImage,
+            width: 1200,
+            height: 630,
+            alt: ogTitle,
+          },
+        ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }
