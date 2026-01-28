@@ -110,7 +110,8 @@ async function apiFetchInternal<T>(
   const method = (init.method || "GET").toUpperCase();
   const shouldNotify =
     notify !== false && path.startsWith("/admin") && !path.startsWith("/admin/auth");
-  const csrfToken = getCsrfToken();
+  const useCsrf = path.startsWith("/admin");
+  const csrfToken = useCsrf ? getCsrfToken() : "";
   const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const controller = new AbortController();
   const effectiveTimeoutMs = timeoutMs ?? (shouldNotify ? 20000 : undefined);

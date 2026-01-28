@@ -58,8 +58,16 @@ const hasPermission = (permissions: string[], required: string) => {
   return false;
 };
 
-const buildCspHeader = (nonce: string) =>
-  [
+const buildCspHeader = (nonce: string) => {
+  const isProd = process.env.NODE_ENV === "production";
+  const scriptDirectives = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    "https:",
+    ...(isProd ? [] : ["'unsafe-inline'", "'unsafe-eval'"]),
+  ];
+  return [
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
@@ -67,9 +75,10 @@ const buildCspHeader = (nonce: string) =>
     "img-src 'self' https: data:",
     "font-src 'self' https: data:",
     `style-src 'self' 'unsafe-inline' 'nonce-${nonce}' https:`,
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-${nonce}' 'strict-dynamic' https:`,
+    `script-src ${scriptDirectives.join(" ")}`,
     "connect-src 'self' https: ws: wss:",
   ].join("; ");
+};
 
 const applyPublicCsp = (response: NextResponse, nonce: string) => {
   response.headers.set("Content-Security-Policy", buildCspHeader(nonce));

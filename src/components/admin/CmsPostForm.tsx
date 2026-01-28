@@ -145,6 +145,14 @@ export default function CmsPostForm({
     });
     return base;
   });
+  const existingLangs = useMemo(() => {
+    const langs = new Set<string>();
+    initial?.translations?.forEach((t) => {
+      const raw = t.language?.code || langCode;
+      langs.add(raw === "vn" ? "vi" : raw);
+    });
+    return langs;
+  }, [initial, langCode]);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">(
     initial?.status || "DRAFT"
   );
@@ -368,6 +376,10 @@ export default function CmsPostForm({
       focusKeyword,
     ]
   );
+  const seoScore = Math.max(0, Math.min(100, seoAnalysis.score));
+  const seoRadius = 26;
+  const seoCircumference = 2 * Math.PI * seoRadius;
+  const seoDashOffset = seoCircumference * (1 - seoScore / 100);
 
   const setCurrentTranslation = (patch: Partial<typeof current>) => {
     setTranslations((prev) => ({
@@ -506,30 +518,68 @@ export default function CmsPostForm({
             <Button
               onClick={async () => {
                 try {
-                  const schemaJson = parseSchemaJson(current.schemaJson);
-                  if (schemaJson === null) return;
+                  const payloadTranslations: {
+                    langCode: string;
+                    title: string;
+                    slug: string;
+                    excerpt: string;
+                    content: string;
+                    thumbnailUrl?: string | null;
+                    seoTitle?: string;
+                    seoDescription?: string;
+                    canonical?: string;
+                    robots?: string;
+                    ogTitle?: string;
+                    ogDescription?: string;
+                    ogImage?: string;
+                    schemaJson?: Record<string, unknown> | undefined;
+                  }[] = [];
+
+                  for (const code of languages) {
+                    const translation = translations[code];
+                    if (!translation) continue;
+                    const hasContent = [
+                      translation.title,
+                      translation.slug,
+                      translation.excerpt,
+                      translation.content,
+                      translation.seoTitle,
+                      translation.seoDescription,
+                      translation.canonical,
+                      translation.robots,
+                      translation.ogTitle,
+                      translation.ogDescription,
+                      translation.ogImage,
+                      translation.schemaJson,
+                      translation.thumbnailUrl ?? "",
+                    ].some((value) => String(value || "").trim().length > 0);
+                    if (!hasContent && !existingLangs.has(code)) continue;
+
+                    const schemaJson = parseSchemaJson(translation.schemaJson);
+                    if (schemaJson === null) return;
+
+                    payloadTranslations.push({
+                      langCode: code,
+                      title: translation.title,
+                      slug: translation.slug,
+                      excerpt: translation.excerpt,
+                      content: translation.content,
+                      thumbnailUrl: translation.thumbnailUrl,
+                      seoTitle: translation.seoTitle || undefined,
+                      seoDescription: translation.seoDescription || undefined,
+                      canonical: translation.canonical || undefined,
+                      robots: translation.robots || undefined,
+                      ogTitle: translation.ogTitle || undefined,
+                      ogDescription: translation.ogDescription || undefined,
+                      ogImage: translation.ogImage || undefined,
+                      schemaJson: schemaJson,
+                    });
+                  }
                   await onSave({
                     status,
                     categoryIds: selectedCategoryIds,
                     tagIds: selectedTagIds,
-                    translations: [
-                      {
-                        langCode: activeLang,
-                        title: current.title,
-                        slug: current.slug,
-                        excerpt: current.excerpt,
-                        content: current.content,
-                        thumbnailUrl: current.thumbnailUrl,
-                        seoTitle: current.seoTitle || undefined,
-                        seoDescription: current.seoDescription || undefined,
-                        canonical: current.canonical || undefined,
-                        robots: current.robots || undefined,
-                        ogTitle: current.ogTitle || undefined,
-                        ogDescription: current.ogDescription || undefined,
-                        ogImage: current.ogImage || undefined,
-                        schemaJson: schemaJson,
-                      },
-                    ],
+                    translations: payloadTranslations,
                   });
                   notify("Saved.", "success");
                   setIsDirty(false);
@@ -989,7 +1039,7 @@ export default function CmsPostForm({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-[#0f1722] p-4 text-white">
+              <div className="rounded-2xl border border-white/10 bg-[#0f1722] p-4 text-white seo-panel">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -997,13 +1047,38 @@ export default function CmsPostForm({
                     </p>
                     <p className="text-sm text-white/70">Phân tích realtime</p>
                   </div>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#ff9f40] text-lg font-semibold text-[#ff9f40]">
-                    {seoAnalysis.score}
+                  <div className="seo-score-ring">
+                    <svg width="64" height="64">
+                      <circle
+                        className="ring-track"
+                        cx="32"
+                        cy="32"
+                        r={seoRadius}
+                        fill="none"
+                        strokeWidth="6"
+                      />
+                      <circle
+                        className="ring-progress"
+                        cx="32"
+                        cy="32"
+                        r={seoRadius}
+                        fill="none"
+                        strokeWidth="6"
+                        strokeDasharray={seoCircumference}
+                        strokeDashoffset={seoDashOffset}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="seo-score-value">{seoScore}</span>
                   </div>
                 </div>
                 <div className="mt-3 space-y-2 text-xs">
-                  {seoAnalysis.checks.map((check) => (
-                    <div key={check.label} className="flex items-center gap-2">
+                  {seoAnalysis.checks.map((check, index) => (
+                    <div
+                      key={check.label}
+                      className="flex items-center gap-2 seo-checklist-item"
+                      style={{ animationDelay: `${index * 40}ms` }}
+                    >
                       <span
                         className={`flex h-5 w-5 items-center justify-center rounded-full ${
                           check.ok ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
@@ -1037,7 +1112,7 @@ export default function CmsPostForm({
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
+              <div className="rounded-2xl border border-[var(--line)] bg-white p-4 seo-panel">
                 <p className="text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)]">
                   Schema Builder
                 </p>
@@ -1152,6 +1227,15 @@ export default function CmsPostForm({
                   >
                     Áp dụng schema
                   </Button>
+                  <Textarea
+                    label="Schema JSON (có thể chỉnh sửa)"
+                    value={current.schemaJson || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setCurrentTranslation({ schemaJson: event.target.value });
+                    }}
+                    className="min-h-[160px]"
+                  />
                 </div>
               </div>
             </div>
@@ -1207,8 +1291,9 @@ export default function CmsPostForm({
                     try {
                       const blob = await getCroppedBlob(thumbCropSrc);
                       if (!blob) throw new Error("Crop failed");
+                      const mimeType = blob.type || "application/octet-stream";
                       const response = await uploadMedia(
-                        new File([blob], thumbFileNameRef.current, { type: "image/jpeg" })
+                        new File([blob], thumbFileNameRef.current, { type: mimeType })
                       );
                       const url = response?.data?.url;
                       if (url) {

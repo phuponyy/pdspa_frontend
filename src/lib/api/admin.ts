@@ -458,6 +458,15 @@ export const updateMedia = async (id: number, file: File) => {
   });
 };
 
+export const updateMediaMeta = async (
+  id: number,
+  payload: { filename: string }
+) =>
+  apiFetch<MediaUploadResponse>(`/admin/cms/media/${id}/meta`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
 export const deleteMedia = async (token: string | undefined, id: number) =>
   apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/cms/media/${id}`, {
     token,

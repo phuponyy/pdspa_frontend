@@ -353,6 +353,10 @@ export default function PageEditor({ lang }: { lang: string }) {
       }),
     [currentMeta.metaTitle, currentMeta.metaDescription, seoContent, focusKeyword]
   );
+  const seoScore = Math.max(0, Math.min(100, seoAnalysis.score));
+  const seoRadius = 26;
+  const seoCircumference = 2 * Math.PI * seoRadius;
+  const seoDashOffset = seoCircumference * (1 - seoScore / 100);
   const currentHero = heroByLang[activeLang] || {
     heading: "",
     subheading: "",
@@ -739,7 +743,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               }}
             />
 
-            <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white">
+            <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white seo-panel">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -747,13 +751,38 @@ export default function PageEditor({ lang }: { lang: string }) {
                   </p>
                   <p className="text-sm text-white/70">Phân tích realtime</p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#ff9f40] text-lg font-semibold text-[#ff9f40]">
-                  {seoAnalysis.score}
+                <div className="seo-score-ring">
+                  <svg width="64" height="64">
+                    <circle
+                      className="ring-track"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      className="ring-progress"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                      strokeDasharray={seoCircumference}
+                      strokeDashoffset={seoDashOffset}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="seo-score-value">{seoScore}</span>
                 </div>
               </div>
               <div className="mt-3 space-y-2 text-xs">
-                {seoAnalysis.checks.map((check) => (
-                  <div key={check.label} className="flex items-center gap-2">
+                {seoAnalysis.checks.map((check, index) => (
+                  <div
+                    key={check.label}
+                    className="flex items-center gap-2 seo-checklist-item"
+                    style={{ animationDelay: `${index * 40}ms` }}
+                  >
                     <span
                       className={`flex h-5 w-5 items-center justify-center rounded-full ${
                         check.ok
@@ -787,7 +816,7 @@ export default function PageEditor({ lang }: { lang: string }) {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 seo-panel">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                 Schema Builder
               </p>
@@ -904,6 +933,18 @@ export default function PageEditor({ lang }: { lang: string }) {
                 >
                   Áp dụng schema
                 </Button>
+                <Textarea
+                  label="Schema JSON (có thể chỉnh sửa)"
+                  value={currentMeta.schemaJson || ""}
+                  onChange={(event) => {
+                    setIsDirty(true);
+                    setMetaByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: { ...prev[activeLang], schemaJson: event.target.value },
+                    }));
+                  }}
+                  className="min-h-[160px]"
+                />
               </div>
             </div>
 

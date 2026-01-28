@@ -94,6 +94,8 @@ export default function Header({
   const [bookingError, setBookingError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileQuery, setMobileQuery] = useState("");
 
   useEffect(() => {
     if (isAdminRoute) {
@@ -265,19 +267,69 @@ export default function Header({
     return `/${code}${restPath ? `/${restPath}` : ""}`;
   };
 
-  const isActive = (href: string) => {
-    if (href === "/" || href === `/${lang}`) {
-      return pathname === href;
+  const normalizePath = (value: string) => {
+    let path = value.trim();
+    if (!path) return "/";
+    if (!path.startsWith("/")) {
+      try {
+        path = new URL(path).pathname;
+      } catch {
+        path = `/${path}`;
+      }
     }
-    return pathname.startsWith(href);
+    path = path.replace(/\/+$/, "");
+    return path || "/";
+  };
+  const isActive = (href: string) => {
+    const current = normalizePath(pathname);
+    const raw = normalizePath(href);
+    const isRoot =
+      raw === "/" || raw === `/${lang}` || (lang === "vi" && raw === "/vi") || (lang === "en" && raw === "/en");
+    if (isRoot) {
+      return current === "/" || current === `/${lang}`;
+    }
+    const candidates = new Set([raw]);
+    if (lang === "vi" && raw !== "/" && !raw.startsWith("/vi")) {
+      candidates.add(`/vi${raw}`);
+    }
+    if (lang === "en" && raw.startsWith("/en/")) {
+      candidates.add(raw.replace(/^\/en/, "") || "/");
+    }
+    return Array.from(candidates).some((candidate) => current === candidate || current.startsWith(`${candidate}/`));
   };
   const navLinkClass = (active: boolean) =>
     cn(
-      "transition",
+      "relative transition-colors duration-300",
+      "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-[var(--accent-strong)] after:shadow-[0_0_12px_rgba(255,106,61,0.65)] after:transition-transform after:duration-300",
       active
-        ? "text-[var(--accent-strong)]"
-        : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.9)]"
+        ? "text-[var(--accent-strong)] after:scale-x-100"
+        : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.9)] hover:after:scale-x-100"
     );
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  const filteredMobileLinks = useMemo(() => {
+    const q = mobileQuery.trim().toLowerCase();
+    if (!q) return links;
+    return links.filter((link) => link.label.toLowerCase().includes(q));
+  }, [links, mobileQuery]);
 
   const addBookingService = () => {
     setBookingServices((prev) => [
@@ -403,6 +455,72 @@ export default function Header({
     >
       <div
         className={cn(
+          "fixed inset-0 z-[90] bg-black/50 transition-opacity duration-300 md:hidden",
+          isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-[100] h-full w-72 bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] transition-transform duration-500 [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] md:hidden",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
+          <span className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--ink-muted)]">
+            Menu
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-black/10"
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div className="px-5 py-4">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder={lang === "vi" ? "Tìm kiếm menu..." : "Search menu..."}
+              value={mobileQuery}
+              onChange={(event) => setMobileQuery(event.target.value)}
+              className="h-10 w-full rounded-full border border-black/10 bg-white pl-9 pr-3 text-sm text-black/70"
+            />
+          </div>
+          <nav className="mt-4 flex flex-col gap-2">
+            {filteredMobileLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  "rounded-xl px-4 py-3 text-sm font-semibold transition",
+                  isActive(link.href)
+                    ? "bg-[var(--accent-strong)] text-white"
+                    : "text-[var(--ink-muted)] hover:bg-black/5"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+            {!filteredMobileLinks.length ? (
+              <p className="text-sm text-[var(--ink-muted)]">No results.</p>
+            ) : null}
+          </nav>
+        </div>
+      </aside>
+      <div
+        className={cn(
           "hidden text-sm text-white transition-all duration-300 md:block",
           hideTopBar ? "max-h-0 opacity-0 pointer-events-none" : "max-h-20 opacity-100 pointer-events-auto"
         )}
@@ -488,16 +606,31 @@ export default function Header({
         </div>
       </div>
       <div className="bg-transparent">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-10">
-          <div className="flex flex-1 items-center justify-between gap-8 rounded-full bg-white px-8 py-2 shadow-[0_18px_40px_rgba(255,106,61,0.4)]">
-            <Link href={buildPublicHref("")} className="flex items-center gap-3">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
-                alt="Panda Spa"
-                className="h-14 w-auto object-contain"
-                loading="lazy"
-              />
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+          <div className="relative flex flex-1 items-center justify-between gap-8 rounded-full bg-white px-4 py-2 shadow-[0_18px_40px_rgba(255,106,61,0.4)] md:static md:px-8">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 text-black md:hidden"
+                aria-label="Open menu"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16M4 12h16M4 18h10" />
+                </svg>
+              </button>
+              <Link
+                href={buildPublicHref("")}
+                className="absolute left-1/2 flex -translate-x-1/2 items-center gap-3 md:static md:translate-x-0"
+              >
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
+                  alt="Panda Spa"
+                  className="h-14 w-auto object-contain"
+                  loading="lazy"
+                />
             </Link>
+            </div>
             <nav className="hidden items-center gap-9 text-base font-semibold text-black md:flex">
               {links.map((link) => (
                 <Link

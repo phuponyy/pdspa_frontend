@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { getCmsPages } from "@/lib/api/admin";
+import { getSiteConfig } from "@/lib/api/public";
 import Loading from "@/components/common/Loading";
 import { DEFAULT_LANG } from "@/lib/constants";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
@@ -25,8 +26,57 @@ export default function PagesListPage() {
     queryKey: ["cms-pages", page, pageSize],
     queryFn: () => getCmsPages(undefined, page, pageSize),
   });
+  const { data: siteConfig } = useQuery({
+    queryKey: ["site-config"],
+    queryFn: () => getSiteConfig(),
+    staleTime: 60_000,
+  });
 
   const pages = data?.data?.items || [];
+  const navConfig = siteConfig?.data || {};
+  const navRaw =
+    navConfig[`navbar_${resolvedLang}`] ||
+    (resolvedLang === "vi" ? navConfig.navbar_vn : undefined);
+  const menuLinks = useMemo(() => {
+    if (!navRaw) return [] as { label: string; href: string }[];
+    try {
+      const parsed = JSON.parse(navRaw) as { label?: string; href?: string }[];
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((item) => ({
+          label: String(item.label || "").trim(),
+          href: String(item.href || "").trim(),
+        }))
+        .filter((item) => item.href);
+    } catch {
+      return [];
+    }
+  }, [navRaw]);
+  const normalizeSlug = (href: string) => {
+    const clean = href.split("?")[0]?.split("#")[0] || "";
+    const noHost = clean.replace(/^https?:\/\/[^/]+/i, "");
+    const stripped = noHost.replace(/^\/+/, "");
+    if (!stripped) return "";
+    const parts = stripped.split("/");
+    if (parts[0] === "vi" || parts[0] === "en") {
+      return parts.slice(1).join("/") || "";
+    }
+    return parts.join("/");
+  };
+  const menuPages = useMemo(() => {
+    if (!menuLinks.length) return [];
+    return menuLinks.map((link) => {
+      const slug = normalizeSlug(link.href);
+      const matched = pages.find((page) =>
+        page.translations?.some((t) => t.slug === slug)
+      );
+      return { ...link, slug, page: matched };
+    });
+  }, [menuLinks, pages]);
+  const menuPagesExisting = useMemo(
+    () => menuPages.filter((item) => item.page),
+    [menuPages]
+  );
   const totalPages = data?.data?.pagination?.totalPages || 1;
   const totalItems = data?.data?.pagination?.total || 0;
   const filteredPages = useMemo(() => {
@@ -147,6 +197,43 @@ export default function PagesListPage() {
           </div>
         </div>
       </div>
+
+      {menuPagesExisting.length ? (
+        <div className="rounded-3xl border border-white/10 bg-[#0f1722] p-5 text-white/80">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-white/50">Trang trên menu</p>
+              <p className="text-sm text-white/70">Chỉnh sửa metadata, SEO & schema từ đây.</p>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {menuPagesExisting.map((item) => {
+              const translation = item.page ? getTranslation(item.page) : undefined;
+              const editHref = `${ADMIN_ROUTES.pages}/${item.page?.id}?lang=${resolvedLang}`;
+              return (
+                <Link key={item.href} href={editHref} className="block">
+                  <Card className="border-white/10 bg-[#111a25] transition hover:bg-white/5">
+                    <CardContent className="flex items-center justify-between gap-4 py-4">
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          {item.label || translation?.title || item.slug || "Trang menu"}
+                        </p>
+                        <p className="text-xs text-white/50">{item.href}</p>
+                        <Badge variant={item.page?.status === "PUBLISHED" ? "success" : "draft"}>
+                          {item.page?.status === "PUBLISHED" ? "Xuất bản" : "Bản nháp"}
+                        </Badge>
+                      </div>
+                      <span className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70 hover:text-white">
+                        Chỉnh sửa
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       {isLoading ? (
         <Loading label="Loading pages" />

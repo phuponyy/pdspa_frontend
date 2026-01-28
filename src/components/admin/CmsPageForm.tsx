@@ -128,6 +128,14 @@ export default function CmsPageForm({
     });
     return next;
   });
+  const existingLangs = useMemo(() => {
+    const langs = new Set<string>();
+    initial?.translations?.forEach((t) => {
+      const raw = t.language?.code || langCode;
+      langs.add(raw === "vn" ? "vi" : raw);
+    });
+    return langs;
+  }, [initial, langCode]);
   const [focusKeywordByLang, setFocusKeywordByLang] = useState<Record<string, string>>(
     () => ({
       vi: "",
@@ -252,6 +260,10 @@ export default function CmsPageForm({
       focusKeyword,
     ]
   );
+  const seoScore = Math.max(0, Math.min(100, seoAnalysis.score));
+  const seoRadius = 26;
+  const seoCircumference = 2 * Math.PI * seoRadius;
+  const seoDashOffset = seoCircumference * (1 - seoScore / 100);
 
   const parseSchemaJson = (raw?: string) => {
     const trimmed = raw?.trim();
@@ -379,7 +391,6 @@ export default function CmsPageForm({
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => {
                     const generated = generateSeoFromContent({
                       title: current.title,
@@ -492,7 +503,7 @@ export default function CmsPageForm({
               />
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-[#0f1722] p-4 text-white">
+            <div className="mt-4 rounded-2xl border border-white/10 bg-[#0f1722] p-4 text-white seo-panel">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -500,13 +511,38 @@ export default function CmsPageForm({
                   </p>
                   <p className="text-sm text-white/70">Phân tích realtime</p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#ff9f40] text-lg font-semibold text-[#ff9f40]">
-                  {seoAnalysis.score}
+                <div className="seo-score-ring">
+                  <svg width="64" height="64">
+                    <circle
+                      className="ring-track"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      className="ring-progress"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                      strokeDasharray={seoCircumference}
+                      strokeDashoffset={seoDashOffset}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="seo-score-value">{seoScore}</span>
                 </div>
               </div>
               <div className="mt-3 space-y-2 text-xs">
-                {seoAnalysis.checks.map((check) => (
-                  <div key={check.label} className="flex items-center gap-2">
+                {seoAnalysis.checks.map((check, index) => (
+                  <div
+                    key={check.label}
+                    className="flex items-center gap-2 seo-checklist-item"
+                    style={{ animationDelay: `${index * 40}ms` }}
+                  >
                     <span
                       className={`flex h-5 w-5 items-center justify-center rounded-full ${
                         check.ok ? "bg-emerald-500/20 text-emerald-300" : "bg-red-500/20 text-red-300"
@@ -538,7 +574,7 @@ export default function CmsPageForm({
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-[var(--line)] bg-white p-4">
+            <div className="mt-4 rounded-2xl border border-[var(--line)] bg-white p-4 seo-panel">
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)]">
                 Schema Builder
               </p>
@@ -604,7 +640,6 @@ export default function CmsPageForm({
                     ))}
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() =>
                         setSchemaFaqByLang((prev) => ({
                           ...prev,
@@ -634,7 +669,6 @@ export default function CmsPageForm({
                   </pre>
                 </div>
                 <Button
-                  size="sm"
                   onClick={() => {
                     const schema = buildSchemaTemplate({
                       type: schemaTemplate,
@@ -657,6 +691,18 @@ export default function CmsPageForm({
                 >
                   Áp dụng schema
                 </Button>
+                <Textarea
+                  label="Schema JSON (có thể chỉnh sửa)"
+                  value={current.schemaJson || ""}
+                  onChange={(event) => {
+                    setIsDirty(true);
+                    setTranslations((prev) => ({
+                      ...prev,
+                      [activeLang]: { ...prev[activeLang], schemaJson: event.target.value },
+                    }));
+                  }}
+                  className="min-h-[160px]"
+                />
               </div>
             </div>
           </div>
@@ -675,26 +721,60 @@ export default function CmsPageForm({
             <Button
               onClick={async () => {
                 try {
-                  const schemaJson = parseSchemaJson(current.schemaJson);
-                  if (schemaJson === null) return;
+                  const payloadTranslations: {
+                    langCode: string;
+                    title: string;
+                    slug: string;
+                    content: string;
+                    seoTitle?: string;
+                    seoDescription?: string;
+                    canonical?: string;
+                    robots?: string;
+                    ogTitle?: string;
+                    ogDescription?: string;
+                    ogImage?: string;
+                    schemaJson?: Record<string, unknown> | undefined;
+                  }[] = [];
+
+                  for (const code of languages) {
+                    const translation = translations[code];
+                    if (!translation) continue;
+                    const hasContent = [
+                      translation.title,
+                      translation.slug,
+                      translation.content,
+                      translation.seoTitle,
+                      translation.seoDescription,
+                      translation.canonical,
+                      translation.robots,
+                      translation.ogTitle,
+                      translation.ogDescription,
+                      translation.ogImage,
+                      translation.schemaJson,
+                    ].some((value) => String(value || "").trim().length > 0);
+                    if (!hasContent && !existingLangs.has(code)) continue;
+
+                    const schemaJson = parseSchemaJson(translation.schemaJson);
+                    if (schemaJson === null) return;
+
+                    payloadTranslations.push({
+                      langCode: code,
+                      title: translation.title,
+                      slug: translation.slug,
+                      content: translation.content,
+                      seoTitle: translation.seoTitle || undefined,
+                      seoDescription: translation.seoDescription || undefined,
+                      canonical: translation.canonical || undefined,
+                      robots: translation.robots || undefined,
+                      ogTitle: translation.ogTitle || undefined,
+                      ogDescription: translation.ogDescription || undefined,
+                      ogImage: translation.ogImage || undefined,
+                      schemaJson: schemaJson,
+                    });
+                  }
                   await onSave({
                     status,
-                    translations: [
-                      {
-                        langCode: activeLang,
-                        title: current.title,
-                        slug: current.slug,
-                        content: current.content,
-                        seoTitle: current.seoTitle || undefined,
-                        seoDescription: current.seoDescription || undefined,
-                        canonical: current.canonical || undefined,
-                        robots: current.robots || undefined,
-                        ogTitle: current.ogTitle || undefined,
-                        ogDescription: current.ogDescription || undefined,
-                        ogImage: current.ogImage || undefined,
-                        schemaJson: schemaJson,
-                      },
-                    ],
+                    translations: payloadTranslations,
                   });
                   notify("Saved.", "success");
                   setIsDirty(false);

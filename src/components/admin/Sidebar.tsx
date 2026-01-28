@@ -283,8 +283,16 @@ export default function Sidebar() {
   const clearClientSession = () => {
     if (typeof window === "undefined") return;
     try {
-      window.localStorage.clear();
-      window.sessionStorage.clear();
+      const prefixes = ["cms-post-draft-", "cms-page-draft-"];
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < window.localStorage.length; i += 1) {
+        const key = window.localStorage.key(i);
+        if (!key) continue;
+        if (prefixes.some((prefix) => key.startsWith(prefix))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => window.localStorage.removeItem(key));
     } catch {
       // ignore storage cleanup errors
     }
