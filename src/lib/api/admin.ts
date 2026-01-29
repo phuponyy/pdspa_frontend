@@ -722,6 +722,15 @@ export const getAdminOverview = async (
     cache: "no-store",
   });
 
+export const getObservabilitySummary = async (token?: string) =>
+  apiFetch<ApiSuccess<import("@/types/admin-dashboard.types").ObservabilitySummary>>(
+    "/admin/observability",
+    {
+      token,
+      cache: "no-store",
+    }
+  );
+
 export const getAdminAnalytics = async (
   token: string | undefined,
   params: { range?: string; from?: string; to?: string; interval?: string }

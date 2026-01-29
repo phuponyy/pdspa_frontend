@@ -7,6 +7,7 @@ export const ADMIN_ROUTES = {
   dashboard: `${ADMIN_BASE}/dashboard`,
   analytics: `${ADMIN_BASE}/analytics`,
   live: `${ADMIN_BASE}/live`,
+  observability: `${ADMIN_BASE}/observability`,
   customers: `${ADMIN_BASE}/customers`,
   bookings: `${ADMIN_BASE}/bookings`,
   leads: `${ADMIN_BASE}/leads`,

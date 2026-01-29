@@ -71,6 +71,25 @@ export type LiveResponse = {
   }[];
 };
 
+export type ObservabilitySummary = {
+  uptimeSec: number;
+  totalRequests: number;
+  totalErrors: number;
+  errorRate: number;
+  topSlow: {
+    method: string;
+    route: string;
+    count: number;
+    errors: number;
+    p95: number;
+    avg: number;
+  }[];
+  health: {
+    status: string;
+    database: string;
+  };
+};
+
 export type Customer = {
   id: number;
   name: string;
