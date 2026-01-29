@@ -18,6 +18,12 @@ import type {
   MediaUploadResponse,
   RedirectItem,
   RedirectListResponse,
+  BrokenLinksScanResponse,
+  SeoKeyword,
+  SeoKeywordHistoryResponse,
+  SeoKeywordListResponse,
+  SeoKeywordScanResponse,
+  SeoKeywordCrawlResponse,
   AdminMeResponse,
   AdminUserResponse,
   AdminUsersResponse,
@@ -485,6 +491,165 @@ export const deleteRedirect = async (token: string | undefined, id: number) =>
     token,
     method: "DELETE",
   });
+
+export const scanBrokenLinks = async (
+  token: string | undefined,
+  params?: {
+    lang?: string;
+    includeDrafts?: boolean;
+    includeExternal?: boolean;
+    maxLinks?: number;
+    timeoutMs?: number;
+    concurrency?: number;
+  }
+) =>
+  apiFetch<BrokenLinksScanResponse>("/admin/seo/broken-links/scan", {
+    token,
+    query: {
+      lang: params?.lang,
+      includeDrafts:
+        typeof params?.includeDrafts === "boolean"
+          ? String(params.includeDrafts)
+          : undefined,
+      includeExternal:
+        typeof params?.includeExternal === "boolean"
+          ? String(params.includeExternal)
+          : undefined,
+      maxLinks: params?.maxLinks,
+      timeoutMs: params?.timeoutMs,
+      concurrency: params?.concurrency,
+    },
+    cache: "no-store",
+  });
+
+export const getSeoKeywords = async (
+  token?: string,
+  page = 1,
+  limit = 20,
+  q?: string
+) =>
+  apiFetch<SeoKeywordListResponse>("/admin/seo/keywords", {
+    token,
+    query: { page, limit, q },
+    cache: "no-store",
+  });
+
+export const createSeoKeyword = async (
+  token: string | undefined,
+  payload: {
+    phrase: string;
+    targetUrl?: string;
+    locale?: string;
+    device?: string;
+    isActive?: boolean;
+    notes?: string;
+  }
+) =>
+  apiFetch<ApiSuccess<SeoKeyword>>("/admin/seo/keywords", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateSeoKeyword = async (
+  token: string | undefined,
+  id: number,
+  payload: Partial<{
+    phrase: string;
+    targetUrl?: string;
+    locale?: string;
+    device?: string;
+    isActive?: boolean;
+    notes?: string;
+  }>
+) =>
+  apiFetch<ApiSuccess<SeoKeyword>>(`/admin/seo/keywords/${id}`, {
+    token,
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteSeoKeyword = async (token: string | undefined, id: number) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/seo/keywords/${id}`, {
+    token,
+    method: "DELETE",
+  });
+
+export const getSeoKeywordHistory = async (
+  token: string | undefined,
+  id: number,
+  limit = 30
+) =>
+  apiFetch<SeoKeywordHistoryResponse>(`/admin/seo/keywords/${id}/history`, {
+    token,
+    query: { limit },
+    cache: "no-store",
+  });
+
+export const addSeoKeywordRank = async (
+  token: string | undefined,
+  id: number,
+  payload: {
+    position?: number;
+    resultUrl?: string;
+    resultTitle?: string;
+    engine?: string;
+    checkedAt?: string;
+  }
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(`/admin/seo/keywords/${id}/ranks`, {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const runSeoKeywordScan = async (
+  token: string | undefined,
+  payload?: {
+    keywordIds?: number[];
+    limit?: number;
+    force?: boolean;
+  }
+) =>
+  apiFetch<SeoKeywordScanResponse>("/admin/seo/keywords/scan", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload ?? {}),
+  });
+
+export const crawlSeoKeywords = async (
+  token: string | undefined,
+  payload?: {
+    lang?: string;
+    device?: string;
+    includePosts?: boolean;
+    includePages?: boolean;
+  }
+) =>
+  apiFetch<SeoKeywordCrawlResponse>("/admin/seo/keywords/crawl", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload ?? {}),
+  });
+
+export const exportSeoKeywordsCsv = async (
+  token: string | undefined,
+  keywordId?: number
+) => {
+  const query = keywordId ? `?keywordId=${keywordId}` : "";
+  const response = await fetch(`${API_BASE_URL}/admin/seo/keywords/export${query}`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      "x-csrf-token": getCsrfToken(),
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Export failed");
+  }
+  return response.text();
+};
 
 export const getCmsPages = async (token?: string, page = 1, limit = 20) =>
   apiFetch<CmsListResponse<CmsPage>>("/admin/cms/pages", {

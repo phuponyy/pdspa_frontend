@@ -366,6 +366,90 @@ export type RedirectListResponse = ApiSuccess<{
   };
 }>;
 
+export type BrokenLinkItem = {
+  url: string;
+  status?: number;
+  error?: string;
+  sourceType?: "CmsPost" | "CmsPage" | "Navbar";
+  sourceId?: number;
+  sourceTitle?: string;
+  lang?: string;
+};
+
+export type BrokenLinksScanResponse = ApiSuccess<{
+  baseUrl: string;
+  totalFound: number;
+  checked: number;
+  brokenCount: number;
+  skipped: {
+    external: number;
+    anchors: number;
+    relative: number;
+    invalid: number;
+    assets: number;
+  };
+  broken: BrokenLinkItem[];
+}>;
+
+export type SeoKeyword = {
+  id: number;
+  phrase: string;
+  targetUrl?: string | null;
+  locale: string;
+  device: string;
+  isActive: boolean;
+  notes?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  ranks?: SeoKeywordRank[];
+};
+
+export type SeoKeywordRank = {
+  id: number;
+  keywordId: number;
+  position?: number | null;
+  resultUrl?: string | null;
+  resultTitle?: string | null;
+  engine?: string | null;
+  status?: string | null;
+  checkedAt?: string;
+  responseMs?: number | null;
+  error?: string | null;
+};
+
+export type SeoKeywordListResponse = ApiSuccess<{
+  items: SeoKeyword[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}>;
+
+export type SeoKeywordHistoryResponse = ApiSuccess<{
+  keyword: SeoKeyword;
+  items: SeoKeywordRank[];
+}>;
+
+export type SeoKeywordScanSummary = {
+  total: number;
+  scanned: number;
+  skipped: number;
+  improved: number;
+  dropped: number;
+  unchanged: number;
+  notFound: number;
+  errors: number;
+};
+
+export type SeoKeywordScanResponse = ApiSuccess<SeoKeywordScanSummary>;
+
+export type SeoKeywordCrawlResponse = ApiSuccess<{
+  created: number;
+  skipped: number;
+}>;
+
 export type MediaListResponse = CmsListResponse<MediaItem>;
 export type MediaUploadResponse = ApiSuccess<MediaItem>;
 

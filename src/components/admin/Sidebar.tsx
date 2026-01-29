@@ -186,6 +186,30 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
             </svg>
           ),
         },
+        {
+          href: ADMIN_ROUTES.seoBrokenLinks,
+          label: "Broken Links",
+          requiredPermissions: ["manage_broken_links"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 13a5 5 0 0 0 7.1 0l2.2-2.2a5 5 0 1 0-7.1-7.1l-1.2 1.2" />
+              <path d="M14 11a5 5 0 0 0-7.1 0L4.7 13.2a5 5 0 0 0 7.1 7.1l1.2-1.2" />
+              <path d="M8 12h8" />
+            </svg>
+          ),
+        },
+        {
+          href: ADMIN_ROUTES.seoKeywords,
+          label: "Keyword Tracking",
+          requiredPermissions: ["manage_keywords"],
+          icon: (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-3.5-3.5" />
+              <path d="M8 11h6" />
+            </svg>
+          ),
+        },
       ],
     },
     {

@@ -19,6 +19,8 @@ export const ADMIN_ROUTES = {
   settings: `${ADMIN_BASE}/settings`,
   roles: `${ADMIN_BASE}/settings/roles`,
   seoRedirects: `${ADMIN_BASE}/seo/redirects`,
+  seoBrokenLinks: `${ADMIN_BASE}/seo/broken-links`,
+  seoKeywords: `${ADMIN_BASE}/seo/keywords`,
   securityWhitelist: `${ADMIN_BASE}/security/ip-whitelist`,
   securityBlacklist: `${ADMIN_BASE}/security/ip-blacklist`,
   securitySessions: `${ADMIN_BASE}/security/sessions`,

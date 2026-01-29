@@ -39,6 +39,8 @@ const PERMISSION_OPTIONS = [
   { key: "manage_posts", label: "Posts" },
   { key: "manage_media", label: "Media" },
   { key: "manage_redirects", label: "Redirects" },
+  { key: "manage_broken_links", label: "Broken links" },
+  { key: "manage_keywords", label: "Keyword tracking" },
 ];
 
 export default function AdminRoles() {
