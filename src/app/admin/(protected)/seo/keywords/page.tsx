@@ -10,6 +10,7 @@ import {
   exportSeoKeywordsCsv,
   getSeoKeywordHistory,
   getSeoKeywords,
+  getSeoKeywordSerpPreview,
   runSeoKeywordScan,
 } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/common/ToastProvider";
-import type { SeoKeyword, SeoKeywordRank } from "@/types/api.types";
+import type {
+  SeoKeyword,
+  SeoKeywordRank,
+  SeoKeywordSerpPreviewItem,
+} from "@/types/api.types";
 
 export default function KeywordTrackingPage() {
   const toast = useToast();
@@ -403,6 +408,7 @@ function KeywordRow({
 }) {
   const latest = keyword.ranks?.[0];
   const [showHistory, setShowHistory] = useState(false);
+  const [showSerp, setShowSerp] = useState(false);
   const [rankForm, setRankForm] = useState({
     position: latest?.position?.toString() || "",
     resultUrl: latest?.resultUrl || "",
@@ -410,6 +416,8 @@ function KeywordRow({
   });
   const [history, setHistory] = useState<SeoKeywordRank[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [serpItems, setSerpItems] = useState<SeoKeywordSerpPreviewItem[]>([]);
+  const [loadingSerp, setLoadingSerp] = useState(false);
 
   const chart = useMemo(() => {
     const sorted = [...history].reverse();
@@ -438,6 +446,49 @@ function KeywordRow({
     setShowHistory(next);
     if (next && history.length === 0) {
       await loadHistory();
+    }
+  };
+
+  const normalizeUrl = (value?: string) => {
+    if (!value) return null;
+    try {
+      const url = new URL(value);
+      return {
+        host: url.host.toLowerCase(),
+        path: url.pathname.replace(/\/+$/, "") || "/",
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  const isTargetResult = (link?: string) => {
+    if (!keyword.targetUrl || !link) return false;
+    const target = normalizeUrl(keyword.targetUrl);
+    const result = normalizeUrl(link);
+    if (!target || !result) return false;
+    if (target.host !== result.host) return false;
+    if (target.path === "/") return true;
+    return result.path.startsWith(target.path);
+  };
+
+  const loadSerpPreview = async () => {
+    setLoadingSerp(true);
+    try {
+      const response = await getSeoKeywordSerpPreview(undefined, keyword.id, 10);
+      setSerpItems(response?.data?.items ?? []);
+    } catch {
+      notify("Không thể tải SERP preview.", "error");
+    } finally {
+      setLoadingSerp(false);
+    }
+  };
+
+  const handleToggleSerp = async () => {
+    const next = !showSerp;
+    setShowSerp(next);
+    if (next && serpItems.length === 0) {
+      await loadSerpPreview();
     }
   };
 
@@ -470,6 +521,14 @@ function KeywordRow({
               onClick={() => handleToggleHistory()}
             >
               {showHistory ? "Hide history" : "Show history"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
+              onClick={() => handleToggleSerp()}
+            >
+              {showSerp ? "Hide SERP" : "SERP preview"}
             </Button>
             <Button
               variant="outline"
@@ -603,6 +662,87 @@ function KeywordRow({
               </div>
             ) : (
               <p className="text-sm text-[var(--ink-muted)]">Chưa có lịch sử.</p>
+            )}
+          </div>
+        ) : null}
+
+        {showSerp ? (
+          <div className="rounded-2xl border border-[var(--line)] bg-white/60 p-4">
+            {loadingSerp ? (
+              <p className="text-sm text-[var(--ink-muted)]">Loading SERP preview...</p>
+            ) : serpItems.length ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+                    SERP preview
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
+                    onClick={loadSerpPreview}
+                    disabled={loadingSerp}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {serpItems.map((item, index) => {
+                    const highlight = isTargetResult(item.link);
+                    return (
+                      <div
+                        key={`${item.link ?? "row"}-${index}`}
+                        className={`flex flex-wrap items-start gap-3 rounded-2xl border px-3 py-3 text-sm ${
+                          highlight
+                            ? "border-[var(--accent-strong)] bg-[rgba(255,106,61,0.08)]"
+                            : "border-[var(--line)] bg-white"
+                        }`}
+                      >
+                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-black/5 text-xs font-semibold text-[var(--ink-muted)]">
+                          {item.thumbnail ? (
+                            <img
+                              src={item.thumbnail}
+                              alt={item.title || "SERP image"}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            `#${item.position ?? index + 1}`
+                          )}
+                        </div>
+                        <div className="min-w-[200px] flex-1">
+                          <p className="text-sm font-semibold text-[var(--ink)]">
+                            {item.title || "No title"}
+                          </p>
+                          {item.link ? (
+                            <p className="truncate text-xs text-[var(--ink-muted)]">
+                              {item.link}
+                            </p>
+                          ) : null}
+                          {item.snippet ? (
+                            <p className="mt-1 text-xs text-[var(--ink-muted)]">
+                              {item.snippet}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-col items-end gap-1 text-xs text-[var(--ink-muted)]">
+                          <span>#{item.position ?? index + 1}</span>
+                          {item.source ? <span>{item.source}</span> : null}
+                          {highlight ? (
+                            <span className="rounded-full bg-[var(--accent-strong)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white">
+                              Your site
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--ink-muted)]">
+                Chưa có dữ liệu SERP.
+              </p>
             )}
           </div>
         ) : null}

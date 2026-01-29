@@ -16,6 +16,8 @@ import type {
   LeadStatusUpdateRequest,
   MediaListResponse,
   MediaUploadResponse,
+  MediaFolder,
+  MediaTag,
   RedirectItem,
   RedirectListResponse,
   BrokenLinksScanResponse,
@@ -24,6 +26,7 @@ import type {
   SeoKeywordListResponse,
   SeoKeywordScanResponse,
   SeoKeywordCrawlResponse,
+  SeoKeywordSerpPreviewResponse,
   AdminMeResponse,
   AdminUserResponse,
   AdminUsersResponse,
@@ -586,6 +589,17 @@ export const getSeoKeywordHistory = async (
     cache: "no-store",
   });
 
+export const getSeoKeywordSerpPreview = async (
+  token: string | undefined,
+  id: number,
+  limit = 10
+) =>
+  apiFetch<SeoKeywordSerpPreviewResponse>(`/admin/seo/keywords/${id}/serp`, {
+    token,
+    query: { limit },
+    cache: "no-store",
+  });
+
 export const addSeoKeywordRank = async (
   token: string | undefined,
   id: number,
@@ -688,10 +702,21 @@ export const deleteCmsPage = async (token: string | undefined, id: number) =>
     method: "DELETE",
   });
 
-export const getMediaLibrary = async (token?: string, page = 1, limit = 30) =>
+export const getMediaLibrary = async (
+  token?: string,
+  page = 1,
+  limit = 30,
+  options?: { q?: string; folderId?: number | null; tagId?: number | null }
+) =>
   apiFetch<MediaListResponse>("/admin/cms/media", {
     token,
-    query: { page, limit },
+    query: {
+      page,
+      limit,
+      q: options?.q,
+      folderId: options?.folderId ?? undefined,
+      tagId: options?.tagId ?? undefined,
+    },
     cache: "no-store",
   });
 
@@ -759,11 +784,33 @@ export const updateMedia = async (id: number, file: File) => {
 
 export const updateMediaMeta = async (
   id: number,
-  payload: { filename: string }
+  payload: { filename?: string; folderId?: number | null; tagIds?: number[] }
 ) =>
   apiFetch<MediaUploadResponse>(`/admin/cms/media/${id}/meta`, {
     method: "PATCH",
     body: JSON.stringify(payload),
+  });
+
+export const getMediaFolders = async () =>
+  apiFetch<ApiSuccess<MediaFolder[]>>("/admin/cms/media/folders", {
+    cache: "no-store",
+  });
+
+export const createMediaFolder = async (name: string) =>
+  apiFetch<ApiSuccess<MediaFolder>>("/admin/cms/media/folders", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+
+export const getMediaTags = async () =>
+  apiFetch<ApiSuccess<MediaTag[]>>("/admin/cms/media/tags", {
+    cache: "no-store",
+  });
+
+export const createMediaTag = async (name: string) =>
+  apiFetch<ApiSuccess<MediaTag>>("/admin/cms/media/tags", {
+    method: "POST",
+    body: JSON.stringify({ name }),
   });
 
 export const deleteMedia = async (token: string | undefined, id: number) =>

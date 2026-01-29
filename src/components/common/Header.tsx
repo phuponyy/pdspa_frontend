@@ -17,6 +17,7 @@ import { createBooking, getServices, getSiteConfig } from "@/lib/api/public";
 import type { PublicService } from "@/types/api.types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import { API_BASE_URL } from "@/lib/constants";
 
 type NavItem = { label: string; href: string };
 type TopBarConfig = {
@@ -77,6 +78,7 @@ export default function Header({
   );
   const [links, setLinks] = useState<NavItem[]>(defaultLinks);
   const [topBar, setTopBar] = useState<TopBarConfig>({});
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [services, setServices] = useState<PublicService[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
@@ -178,6 +180,12 @@ export default function Header({
               (lang === "vi" ? config.topbar_phone_secondary_vn : undefined) ||
               HOTLINE_SECONDARY,
           });
+          const rawLogo = config.site_logo_url as string | undefined;
+          if (rawLogo) {
+            setLogoUrl(rawLogo.startsWith("/") ? `${API_BASE_URL}${rawLogo}` : rawLogo);
+          } else {
+            setLogoUrl(null);
+          }
         }
       } catch {
         if (active) {
@@ -188,6 +196,7 @@ export default function Header({
             phonePrimary: HOTLINE,
             phoneSecondary: HOTLINE_SECONDARY,
           });
+          setLogoUrl(null);
         }
       }
     };
@@ -624,7 +633,10 @@ export default function Header({
                 className="absolute left-1/2 flex -translate-x-1/2 items-center gap-3 md:static md:translate-x-0"
               >
                 <img
-                  src="https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
+                  src={
+                    logoUrl ||
+                    "https://cdn.builder.io/api/v1/image/assets%2F5617c6399e7e490498e90123ca427448%2F579ea19fe5e6468982aa7d2e2790f9f4"
+                  }
                   alt="Panda Spa"
                   className="h-14 w-auto object-contain"
                   loading="lazy"

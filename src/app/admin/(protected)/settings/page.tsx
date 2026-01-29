@@ -1,15 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
 import { resources } from "@/lib/i18n";
-import { updateSiteConfig } from "@/lib/api/admin";
+import { updateSiteConfig, uploadMedia } from "@/lib/api/admin";
 import { getSiteConfig } from "@/lib/api/public";
 import { useTranslation } from "react-i18next";
+import { API_BASE_URL } from "@/lib/constants";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type NavItem = { label: string; href: string };
 type TopBarFields = {
@@ -32,6 +42,16 @@ export default function SettingsPage() {
     vi: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
     en: { address: "", hours: "", phonePrimary: "", phoneSecondary: "" },
   });
+  const [branding, setBranding] = useState({
+    logoUrl: "",
+    iconSvgUrl: "",
+  });
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingIcon, setIsUploadingIcon] = useState(false);
+  const [isRemovingLogo, setIsRemovingLogo] = useState(false);
+  const [isRemovingIcon, setIsRemovingIcon] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const iconInputRef = useRef<HTMLInputElement | null>(null);
   const toast = useToast();
   const { t } = useTranslation();
 
@@ -97,6 +117,10 @@ export default function SettingsPage() {
               phoneSecondary: config.topbar_phone_secondary_en || "",
             },
           });
+          setBranding({
+            logoUrl: config.site_logo_url || "",
+            iconSvgUrl: config.site_icon_svg_url || "",
+          });
         }
       } catch {
         if (active) {
@@ -145,6 +169,61 @@ export default function SettingsPage() {
         message: "Lưu thất bại. Vui lòng thử lại.",
         type: "error",
       });
+    }
+  };
+
+  const resolveAssetUrl = (value: string) =>
+    value?.startsWith("/") ? `${API_BASE_URL}${value}` : value;
+
+  const handleUpload = async (
+    file: File | undefined,
+    type: "logo" | "icon"
+  ) => {
+    if (!file) return;
+    if (type === "icon" && file.type !== "image/svg+xml") {
+      toast.push({ message: "Icon phải là SVG.", type: "error" });
+      return;
+    }
+    if (type === "logo" && !file.type.startsWith("image/")) {
+      toast.push({ message: "Logo phải là ảnh.", type: "error" });
+      return;
+    }
+
+    try {
+      type === "logo" ? setIsUploadingLogo(true) : setIsUploadingIcon(true);
+      const response = await uploadMedia(file);
+      const url = response?.data?.url;
+      if (!url) {
+        throw new Error("Upload failed");
+      }
+      const key = type === "logo" ? "site_logo_url" : "site_icon_svg_url";
+      await updateSiteConfig(undefined, { [key]: url });
+      setBranding((prev) => ({
+        ...prev,
+        [type === "logo" ? "logoUrl" : "iconSvgUrl"]: url,
+      }));
+      toast.push({ message: "Đã cập nhật.", type: "success" });
+    } catch {
+      toast.push({ message: "Không thể cập nhật.", type: "error" });
+    } finally {
+      type === "logo" ? setIsUploadingLogo(false) : setIsUploadingIcon(false);
+    }
+  };
+
+  const handleRemove = async (type: "logo" | "icon") => {
+    try {
+      type === "logo" ? setIsRemovingLogo(true) : setIsRemovingIcon(true);
+      const key = type === "logo" ? "site_logo_url" : "site_icon_svg_url";
+      await updateSiteConfig(undefined, { [key]: "" });
+      setBranding((prev) => ({
+        ...prev,
+        [type === "logo" ? "logoUrl" : "iconSvgUrl"]: "",
+      }));
+      toast.push({ message: "Đã xoá.", type: "success" });
+    } catch {
+      toast.push({ message: "Không thể xoá.", type: "error" });
+    } finally {
+      type === "logo" ? setIsRemovingLogo(false) : setIsRemovingIcon(false);
     }
   };
 
@@ -289,8 +368,129 @@ export default function SettingsPage() {
         </CardContent>
       </Section>
 
+      <Section title="Branding">
+        <CardContent className="space-y-6 px-6 pb-6">
+          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Logo
+              </p>
+              {branding.logoUrl ? (
+                <img
+                  src={resolveAssetUrl(branding.logoUrl)}
+                  alt="Site logo"
+                  className="h-14 w-auto rounded-lg border border-white/10 bg-white/5 p-2"
+                />
+              ) : (
+                <p className="text-sm text-slate-400">Chưa có logo.</p>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={logoInputRef}
+                onChange={(event) => {
+                  handleUpload(event.target.files?.[0], "logo");
+                  event.target.value = "";
+                }}
+              />
+              <Button
+                variant="secondary"
+                disabled={isUploadingLogo}
+                onClick={() => logoInputRef.current?.click()}
+              >
+                {isUploadingLogo ? "Đang tải..." : "Upload logo"}
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="!text-white !border-white/20 hover:!bg-white/10"
+                    disabled={isRemovingLogo || !branding.logoUrl}
+                  >
+                    {isRemovingLogo ? "Đang xoá..." : "Xoá logo"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>Xoá logo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Logo hiện tại sẽ bị xoá khỏi cấu hình trang.
+                  </AlertDialogDescription>
+                  <div className="mt-5 flex items-center justify-end gap-3">
+                    <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleRemove("logo")}>
+                      Xoá
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Site icon (SVG)
+              </p>
+              {branding.iconSvgUrl ? (
+                <img
+                  src={resolveAssetUrl(branding.iconSvgUrl)}
+                  alt="Site icon"
+                  className="h-12 w-12 rounded-lg border border-white/10 bg-white/5 p-2"
+                />
+              ) : (
+                <p className="text-sm text-slate-400">Chưa có icon.</p>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="file"
+                accept="image/svg+xml"
+                className="hidden"
+                ref={iconInputRef}
+                onChange={(event) => {
+                  handleUpload(event.target.files?.[0], "icon");
+                  event.target.value = "";
+                }}
+              />
+              <Button
+                variant="secondary"
+                disabled={isUploadingIcon}
+                onClick={() => iconInputRef.current?.click()}
+              >
+                {isUploadingIcon ? "Đang tải..." : "Upload icon"}
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="!text-white !border-white/20 hover:!bg-white/10"
+                    disabled={isRemovingIcon || !branding.iconSvgUrl}
+                  >
+                    {isRemovingIcon ? "Đang xoá..." : "Xoá icon"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogTitle>Xoá icon?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Icon SVG hiện tại sẽ bị xoá khỏi cấu hình trang.
+                  </AlertDialogDescription>
+                  <div className="mt-5 flex items-center justify-end gap-3">
+                    <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleRemove("icon")}>
+                      Xoá
+                    </AlertDialogAction>
+                  </div>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </CardContent>
+      </Section>
+
       <Section title={t("settings.common")}>
-        <SettingRow icon={<span className="text-xl">💡</span>} label="Logo" value="Panda Spa" />
         <SettingRow icon={<span className="text-xl">Tt</span>} label="Tên Website" value="Panda Spa" />
         <SettingRow icon={<span className="text-xl">❝</span>} label="Slogan" value="The best CMS ever" />
       </Section>

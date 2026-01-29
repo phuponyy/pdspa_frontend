@@ -552,8 +552,8 @@ export default function CmsPostForm({
           </Button>
         ) : null}
       </div>
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <div className="rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+        <div className="self-start rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
           <div className="grid gap-4">
           <Input
             label="Title"

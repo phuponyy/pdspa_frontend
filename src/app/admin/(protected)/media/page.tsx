@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  createMediaFolder,
+  createMediaTag,
   deleteMedia,
+  getMediaFolders,
   getMediaLibrary,
+  getMediaTags,
   updateMedia,
   updateMediaMeta,
   uploadMedia,
@@ -12,8 +16,10 @@ import {
 import Loading from "@/components/common/Loading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
 import { API_BASE_URL } from "@/lib/constants";
+import type { MediaFolder, MediaTag } from "@/types/api.types";
 import {
   Dialog,
   DialogContent,
@@ -41,12 +47,26 @@ const formatBytes = (bytes: number) => {
 const resolveMediaUrl = (url: string) =>
   url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
 
+const resolveMediaPreview = (item: { url: string; variants?: { url: string; kind: string }[] }) => {
+  const variant =
+    item.variants?.find((v) => v.kind === "webp-320") ||
+    item.variants?.find((v) => v.kind.startsWith("webp-"));
+  return variant ? resolveMediaUrl(variant.url) : resolveMediaUrl(item.url);
+};
+
 export default function MediaLibraryPage() {
   const toast = useToast();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(30);
+  const [query, setQuery] = useState("");
+  const [folderFilter, setFolderFilter] = useState<number | "ALL">("ALL");
+  const [tagFilter, setTagFilter] = useState<number | "ALL">("ALL");
+  const [folders, setFolders] = useState<MediaFolder[]>([]);
+  const [tags, setTags] = useState<MediaTag[]>([]);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newTagName, setNewTagName] = useState("");
   const uploadInputRef = useRef<HTMLInputElement | null>(null);
   const replaceInputRef = useRef<HTMLInputElement | null>(null);
   const [replaceTargetId, setReplaceTargetId] = useState<number | null>(null);
@@ -55,6 +75,8 @@ export default function MediaLibraryPage() {
     height: number;
   } | null>(null);
   const [editedFilename, setEditedFilename] = useState("");
+  const [selectedFolderId, setSelectedFolderId] = useState<number | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [isCropping, setIsCropping] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -72,14 +94,50 @@ export default function MediaLibraryPage() {
   };
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["cms-media", page, pageSize],
-    queryFn: () => getMediaLibrary(undefined, page, pageSize),
+    queryKey: ["cms-media", page, pageSize, query, folderFilter, tagFilter],
+    queryFn: () =>
+      getMediaLibrary(undefined, page, pageSize, {
+        q: query || undefined,
+        folderId: folderFilter === "ALL" ? undefined : folderFilter,
+        tagId: tagFilter === "ALL" ? undefined : tagFilter,
+      }),
   });
 
   const items = data?.data?.items || [];
   const totalPages = data?.data?.pagination?.totalPages || 1;
   const totalItems = data?.data?.pagination?.total || 0;
   const selected = items.find((item) => item.id === selectedId) || null;
+  const duplicateMap = useMemo(() => {
+    const map = new Map<string, number>();
+    items.forEach((item) => {
+      if (!item.checksum) return;
+      map.set(item.checksum, (map.get(item.checksum) ?? 0) + 1);
+    });
+    return map;
+  }, [items]);
+  useEffect(() => {
+    let active = true;
+    const loadMeta = async () => {
+      try {
+        const [folderRes, tagRes] = await Promise.all([
+          getMediaFolders(),
+          getMediaTags(),
+        ]);
+        if (!active) return;
+        setFolders(folderRes?.data ?? []);
+        setTags(tagRes?.data ?? []);
+      } catch {
+        if (active) {
+          setFolders([]);
+          setTags([]);
+        }
+      }
+    };
+    loadMeta();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const toggleSelect = (id: number) => {
     setSelectedIds((prev) =>
@@ -100,9 +158,13 @@ export default function MediaLibraryPage() {
     if (!selected) {
       setSelectedDimensions(null);
       setEditedFilename("");
+      setSelectedFolderId(null);
+      setSelectedTagIds([]);
       return;
     }
     setEditedFilename(selected.filename || "");
+    setSelectedFolderId(selected.folder?.id ?? null);
+    setSelectedTagIds(selected.tags?.map((item) => item.tagId) ?? []);
     let active = true;
     const loadDimensions = async () => {
       try {
@@ -141,7 +203,13 @@ export default function MediaLibraryPage() {
       return;
     }
     const ids = new Set(items.map((item) => item.id));
-    setSelectedIds((prev) => prev.filter((id) => ids.has(id)));
+    setSelectedIds((prev) => {
+      const next = prev.filter((id) => ids.has(id));
+      if (next.length === prev.length && next.every((id, idx) => id === prev[idx])) {
+        return prev;
+      }
+      return next;
+    });
   }, [items, selectedIds.length]);
 
   const handlePageSizeChange = (value: number) => {
@@ -184,19 +252,22 @@ export default function MediaLibraryPage() {
     }
   };
 
-  const handleRename = async (id: number) => {
+  const handleSaveMeta = async (id: number) => {
     const trimmed = editedFilename.trim();
     if (!trimmed) {
       toast.push({ message: "Tên file không được để trống.", type: "error" });
       return;
     }
-    if (trimmed === selected?.filename) return;
     try {
-      await updateMediaMeta(id, { filename: trimmed });
+      await updateMediaMeta(id, {
+        filename: trimmed,
+        folderId: selectedFolderId,
+        tagIds: selectedTagIds,
+      });
       await refetch();
-      toast.push({ message: "Đã đổi tên file.", type: "success" });
+      toast.push({ message: "Đã lưu metadata.", type: "success" });
     } catch {
-      toast.push({ message: "Đổi tên thất bại.", type: "error" });
+      toast.push({ message: "Lưu metadata thất bại.", type: "error" });
     }
   };
 
@@ -204,12 +275,48 @@ export default function MediaLibraryPage() {
     const validFiles = files.filter((file) => validateImage(file));
     if (!validFiles.length) return;
     try {
-      await Promise.all(validFiles.map((file) => uploadMedia(file)));
+      const results = await Promise.all(validFiles.map((file) => uploadMedia(file)));
       await refetch();
+      const duplicates = results.filter((item: any) => item?.duplicate).length;
       toast.push({ message: `Đã tải ${validFiles.length} ảnh.`, type: "success" });
+      if (duplicates) {
+        toast.push({ message: `${duplicates} ảnh trùng đã được bỏ qua.`, type: "info" });
+      }
     } catch {
       toast.push({ message: "Upload thất bại.", type: "error" });
     }
+  };
+
+  const handleCreateFolder = async () => {
+    const name = newFolderName.trim();
+    if (!name) return;
+    try {
+      const response = await createMediaFolder(name);
+      setFolders((prev) => [...prev, ...(response?.data ? [response.data] : [])]);
+      setNewFolderName("");
+      toast.push({ message: "Đã tạo folder.", type: "success" });
+    } catch {
+      toast.push({ message: "Không thể tạo folder.", type: "error" });
+    }
+  };
+
+  const handleCreateTag = async () => {
+    const name = newTagName.trim();
+    if (!name) return;
+    try {
+      const response = await createMediaTag(name);
+      setTags((prev) => [...prev, ...(response?.data ? [response.data] : [])]);
+      setNewTagName("");
+      toast.push({ message: "Đã tạo tag.", type: "success" });
+    } catch {
+      toast.push({ message: "Không thể tạo tag.", type: "error" });
+    }
+  };
+
+  const toggleTagSelection = (id: number) => {
+    setSelectedTagIds((prev) =>
+      prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]
+    );
   };
 
   const cropToSquare = async () => {
@@ -331,6 +438,94 @@ export default function MediaLibraryPage() {
           Hoặc click nút + ở trên để chọn nhiều ảnh
         </p>
       </div>
+      <div className="grid gap-3 rounded-3xl border border-white/10 bg-[#0f1722] p-4 text-sm text-white/70 md:grid-cols-2">
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40">Search</p>
+            <Input
+              placeholder="Tìm theo tên file..."
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
+              className="mt-2"
+            />
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-white/40">
+              Folder
+              <select
+                className="rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-sm text-white"
+                value={folderFilter}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setFolderFilter(value === "ALL" ? "ALL" : Number(value));
+                  setPage(1);
+                }}
+              >
+                <option value="ALL" className="bg-[#0f1722] text-white">
+                  Tất cả
+                </option>
+                {folders.map((folder) => (
+                  <option key={folder.id} value={folder.id} className="bg-[#0f1722] text-white">
+                    {folder.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-2 text-xs uppercase tracking-[0.2em] text-white/40">
+              Tag
+              <select
+                className="rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-sm text-white"
+                value={tagFilter}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setTagFilter(value === "ALL" ? "ALL" : Number(value));
+                  setPage(1);
+                }}
+              >
+                <option value="ALL" className="bg-[#0f1722] text-white">
+                  Tất cả
+                </option>
+                {tags.map((tag) => (
+                  <option key={tag.id} value={tag.id} className="bg-[#0f1722] text-white">
+                    {tag.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40">Tạo folder</p>
+            <div className="mt-2 flex gap-2">
+              <Input
+                placeholder="Tên folder..."
+                value={newFolderName}
+                onChange={(event) => setNewFolderName(event.target.value)}
+              />
+              <Button size="sm" variant="secondary" onClick={handleCreateFolder}>
+                Tạo
+              </Button>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-white/40">Tạo tag</p>
+            <div className="mt-2 flex gap-2">
+              <Input
+                placeholder="Tên tag..."
+                value={newTagName}
+                onChange={(event) => setNewTagName(event.target.value)}
+              />
+              <Button size="sm" variant="secondary" onClick={handleCreateTag}>
+                Tạo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-[#0f1722] px-4 py-3 text-sm text-white/70">
         <div>
           {totalItems ? (
@@ -421,7 +616,7 @@ export default function MediaLibraryPage() {
             items.map((item) => (
               <Card key={item.id}>
                 <CardContent className="p-3">
-                  <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/5">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/5">
                     <button
                       type="button"
                       onClick={() => setSelectedId(item.id)}
@@ -429,12 +624,17 @@ export default function MediaLibraryPage() {
                       aria-label={`View ${item.filename}`}
                     >
                       <img
-                        src={resolveMediaUrl(item.url)}
+                        src={resolveMediaPreview(item)}
                         alt={item.filename}
                         className="h-full w-full object-cover"
                         loading="lazy"
                       />
                     </button>
+                    {item.checksum && (duplicateMap.get(item.checksum) ?? 0) > 1 ? (
+                      <span className="absolute left-2 top-2 rounded-full bg-amber-500/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-black">
+                        Duplicate
+                      </span>
+                    ) : null}
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <label className="flex min-w-0 flex-1 items-center gap-2 text-xs text-slate-400">
@@ -446,7 +646,18 @@ export default function MediaLibraryPage() {
                       />
                       <span className="min-w-0 flex-1 truncate">{item.filename}</span>
                     </label>
-                    <div className="flex items-center gap-2">
+                  </div>
+                  <div className="mt-1 space-y-1 text-[11px] text-slate-500">
+                    {item.folder?.name ? (
+                      <p className="truncate">Folder: {item.folder.name}</p>
+                    ) : null}
+                    {item.tags?.length ? (
+                      <p className="truncate">
+                        Tags: {item.tags.map((tag) => tag.tag.name).join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2">
                       <Button
                         size="sm"
                         variant="secondary"
@@ -477,7 +688,6 @@ export default function MediaLibraryPage() {
                         </AlertDialogContent>
                       </AlertDialog>
                     </div>
-                  </div>
                 </CardContent>
               </Card>
             ))
@@ -563,15 +773,76 @@ export default function MediaLibraryPage() {
                     className="w-full rounded-lg border border-white/10 bg-[#0f1722] px-3 py-2 text-sm text-white/80"
                     placeholder="Tên file"
                   />
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => handleRename(selected.id)}
-                    disabled={!editedFilename.trim() || editedFilename.trim() === selected.filename}
-                  >
-                    Lưu tên
-                  </Button>
                 </div>
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">Folder</p>
+                  <select
+                    className="w-full rounded-lg border border-white/10 bg-[#0f1722] px-3 py-2 text-sm text-white/80"
+                    value={selectedFolderId ?? ""}
+                    onChange={(event) =>
+                      setSelectedFolderId(event.target.value ? Number(event.target.value) : null)
+                    }
+                  >
+                    <option value="" className="bg-[#0f1722] text-white">
+                      Không chọn
+                    </option>
+                    {folders.map((folder) => (
+                      <option key={folder.id} value={folder.id} className="bg-[#0f1722] text-white">
+                        {folder.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/40">Tags</p>
+                  <div className="max-h-28 space-y-2 overflow-auto rounded-lg border border-white/10 bg-[#0f1722] p-3 text-xs text-white/70">
+                    {tags.length ? (
+                      tags.map((tag) => (
+                        <label key={tag.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedTagIds.includes(tag.id)}
+                            onChange={() => toggleTagSelection(tag.id)}
+                          />
+                          <span>{tag.name}</span>
+                        </label>
+                      ))
+                    ) : (
+                      <span className="text-xs text-white/50">Chưa có tag</span>
+                    )}
+                  </div>
+                </div>
+                {selected.variants?.length ? (
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/40">Variants</p>
+                    <div className="space-y-2 text-xs text-white/70">
+                      {selected.variants.map((variant) => (
+                        <div
+                          key={variant.id}
+                          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 px-3 py-2"
+                        >
+                          <span className="uppercase tracking-[0.2em] text-white/50">
+                            {variant.kind}
+                          </span>
+                          <span>
+                            {variant.width && variant.height
+                              ? `${variant.width}x${variant.height}`
+                              : "-"}
+                          </span>
+                          <span>{formatBytes(variant.size)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => handleSaveMeta(selected.id)}
+                  disabled={!editedFilename.trim()}
+                >
+                  Lưu metadata
+                </Button>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button
                     size="sm"

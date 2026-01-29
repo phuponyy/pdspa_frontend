@@ -342,6 +342,46 @@ export type MediaItem = {
   filename: string;
   mimeType: string;
   size: number;
+  checksum?: string | null;
+  width?: number | null;
+  height?: number | null;
+  folder?: MediaFolder | null;
+  tags?: MediaTagOnMedia[];
+  variants?: MediaVariant[];
+  createdAt?: string;
+};
+
+export type MediaFolder = {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type MediaTag = {
+  id: number;
+  name: string;
+  slug: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type MediaTagOnMedia = {
+  tagId: number;
+  mediaId: number;
+  tag: MediaTag;
+};
+
+export type MediaVariant = {
+  id: number;
+  kind: string;
+  url: string;
+  width?: number | null;
+  height?: number | null;
+  mimeType: string;
+  size: number;
+  format: string;
   createdAt?: string;
 };
 
@@ -448,6 +488,20 @@ export type SeoKeywordScanResponse = ApiSuccess<SeoKeywordScanSummary>;
 export type SeoKeywordCrawlResponse = ApiSuccess<{
   created: number;
   skipped: number;
+}>;
+
+export type SeoKeywordSerpPreviewItem = {
+  position?: number;
+  title?: string;
+  link?: string;
+  snippet?: string;
+  source?: string;
+  thumbnail?: string;
+};
+
+export type SeoKeywordSerpPreviewResponse = ApiSuccess<{
+  keyword: SeoKeyword;
+  items: SeoKeywordSerpPreviewItem[];
 }>;
 
 export type MediaListResponse = CmsListResponse<MediaItem>;

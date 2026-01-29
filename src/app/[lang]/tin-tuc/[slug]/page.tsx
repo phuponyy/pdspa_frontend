@@ -100,7 +100,11 @@ export default async function PostDetailPage({
   }
 
   const rawContent = typeof translation.content === "string" ? translation.content : "";
-  const content = sanitizeHtml(rawContent);
+  const withLazyImages = rawContent.replace(
+    /<img(?![^>]*loading=)/gi,
+    '<img loading="lazy" decoding="async" '
+  );
+  const content = sanitizeHtml(withLazyImages);
 
   return (
     <section className="py-16">

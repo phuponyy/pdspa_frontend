@@ -93,7 +93,11 @@ export default async function CmsPage({
   }
 
   const rawContent = typeof translation.content === "string" ? translation.content : "";
-  const content = sanitizeHtml(rawContent);
+  const withLazyImages = rawContent.replace(
+    /<img(?![^>]*loading=)/gi,
+    '<img loading="lazy" decoding="async" '
+  );
+  const content = sanitizeHtml(withLazyImages);
   const schemaJson = data?.seo?.schemaJson ?? translation.schemaJson ?? null;
   const resolvedSchema = (() => {
     if (!schemaJson) return "";
