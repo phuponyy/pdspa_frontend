@@ -39,6 +39,10 @@ export default function AdminSessionsPage() {
   const [deviceFilter, setDeviceFilter] = useState("");
   const [userIdFilter, setUserIdFilter] = useState("");
   const [confirmRevokeAll, setConfirmRevokeAll] = useState(false);
+  const [confirmRevokeTarget, setConfirmRevokeTarget] = useState<{
+    type: "ip" | "device";
+    value: string;
+  } | null>(null);
 
   const sessionsQuery = useQuery({
     queryKey: ["admin-sessions", page, pageSize, activeFilter, query, ipFilter, deviceFilter, userIdFilter],
@@ -303,7 +307,11 @@ export default function AdminSessionsPage() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => revokeByIp(session.ip)}
+                            onClick={() =>
+                              session.ip
+                                ? setConfirmRevokeTarget({ type: "ip", value: session.ip })
+                                : undefined
+                            }
                             disabled={!session.ip}
                           >
                             Thu hồi IP
@@ -311,7 +319,12 @@ export default function AdminSessionsPage() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => revokeByDevice(session.device || session.userAgent)}
+                            onClick={() => {
+                              const device = session.device || session.userAgent;
+                              if (device) {
+                                setConfirmRevokeTarget({ type: "device", value: device });
+                              }
+                            }}
                             disabled={!session.device && !session.userAgent}
                           >
                             Thu hồi thiết bị
@@ -328,6 +341,41 @@ export default function AdminSessionsPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={Boolean(confirmRevokeTarget)}
+        onOpenChange={(open) => {
+          if (!open) setConfirmRevokeTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogTitle>
+            Thu hồi theo {confirmRevokeTarget?.type === "ip" ? "IP" : "thiết bị"}?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {confirmRevokeTarget?.type === "ip"
+              ? `Tất cả phiên dùng IP ${confirmRevokeTarget?.value} sẽ bị đăng xuất.`
+              : `Tất cả phiên dùng thiết bị ${confirmRevokeTarget?.value} sẽ bị đăng xuất.`}
+          </AlertDialogDescription>
+          <div className="mt-6 flex items-center justify-end gap-3">
+            <AlertDialogCancel>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const target = confirmRevokeTarget;
+                setConfirmRevokeTarget(null);
+                if (!target) return;
+                if (target.type === "ip") {
+                  void revokeByIp(target.value);
+                } else {
+                  void revokeByDevice(target.value);
+                }
+              }}
+            >
+              Thu hồi
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

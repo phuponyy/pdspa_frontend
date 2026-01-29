@@ -140,6 +140,20 @@ export default function AdminOverview() {
             ))}
           </CardContent>
         </Card>
+        <Card className="border-white/5">
+          <CardHeader>
+            <CardTitle className="text-sm text-white/70">Response time</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-2xl font-semibold text-white">
+              {data?.kpis.performance?.avgMs || 0} ms
+            </p>
+            <p className="text-xs text-white/60">
+              P95: {data?.kpis.performance?.p95Ms || 0} ms · Samples:{" "}
+              {data?.kpis.performance?.samples || 0}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

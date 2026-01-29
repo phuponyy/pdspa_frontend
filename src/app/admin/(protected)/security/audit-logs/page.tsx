@@ -25,9 +25,10 @@ export default function AdminAuditLogsPage() {
   const [entity, setEntity] = useState("");
   const [userId, setUserId] = useState("");
   const [ip, setIp] = useState("");
+  const [scope, setScope] = useState("all");
 
   const auditQuery = useQuery({
-    queryKey: ["admin-audit-logs", page, pageSize, query, action, entity, userId, ip],
+    queryKey: ["admin-audit-logs", page, pageSize, query, action, entity, userId, ip, scope],
     queryFn: () =>
       getAdminAuditLogs(undefined, {
         page,
@@ -37,6 +38,7 @@ export default function AdminAuditLogsPage() {
         entity: entity.trim() || undefined,
         userId: userId ? Number(userId) : undefined,
         ip: ip.trim() || undefined,
+        scope: scope === "all" ? undefined : scope,
       }),
   });
 
@@ -58,7 +60,7 @@ export default function AdminAuditLogsPage() {
 
       <Card>
         <CardContent className="space-y-4 py-5">
-          <div className="grid gap-3 md:grid-cols-5">
+          <div className="grid gap-3 md:grid-cols-6">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -89,6 +91,19 @@ export default function AdminAuditLogsPage() {
               placeholder="IP"
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
+            <select
+              value={scope}
+              onChange={(event) => setScope(event.target.value)}
+              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
+            >
+              <option value="all">All scope</option>
+              <option value="CMS">CMS</option>
+              <option value="SEO">SEO</option>
+              <option value="AUTH">AUTH</option>
+              <option value="SERVICE">SERVICE</option>
+              <option value="BOOKING">BOOKING</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
           </div>
         </CardContent>
       </Card>
@@ -144,8 +159,9 @@ export default function AdminAuditLogsPage() {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10">
-                <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1fr] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
+                <div className="grid grid-cols-[1.1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
                   <span>Action</span>
+                  <span>Scope</span>
                   <span>Entity</span>
                   <span>User</span>
                   <span>IP</span>
@@ -154,19 +170,30 @@ export default function AdminAuditLogsPage() {
                 <div className="divide-y divide-white/5">
                   {items.length ? (
                     items.map((log) => {
-                      const hash = (log.metadata as { payloadHash?: string } | undefined)
-                        ?.payloadHash;
+                      const metadata = log.metadata as
+                        | { payloadHash?: string; endpoint?: string; userAgent?: string }
+                        | undefined;
+                      const hash = metadata?.payloadHash;
+                      const endpoint = metadata?.endpoint;
+                      const userAgent = metadata?.userAgent;
                       return (
                         <div
                           key={log.id}
-                          className="grid grid-cols-[1.2fr_1fr_1fr_1fr_1fr] items-center gap-4 px-4 py-3 text-sm text-white/80"
+                          className="grid grid-cols-[1.1fr_0.8fr_1fr_1fr_0.8fr_1fr] items-center gap-4 px-4 py-3 text-sm text-white/80"
                         >
                           <div>
                             <p className="text-white">{log.action}</p>
                             {hash ? (
                               <p className="text-xs text-white/40">hash: {hash.slice(0, 12)}…</p>
                             ) : null}
+                            {endpoint ? (
+                              <p className="text-xs text-white/40">endpoint: {endpoint}</p>
+                            ) : null}
+                            {userAgent ? (
+                              <p className="text-xs text-white/40">ua: {userAgent}</p>
+                            ) : null}
                           </div>
+                          <Badge variant="default">{log.scope || "-"}</Badge>
                           <div>
                             <p>{log.entity}</p>
                             <p className="text-xs text-white/40">#{log.entityId ?? "-"}</p>

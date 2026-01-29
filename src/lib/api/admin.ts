@@ -95,6 +95,59 @@ export const loginAdmin = async (payload: AdminLoginRequest) =>
     credentials: "include",
   });
 
+export const verifyMfaLogin = async (payload: {
+  mfaToken: string;
+  code?: string;
+  recoveryCode?: string;
+}) =>
+  apiFetch<AdminLoginResponse>("/admin/auth/mfa/verify-login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    credentials: "include",
+  });
+
+export const setupMfa = async (token?: string) =>
+  apiFetch<
+    ApiSuccess<{
+      secret: string;
+      otpauthUrl?: string;
+      recoveryCodes: string[];
+    }>
+  >("/admin/auth/mfa/setup", {
+    token,
+    method: "POST",
+  });
+
+export const enableMfa = async (
+  token: string | undefined,
+  payload: { code: string }
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/auth/mfa/enable", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const disableMfa = async (
+  token: string | undefined,
+  payload: { code?: string; recoveryCode?: string }
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/auth/mfa/disable", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const regenerateMfaRecoveryCodes = async (
+  token: string | undefined,
+  payload: { code: string }
+) =>
+  apiFetch<ApiSuccess<{ recoveryCodes: string[] }>>("/admin/auth/mfa/recovery", {
+    token,
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
 export const getAdminSessions = async (
   token: string | undefined,
   params?: {
@@ -154,6 +207,7 @@ export const getAdminAuditLogs = async (
     userId?: number;
     ip?: string;
     q?: string;
+    scope?: string;
   }
 ) =>
   apiFetch<AdminAuditLogsResponse>("/admin/security/audit-logs", {
@@ -166,6 +220,7 @@ export const getAdminAuditLogs = async (
       userId: params?.userId,
       ip: params?.ip,
       q: params?.q,
+      scope: params?.scope,
     },
     cache: "no-store",
   });

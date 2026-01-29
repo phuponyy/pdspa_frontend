@@ -93,7 +93,11 @@ export type AdminLoginRequest = {
 };
 
 export type AdminLoginResponse = ApiSuccess<{
-  accessToken: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresIn?: string;
+  mfaRequired?: boolean;
+  mfaToken?: string;
 }>;
 
 export type PublicService = {
@@ -412,6 +416,7 @@ export type AdminAuditLog = {
   entityId?: number | null;
   ip?: string | null;
   metadata?: Record<string, unknown> | null;
+  scope?: string | null;
   createdAt?: string;
 };
 
@@ -428,6 +433,7 @@ export type AdminMeResponse = ApiSuccess<{
   avatarUrl?: string | null;
   roleKey?: string;
   permissions: string[];
+  mfaEnabled?: boolean;
 }>;
 
 export type AdminSessionsResponse = ApiSuccess<{

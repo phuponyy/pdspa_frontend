@@ -28,7 +28,7 @@ import { useTranslation } from "react-i18next";
 const statusColor: Record<Booking["status"], string> = {
   NEW: "bg-sky-500/15 text-sky-200 border-sky-500/30",
   CONFIRMED: "bg-emerald-500/15 text-emerald-200 border-emerald-500/30",
-  DONE: "bg-slate-500/15 text-slate-200 border-slate-500/30",
+  PENDING: "bg-slate-500/15 text-slate-200 border-slate-500/30",
   CANCELED: "bg-rose-500/15 text-rose-200 border-rose-500/30",
 };
 
@@ -247,9 +247,9 @@ export default function AdminBookings() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => mutation.mutate({ id: row.original.id, status: "DONE" })}
+                  onClick={() => mutation.mutate({ id: row.original.id, status: "PENDING" })}
                 >
-                  Hoàn tất
+                  Pending
                 </Button>
                 <Button
                   variant="outline"
@@ -335,7 +335,7 @@ export default function AdminBookings() {
         <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="py-2">
             <CardTitle>Bookings</CardTitle>
-            <p className="text-sm text-white/60">Quy trình: Mới &gt; Đã Xác Nhận &gt; Hoàn Tất / Huỷ</p>
+            <p className="text-sm text-white/60">Quy trình: Mới &gt; Đã Xác Nhận &gt; Pending / Huỷ</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => handleExport("csv")}>

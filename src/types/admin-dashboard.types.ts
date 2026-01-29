@@ -4,6 +4,7 @@ export type OverviewResponse = {
     bookings: { total: number; new: number; confirmed: number; canceled: number };
     customers: { new: number; returning: number };
     topServices: { name: string; count: number }[];
+    performance: { avgMs: number; p95Ms: number; samples: number };
   };
   charts: {
     labels: string[];
@@ -86,7 +87,7 @@ export type Customer = {
 
 export type Booking = {
   id: number;
-  status: "NEW" | "CONFIRMED" | "DONE" | "CANCELED";
+  status: "NEW" | "CONFIRMED" | "PENDING" | "CANCELED";
   scheduledAt: string;
   notes?: string | null;
   contactEmail?: string | null;

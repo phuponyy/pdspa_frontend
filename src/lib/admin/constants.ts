@@ -22,4 +22,5 @@ export const ADMIN_ROUTES = {
   securityBlacklist: `${ADMIN_BASE}/security/ip-blacklist`,
   securitySessions: `${ADMIN_BASE}/security/sessions`,
   securityAudit: `${ADMIN_BASE}/security/audit-logs`,
+  securityMfa: `${ADMIN_BASE}/security/mfa`,
 } as const;
