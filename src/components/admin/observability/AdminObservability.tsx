@@ -1,11 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getObservabilitySummary } from "@/lib/api/admin";
+import {
+  getLighthouseReports,
+  getObservabilitySummary,
+  getWebVitalsSummary,
+} from "@/lib/api/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
+import LineChart from "@/components/admin/charts/LineChart";
 
 const formatDuration = (seconds: number) => {
   const total = Math.max(0, Math.floor(seconds));
@@ -21,15 +26,48 @@ const formatPercent = (value: number) =>
   `${Math.round(Math.min(Math.max(value * 100, 0), 10000)) / 100}%`;
 
 export default function AdminObservability() {
+  const [rumRange, setRumRange] = useState<"7d" | "14d" | "30d">("7d");
+  const [labRange, setLabRange] = useState<"7d" | "30d" | "90d">("30d");
   const { data, isLoading } = useQuery({
     queryKey: ["admin-observability"],
     queryFn: () => getObservabilitySummary(undefined),
     refetchInterval: 15000,
   });
+  const rumQuery = useQuery({
+    queryKey: ["admin-web-vitals", rumRange],
+    queryFn: () => getWebVitalsSummary(undefined, rumRange),
+    refetchInterval: 60000,
+  });
+  const labQuery = useQuery({
+    queryKey: ["admin-lighthouse", labRange],
+    queryFn: () => getLighthouseReports(undefined, labRange),
+    refetchInterval: 120000,
+  });
 
   const summary = data?.data;
   const topSlow = useMemo(() => summary?.topSlow ?? [], [summary?.topSlow]);
   const healthBadge = summary?.health?.database === "ok" ? "success" : "destructive";
+  const rum = rumQuery.data?.data;
+  const lighthouse = labQuery.data?.data || [];
+
+  const rumScore = (value: number, name: string) => {
+    if (name === "CLS") {
+      if (value <= 0.1) return "good";
+      if (value <= 0.25) return "needs";
+      return "bad";
+    }
+    if (name === "LCP") {
+      if (value <= 2500) return "good";
+      if (value <= 4000) return "needs";
+      return "bad";
+    }
+    if (name === "INP") {
+      if (value <= 200) return "good";
+      if (value <= 500) return "needs";
+      return "bad";
+    }
+    return "neutral";
+  };
 
   return (
     <div className="space-y-8">
@@ -148,6 +186,177 @@ export default function AdminObservability() {
           )}
         </CardContent>
       </Card>
+
+      <section className="admin-panel px-6 py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Core Web Vitals</p>
+            <h2 className="mt-2 text-xl font-semibold text-white">Real-user metrics (RUM)</h2>
+            <p className="mt-2 text-sm text-slate-400">
+              P75 theo thời gian thực từ người dùng thật.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/50">
+            {(["7d", "14d", "30d"] as const).map((range) => (
+              <button
+                key={range}
+                type="button"
+                onClick={() => setRumRange(range)}
+                className={cn(
+                  "rounded-full border px-3 py-1 transition",
+                  rumRange === range
+                    ? "border-[#ff9f40] text-[#ff9f40]"
+                    : "border-white/10 text-white/50 hover:text-white"
+                )}
+              >
+                {range.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {(["LCP", "INP", "CLS"] as const).map((metric) => {
+            const value = rum?.summary?.[metric]?.p75 ?? 0;
+            const status = rumScore(value, metric);
+            return (
+              <Card key={metric} className="border-white/5">
+                <CardHeader>
+                  <CardTitle className="text-sm text-white/70">{metric} P75</CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center justify-between">
+                  <p className="text-2xl font-semibold text-white">
+                    {metric === "CLS" ? value.toFixed(2) : Math.round(value)}{" "}
+                    {metric === "CLS" ? "" : "ms"}
+                  </p>
+                  <span
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-semibold",
+                      status === "good" && "bg-emerald-500/15 text-emerald-200",
+                      status === "needs" && "bg-amber-500/15 text-amber-200",
+                      status === "bad" && "bg-red-500/15 text-red-200",
+                      status === "neutral" && "bg-white/10 text-white/60"
+                    )}
+                  >
+                    {status === "needs" ? "Needs work" : status}
+                  </span>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+          <Card className="border-white/5">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Trend P75 (LCP/INP/CLS)</CardTitle>
+              <Badge variant="default">RUM</Badge>
+            </CardHeader>
+            <CardContent>
+              <LineChart
+                labels={rum?.timeseries?.labels || []}
+                data={rum?.timeseries?.series?.LCP || []}
+                label="LCP (ms)"
+                color="#38bdf8"
+              />
+            </CardContent>
+            <CardContent>
+              <LineChart
+                labels={rum?.timeseries?.labels || []}
+                data={rum?.timeseries?.series?.INP || []}
+                label="INP (ms)"
+                color="#f97316"
+              />
+            </CardContent>
+            <CardContent>
+              <LineChart
+                labels={rum?.timeseries?.labels || []}
+                data={rum?.timeseries?.series?.CLS || []}
+                label="CLS"
+                color="#22c55e"
+              />
+            </CardContent>
+          </Card>
+          <Card className="border-white/5">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Top pages (samples)</CardTitle>
+              <Badge variant="default">RUM</Badge>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {rum?.topPages?.length ? (
+                rum.topPages.map((page) => (
+                  <div key={page.page} className="rounded-2xl border border-white/10 px-4 py-3">
+                    <p className="text-sm text-white">{page.page}</p>
+                    <p className="mt-2 text-xs text-white/60">
+                      Samples: {page.samples} · LCP P75 {Math.round(page.lcpP75)}ms · INP{" "}
+                      {Math.round(page.inpP75)}ms · CLS {page.clsP75.toFixed(2)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-white/60">Chưa có dữ liệu.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <section className="admin-panel px-6 py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Lighthouse Lab</p>
+            <h2 className="mt-2 text-xl font-semibold text-white">Kết quả Lighthouse định kỳ</h2>
+            <p className="mt-2 text-sm text-slate-400">
+              Tổng hợp từ job CI/CD hoặc cron server.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/50">
+            {(["7d", "30d", "90d"] as const).map((range) => (
+              <button
+                key={range}
+                type="button"
+                onClick={() => setLabRange(range)}
+                className={cn(
+                  "rounded-full border px-3 py-1 transition",
+                  labRange === range
+                    ? "border-[#ff9f40] text-[#ff9f40]"
+                    : "border-white/10 text-white/50 hover:text-white"
+                )}
+              >
+                {range.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {lighthouse.length ? (
+            lighthouse.map((report) => (
+              <Card key={report.id} className="border-white/5">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm text-white/70">
+                    {report.url}
+                  </CardTitle>
+                  <Badge variant="outline">{report.device || "default"}</Badge>
+                </CardHeader>
+                <CardContent className="space-y-2 text-xs text-white/70">
+                  <div className="flex flex-wrap gap-3">
+                    <span>Perf: {report.performance ?? "-"}</span>
+                    <span>SEO: {report.seo ?? "-"}</span>
+                    <span>A11y: {report.accessibility ?? "-"}</span>
+                    <span>BP: {report.bestPractices ?? "-"}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <span>LCP: {report.lcp ? Math.round(report.lcp) : "-"}</span>
+                    <span>CLS: {report.cls ?? "-"}</span>
+                    <span>FCP: {report.fcp ? Math.round(report.fcp) : "-"}</span>
+                    <span>TBT: {report.tbt ? Math.round(report.tbt) : "-"}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <p className="text-sm text-white/60">Chưa có kết quả Lighthouse.</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

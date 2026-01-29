@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { ToastProvider } from "@/components/common/ToastProvider";
+import WebVitalsReporter from "@/components/common/WebVitalsReporter";
 
 export default function Providers({
   children,
@@ -13,7 +14,10 @@ export default function Providers({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>{children}</ToastProvider>
+      <ToastProvider>
+        <WebVitalsReporter />
+        {children}
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

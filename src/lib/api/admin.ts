@@ -46,6 +46,8 @@ import type {
   LiveResponse,
   OverviewResponse,
   PaginatedResponse,
+  WebVitalsSummary,
+  LighthouseReport,
 } from "@/types/admin-dashboard.types";
 
 type AdminRequestEvent = {
@@ -730,6 +732,26 @@ export const getObservabilitySummary = async (token?: string) =>
       cache: "no-store",
     }
   );
+
+export const getWebVitalsSummary = async (
+  token?: string,
+  range: "7d" | "14d" | "30d" = "7d"
+) =>
+  apiFetch<ApiSuccess<WebVitalsSummary>>("/admin/observability/web-vitals", {
+    token,
+    query: { range },
+    cache: "no-store",
+  });
+
+export const getLighthouseReports = async (
+  token?: string,
+  range: "7d" | "30d" | "90d" = "30d"
+) =>
+  apiFetch<ApiSuccess<LighthouseReport[]>>("/admin/observability/lighthouse", {
+    token,
+    query: { range },
+    cache: "no-store",
+  });
 
 export const getAdminAnalytics = async (
   token: string | undefined,

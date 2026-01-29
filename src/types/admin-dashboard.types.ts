@@ -90,6 +90,47 @@ export type ObservabilitySummary = {
   };
 };
 
+export type WebVitalsSummary = {
+  summary: Record<
+    string,
+    {
+      p75: number;
+      avg: number;
+      samples: number;
+    }
+  >;
+  timeseries: {
+    labels: string[];
+    series: Record<string, number[]>;
+  };
+  topPages: {
+    page: string;
+    samples: number;
+    lcpP75: number;
+    inpP75: number;
+    clsP75: number;
+  }[];
+};
+
+export type LighthouseReport = {
+  id: number;
+  url: string;
+  device?: string | null;
+  performance?: number | null;
+  accessibility?: number | null;
+  bestPractices?: number | null;
+  seo?: number | null;
+  pwa?: number | null;
+  lcp?: number | null;
+  cls?: number | null;
+  tbt?: number | null;
+  tti?: number | null;
+  fcp?: number | null;
+  speedIndex?: number | null;
+  totalBlockingTime?: number | null;
+  createdAt: string;
+};
+
 export type Customer = {
   id: number;
   name: string;
