@@ -54,3 +54,27 @@ export const sanitizeHtml = (html: string) =>
       }),
     },
   });
+
+const addLazyImages = (html: string) =>
+  html.replace(/<img(?![^>]*\bloading=)/gi, '<img loading="lazy" decoding="async" ');
+
+export const renderCmsHtml = (html: string) => {
+  const raw = typeof html === "string" ? html : "";
+  return sanitizeHtml(addLazyImages(raw));
+};
+
+export const resolveSchemaJson = (schemaJson: unknown) => {
+  if (!schemaJson) return "";
+  if (typeof schemaJson === "string") {
+    try {
+      return JSON.stringify(JSON.parse(schemaJson));
+    } catch {
+      return "";
+    }
+  }
+  try {
+    return JSON.stringify(schemaJson);
+  } catch {
+    return "";
+  }
+};

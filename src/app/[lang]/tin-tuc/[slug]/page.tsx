@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPublicPostBySlug } from "@/lib/api/public";
 import { isSupportedLang } from "@/lib/i18n";
-import { sanitizeHtml } from "@/lib/sanitize";
+import { renderCmsHtml } from "@/lib/sanitize";
 import Container from "@/components/common/Container";
 import { API_BASE_URL } from "@/lib/constants";
 import { resolveSchemaJson } from "@/lib/seo/cmsPageMeta";
@@ -100,11 +100,7 @@ export default async function PostDetailPage({
   }
 
   const rawContent = typeof translation.content === "string" ? translation.content : "";
-  const withLazyImages = rawContent.replace(
-    /<img(?![^>]*loading=)/gi,
-    '<img loading="lazy" decoding="async" '
-  );
-  const content = sanitizeHtml(withLazyImages);
+  const content = renderCmsHtml(rawContent);
 
   return (
     <section className="py-16">

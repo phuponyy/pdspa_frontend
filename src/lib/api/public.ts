@@ -123,10 +123,11 @@ export const getPublicPostBySlug = async (slug: string, lang: string) =>
     query: { lang },
   });
 
-export const getServices = async (lang: string) =>
+export const getServices = async (lang: string, signal?: AbortSignal) =>
   apiFetch<PublicServicesResponse>("/public/services", {
     cache: "no-store",
     query: { lang },
+    signal,
   });
 
 export const submitLead = async (payload: LeadCreateRequest) =>

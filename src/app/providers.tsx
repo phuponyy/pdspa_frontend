@@ -10,7 +10,21 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: (failureCount) => failureCount < 2,
+            retryDelay: (attemptIndex) =>
+              Math.min(1000 * 2 ** attemptIndex + Math.random() * 250, 8000),
+          },
+          mutations: {
+            retry: 0,
+          },
+        },
+      })
+  );
 
   return (
     <QueryClientProvider client={queryClient}>

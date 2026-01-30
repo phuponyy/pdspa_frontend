@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import RichTextEditor from "@/components/admin/RichTextEditor";
 import Textarea from "@/components/common/Textarea";
 import { useToast } from "@/components/common/ToastProvider";
 import type { CmsPage } from "@/types/api.types";
@@ -15,6 +15,15 @@ import {
   generateSeoFromContent,
   type SchemaTemplateType,
 } from "@/lib/seo/seoUtils";
+
+const RichTextEditor = dynamic(() => import("@/components/admin/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="rounded-2xl border border-[var(--line)] bg-white p-4 text-sm text-[var(--ink-muted)]">
+      Loading editor...
+    </div>
+  ),
+});
 
 export default function CmsPageForm({
   initial,

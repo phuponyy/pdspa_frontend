@@ -13,8 +13,21 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { getAdminMe, getBookings } from "@/lib/api/admin";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAdminQuery } from "@/lib/api/adminHooks";
+import {
+  getAdminMe,
+  getAdminOverview,
+  getAdminRoles,
+  getAdminServices,
+  getAdminUsers,
+  getBookings,
+  getCmsCategories,
+  getCmsPosts,
+  getCmsTags,
+  getMediaFolders,
+  getMediaTags,
+} from "@/lib/api/admin";
 import AdminRequestFeedback from "./AdminRequestFeedback";
 import type { Booking } from "@/types/admin-dashboard.types";
 import { useTranslation } from "react-i18next";
@@ -56,6 +69,7 @@ export default function AdminShell({
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -76,9 +90,12 @@ export default function AdminShell({
       }),
     []
   );
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useAdminQuery({
     queryKey: ["admin-me"],
-    queryFn: () => getAdminMe(undefined),
+    queryFn: ({ signal }) => getAdminMe(undefined, signal),
+    staleTime: 60_000,
+    cacheTime: 5 * 60_000,
+    toastOnError: false,
   });
   const userName = data?.data?.name || data?.data?.email || "Admin User";
   const avatarUrl = data?.data?.avatarUrl || "/admin-avatar.svg";
@@ -151,17 +168,20 @@ export default function AdminShell({
     return true;
   }, [adminPath, effectivePermissions, roleKey]);
 
-  const bookingsQuery = useQuery({
+  const bookingsQuery = useAdminQuery({
     queryKey: ["admin-booking-notifications"],
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       getBookings(
         undefined,
         { status: "NEW", page: 1, limit: 5 },
-        { notify: false, timeoutMs: 8000 }
+        { notify: false, timeoutMs: 8000, signal }
       ),
     enabled: canViewBookings,
     refetchInterval: 15000,
     refetchIntervalInBackground: true,
+    staleTime: 5_000,
+    cacheTime: 60_000,
+    toastOnError: false,
   });
 
   const newBookings = bookingsQuery.data?.items ?? [];
@@ -194,6 +214,37 @@ export default function AdminShell({
       i18n.changeLanguage(stored);
     }
   }, [i18n]);
+
+  useEffect(() => {
+    if (!roleKey) return;
+    const prefetch = <T,>(key: unknown[], fn: () => Promise<T>) =>
+      queryClient.prefetchQuery({
+        queryKey: key,
+        queryFn: fn,
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+      });
+
+    if (effectivePermissions.includes("view_dashboard")) {
+      prefetch(["admin-overview"], () => getAdminOverview(undefined, {}));
+    }
+    if (effectivePermissions.includes("manage_posts")) {
+      prefetch(["cms-posts", 1, 20], () => getCmsPosts(undefined, 1, 20));
+      prefetch(["cms-categories"], () => getCmsCategories(undefined));
+      prefetch(["cms-tags"], () => getCmsTags(undefined));
+    }
+    if (effectivePermissions.includes("manage_media")) {
+      prefetch(["cms-media-folders"], () => getMediaFolders());
+      prefetch(["cms-media-tags"], () => getMediaTags());
+    }
+    if (effectivePermissions.includes("manage_users")) {
+      prefetch(["admin-roles"], () => getAdminRoles(undefined));
+      prefetch(["admin-users"], () => getAdminUsers(undefined));
+    }
+    if (effectivePermissions.includes("manage_services")) {
+      prefetch(["admin-services"], () => getAdminServices(undefined));
+    }
+  }, [effectivePermissions, queryClient, roleKey]);
 
   useEffect(() => {
     if (!roleKey) return;

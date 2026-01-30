@@ -1,5 +1,4 @@
-import { apiFetch } from "./client";
-import { API_BASE_URL } from "@/lib/constants";
+import { adminFetch, apiFetch } from "./client";
 import type {
   AdminLoginRequest,
   AdminLoginResponse,
@@ -59,45 +58,7 @@ import type {
   LighthouseReport,
 } from "@/types/admin-dashboard.types";
 
-type AdminRequestEvent = {
-  phase: "start" | "end";
-  id: string;
-  method: string;
-  path: string;
-  ok?: boolean;
-  status?: number;
-};
-
-const getCsrfToken = () => {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie
-    .split(";")
-    .map((item) => item.trim())
-    .find((item) => item.startsWith("pd2_csrf="));
-  return match ? decodeURIComponent(match.split("=")[1] || "") : "";
-};
-
-const dispatchAdminRequest = (detail: AdminRequestEvent) => {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent<AdminRequestEvent>("admin-request", { detail }));
-};
-
-const withAdminRequest = async <T,>(
-  path: string,
-  method: string,
-  run: () => Promise<T>
-) => {
-  const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  dispatchAdminRequest({ phase: "start", id: requestId, method, path });
-  try {
-    const result = await run();
-    dispatchAdminRequest({ phase: "end", id: requestId, method, path, ok: true, status: 200 });
-    return result;
-  } catch (err) {
-    dispatchAdminRequest({ phase: "end", id: requestId, method, path, ok: false, status: 0 });
-    throw err;
-  }
-};
+// adminFetch handles CSRF + admin request lifecycle
 
 export const loginAdmin = async (payload: AdminLoginRequest) =>
   apiFetch<AdminLoginResponse>("/admin/auth/login", {
@@ -363,23 +324,11 @@ export const updateSiteConfig = async (
   });
 
 export const uploadHeroImage = async (file: File) => {
-  return withAdminRequest("/admin/pages/home/hero/images", "POST", async () => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const csrfToken = getCsrfToken();
-
-    const response = await fetch(`${API_BASE_URL}/admin/pages/home/hero/images`, {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
-    });
-
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
-
-    return (await response.json()) as HeroImageUploadResponse;
+  const formData = new FormData();
+  formData.append("file", file);
+  return adminFetch<HeroImageUploadResponse>("/admin/pages/home/hero/images", {
+    method: "POST",
+    body: formData,
   });
 };
 
@@ -651,18 +600,11 @@ export const exportSeoKeywordsCsv = async (
   keywordId?: number
 ) => {
   const query = keywordId ? `?keywordId=${keywordId}` : "";
-  const response = await fetch(`${API_BASE_URL}/admin/seo/keywords/export${query}`, {
+  return adminFetch<string>(`/admin/seo/keywords/export${query}`, {
     method: "GET",
-    credentials: "include",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      "x-csrf-token": getCsrfToken(),
-    },
+    token,
+    responseType: "text",
   });
-  if (!response.ok) {
-    throw new Error("Export failed");
-  }
-  return response.text();
 };
 
 export const getCmsPages = async (token?: string, page = 1, limit = 20) =>
@@ -741,44 +683,20 @@ export const updateAdminIpConfig = async (payload: {
   );
 
 export const uploadMedia = async (file: File) => {
-  return withAdminRequest("/admin/cms/media", "POST", async () => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const csrfToken = getCsrfToken();
-
-    const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
-    });
-
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
-
-    return (await response.json()) as MediaUploadResponse;
+  const formData = new FormData();
+  formData.append("file", file);
+  return adminFetch<MediaUploadResponse>("/admin/cms/media", {
+    method: "POST",
+    body: formData,
   });
 };
 
 export const updateMedia = async (id: number, file: File) => {
-  return withAdminRequest(`/admin/cms/media/${id}`, "PATCH", async () => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const csrfToken = getCsrfToken();
-
-    const response = await fetch(`${API_BASE_URL}/admin/cms/media/${id}`, {
-      method: "PATCH",
-      credentials: "include",
-      body: formData,
-      headers: csrfToken ? { "X-CSRF-Token": csrfToken } : undefined,
-    });
-
-    if (!response.ok) {
-      throw new Error("Update failed");
-    }
-
-    return (await response.json()) as MediaUploadResponse;
+  const formData = new FormData();
+  formData.append("file", file);
+  return adminFetch<MediaUploadResponse>(`/admin/cms/media/${id}`, {
+    method: "PATCH",
+    body: formData,
   });
 };
 
@@ -825,10 +743,11 @@ export const getAdminUsers = async (token?: string) =>
     cache: "no-store",
   });
 
-export const getAdminMe = async (token?: string) =>
+export const getAdminMe = async (token?: string, signal?: AbortSignal) =>
   apiFetch<AdminMeResponse>("/admin/auth/me", {
     token,
     cache: "no-store",
+    signal,
   });
 
 export const getAdminRoles = async (token?: string) =>
@@ -885,10 +804,11 @@ export const deleteAdminRole = async (token: string | undefined, id: number) =>
     method: "DELETE",
   });
 
-export const getAdminServices = async (token?: string) =>
+export const getAdminServices = async (token?: string, signal?: AbortSignal) =>
   apiFetch<AdminServicesResponse>("/admin/services", {
     token,
     cache: "no-store",
+    signal,
   });
 
 export const createAdminService = async (token: string | undefined, payload: unknown) =>
@@ -994,7 +914,7 @@ export const getCustomers = async (
 export const getBookings = async (
   token?: string,
   params?: Record<string, string | number | undefined>,
-  options?: { notify?: boolean; timeoutMs?: number }
+  options?: { notify?: boolean; timeoutMs?: number; signal?: AbortSignal }
 ) =>
   apiFetch<PaginatedResponse<Booking>>("/admin/bookings", {
     token,
@@ -1002,6 +922,7 @@ export const getBookings = async (
     cache: "no-store",
     notify: options?.notify,
     timeoutMs: options?.timeoutMs,
+    signal: options?.signal,
   });
 
 export const updateBookingStatus = async (
@@ -1027,25 +948,15 @@ export const updateBooking = async (
   });
 
 export const exportCustomers = async (format: "csv" | "xlsx") => {
-  return withAdminRequest(`/admin/exports/customers?format=${format}`, "EXPORT", async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/exports/customers?format=${format}`, {
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error("Export failed");
-    }
-    return response.blob();
+  return adminFetch<Blob>(`/admin/exports/customers?format=${format}`, {
+    method: "GET",
+    responseType: "blob",
   });
 };
 
 export const exportBookings = async (format: "csv" | "xlsx") => {
-  return withAdminRequest(`/admin/exports/bookings?format=${format}`, "EXPORT", async () => {
-    const response = await fetch(`${API_BASE_URL}/admin/exports/bookings?format=${format}`, {
-      credentials: "include",
-    });
-    if (!response.ok) {
-      throw new Error("Export failed");
-    }
-    return response.blob();
+  return adminFetch<Blob>(`/admin/exports/bookings?format=${format}`, {
+    method: "GET",
+    responseType: "blob",
   });
 };

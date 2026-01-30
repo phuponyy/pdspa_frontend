@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createAdminService,
   deleteAdminService,
   getAdminServices,
   updateAdminService,
 } from "@/lib/api/admin";
+import { useAdminQuery } from "@/lib/api/adminHooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,9 +80,11 @@ export default function AdminServices() {
   const [editing, setEditing] = useState<AdminService | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const servicesQuery = useQuery({
+  const servicesQuery = useAdminQuery({
     queryKey: ["admin-services"],
-    queryFn: () => getAdminServices(undefined),
+    queryFn: ({ signal }) => getAdminServices(undefined, signal),
+    toastOnError: true,
+    errorMessage: "Không thể tải danh sách dịch vụ.",
   });
 
   const services = servicesQuery.data?.data || [];
@@ -439,7 +442,18 @@ export default function AdminServices() {
           </Dialog>
         </CardHeader>
         <CardContent className="space-y-4">
-          {services.length ? (
+          {servicesQuery.isError ? (
+            <div className="rounded-2xl border border-white/10 bg-[#111a25] p-4 text-sm text-white/70">
+              Không thể tải dịch vụ. 
+              <button
+                type="button"
+                onClick={() => servicesQuery.refetch()}
+                className="ml-2 rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white"
+              >
+                Retry
+              </button>
+            </div>
+          ) : services.length ? (
             services.map((service) => {
               const translation =
                 service.translations.find((item) => item.langCode === activeLang) ??

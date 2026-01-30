@@ -11,6 +11,7 @@ import Container from "@/components/common/Container";
 import type { HomeSection } from "@/types/page.types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { resolveSchemaJson } from "@/lib/sanitize";
 
 const findSection = (sections: HomeSection[] | undefined, keys: string[]) =>
   sections?.find((section) =>
@@ -111,21 +112,7 @@ export default async function HomePage({
   const services = servicesResponse?.data ?? [];
   const config = siteConfigResponse?.data ?? {};
   const schemaJson = homeData?.meta?.schemaJson ?? null;
-  const resolvedSchema = (() => {
-    if (!schemaJson) return "";
-    if (typeof schemaJson === "string") {
-      try {
-        return JSON.stringify(JSON.parse(schemaJson));
-      } catch {
-        return "";
-      }
-    }
-    try {
-      return JSON.stringify(schemaJson);
-    } catch {
-      return "";
-    }
-  })();
+  const resolvedSchema = resolveSchemaJson(schemaJson);
 
   const heroFromPage = (homeData?.page as { hero?: HomeSection })?.hero;
   const heroSection =

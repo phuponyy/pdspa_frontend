@@ -10,7 +10,7 @@ import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMe } from "@/lib/api/admin";
 import { apiFetch } from "@/lib/api/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 type AdminNavLink = {
@@ -256,7 +256,7 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
         {
           href: ADMIN_ROUTES.securityWhitelist,
           label: "WhiteList IP",
-          requiredPermissions: ["manage_users"],
+          requiredPermissions: ["manage_security"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6z" />
@@ -267,7 +267,7 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
         {
           href: ADMIN_ROUTES.securityBlacklist,
           label: "BlackList IP",
-          requiredPermissions: ["manage_users"],
+          requiredPermissions: ["manage_security"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6z" />
@@ -278,7 +278,7 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
         {
           href: ADMIN_ROUTES.securitySessions,
           label: "Phiên đăng nhập",
-          requiredPermissions: ["manage_users"],
+          requiredPermissions: ["manage_security"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="4" width="18" height="14" rx="2" />
@@ -289,7 +289,7 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
         {
           href: ADMIN_ROUTES.securityMfa,
           label: "MFA / 2FA",
-          requiredPermissions: ["manage_users"],
+          requiredPermissions: ["manage_security"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="4" y="10" width="16" height="10" rx="2" />
@@ -301,7 +301,7 @@ export const adminNavSections = (t: (key: string) => string): AdminNavSection[] 
         {
           href: ADMIN_ROUTES.securityAudit,
           label: "Audit Log",
-          requiredPermissions: ["manage_users"],
+          requiredPermissions: ["manage_security"],
           icon: (
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 4h12l4 4v12a2 2 0 0 1-2 2H4z" />
@@ -340,6 +340,7 @@ export default function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
+  const navRef = useRef<HTMLDivElement | null>(null);
   const navSections = useMemo(() => adminNavSections(t), [t]);
   const { data, isLoading } = useQuery({
     queryKey: ["admin-me"],
@@ -409,8 +410,48 @@ export default function Sidebar() {
     }
   };
 
+  const handleNavKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const container = navRef.current;
+    if (!container) return;
+    const focusableLinks = Array.from(
+      container.querySelectorAll<HTMLAnchorElement>('[data-admin-nav-link="true"]')
+    ).filter((item) => item.tabIndex >= 0);
+
+    if (!focusableLinks.length) return;
+    const currentIndex = focusableLinks.indexOf(
+      document.activeElement as HTMLAnchorElement
+    );
+
+    const focusAt = (index: number) => {
+      const target = focusableLinks[index];
+      if (target) {
+        event.preventDefault();
+        target.focus();
+      }
+    };
+
+    if (event.key === "ArrowDown") {
+      const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % focusableLinks.length : 0;
+      focusAt(nextIndex);
+    } else if (event.key === "ArrowUp") {
+      const nextIndex =
+        currentIndex >= 0
+          ? (currentIndex - 1 + focusableLinks.length) % focusableLinks.length
+          : focusableLinks.length - 1;
+      focusAt(nextIndex);
+    } else if (event.key === "Home") {
+      focusAt(0);
+    } else if (event.key === "End") {
+      focusAt(focusableLinks.length - 1);
+    }
+  };
+
   return (
-    <aside className="sticky top-8 hidden h-fit w-72 flex-col gap-6 text-white lg:flex">
+    <aside
+      className="sticky top-8 hidden h-fit w-72 flex-col gap-6 text-white lg:flex"
+      role="navigation"
+      aria-label="Admin sidebar"
+    >
       <div className="admin-panel flex flex-col gap-4 p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff9f40] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.3)]">
@@ -428,7 +469,11 @@ export default function Sidebar() {
           Bảo mật không gian làm việc cho nội dung, khách hàng tiềm năng và tình trạng hệ thống.
         </p>
       </div>
-      <div className="admin-panel flex flex-col gap-5 p-4 text-sm">
+      <div
+        ref={navRef}
+        className="admin-panel flex flex-col gap-5 p-4 text-sm"
+        onKeyDown={handleNavKeyDown}
+      >
         {isLoading ? (
           <p className="px-3 text-xs uppercase tracking-[0.35em] text-white/40">
             Đăng Tải...
@@ -440,6 +485,9 @@ export default function Sidebar() {
         ) : (
           sectionsWithActive.map((section) => {
             const isOpen = openSections[section.title] ?? true;
+            const sectionId = `admin-section-${section.title
+              .toLowerCase()
+              .replace(/\s+/g, "-")}`;
             return (
               <div key={section.title} className="space-y-2">
                 <button
@@ -452,6 +500,8 @@ export default function Sidebar() {
                   }
                   className="flex w-full items-center justify-between px-3 text-left text-xs uppercase tracking-[0.35em] text-white/40 transition hover:text-white/70"
                   aria-expanded={isOpen}
+                  aria-controls={sectionId}
+                  aria-label={`Toggle ${section.title}`}
                 >
                   <span>{section.title}</span>
                   <svg
@@ -468,10 +518,12 @@ export default function Sidebar() {
                   </svg>
                 </button>
                 <div
+                  id={sectionId}
                   className={cn(
                     "flex flex-col gap-2 overflow-hidden transition-all duration-300",
                     isOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
                   )}
+                  aria-hidden={!isOpen}
                 >
                   {section.links.map((link) => {
                     const active = pathname === link.href;
@@ -479,6 +531,8 @@ export default function Sidebar() {
                       <Link
                         key={link.href}
                         href={link.href}
+                        data-admin-nav-link="true"
+                        tabIndex={isOpen ? 0 : -1}
                         className={cn(
                           "group relative flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition",
                           active

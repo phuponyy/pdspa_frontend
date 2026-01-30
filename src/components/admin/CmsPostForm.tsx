@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
 import Textarea from "@/components/common/Textarea";
-import RichTextEditor from "@/components/admin/RichTextEditor";
 import { useToast } from "@/components/common/ToastProvider";
 import type { CmsCategory, CmsPost, CmsTag } from "@/types/api.types";
 import { ApiError } from "@/lib/api/client";
@@ -27,6 +27,16 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { API_BASE_URL } from "@/lib/constants";
 import Cropper from "react-easy-crop";
+import FocusTrap from "@/components/common/FocusTrap";
+
+const RichTextEditor = dynamic(() => import("@/components/admin/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="rounded-2xl border border-[var(--line)] bg-white p-4 text-sm text-[var(--ink-muted)]">
+      Loading editor...
+    </div>
+  ),
+});
 
 export default function CmsPostForm({
   initial,
@@ -1362,7 +1372,13 @@ export default function CmsPostForm({
       </div>
       {thumbCropOpen && thumbCropSrc ? (
         <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/70 p-6">
-          <div className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-[#0f1722] text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+          <FocusTrap active={thumbCropOpen}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Crop thumbnail"
+              className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 bg-[#0f1722] text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+            >
             <div className="border-b border-white/10 px-6 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
               Crop thumbnail (1:1)
             </div>
@@ -1433,7 +1449,8 @@ export default function CmsPostForm({
                 </button>
               </div>
             </div>
-          </div>
+            </div>
+          </FocusTrap>
         </div>
       ) : null}
     </div>

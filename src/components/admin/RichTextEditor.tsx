@@ -6,9 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/lib/constants";
 import Cropper from "react-easy-crop";
 import { getMediaLibrary } from "@/lib/api/admin";
+import { adminFetch } from "@/lib/api/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import FocusTrap from "@/components/common/FocusTrap";
 
 const Editor = dynamic(async () => {
   const mod = await import("@tinymce/tinymce-react");
@@ -86,28 +88,14 @@ export default function RichTextEditor({
   const uploadImageBlob = useCallback(async (blob: Blob, filename: string) => {
     const formData = new FormData();
     formData.append("file", blob, filename);
-    const csrfToken =
-      typeof document === "undefined"
-        ? ""
-        : document.cookie
-            .split(";")
-            .map((item) => item.trim())
-            .find((item) => item.startsWith("pd2_csrf="))
-            ?.split("=")[1] || "";
-    const response = await fetch(`${API_BASE_URL}/admin/cms/media`, {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-      headers: csrfToken ? { "X-CSRF-Token": decodeURIComponent(csrfToken) } : undefined,
-    });
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
-    const payload = (await response.json()) as {
+    const payload = await adminFetch<{
       success?: boolean;
       location?: string;
       data?: { url?: string };
-    };
+    }>("/admin/cms/media", {
+      method: "POST",
+      body: formData,
+    });
     const url = payload?.location || payload?.data?.url || "";
     if (!url) {
       throw new Error("Upload failed");
@@ -279,7 +267,13 @@ export default function RichTextEditor({
       </Dialog>
       {cropOpen && cropSrc ? (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-6">
-          <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-[#0f1722] text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
+          <FocusTrap active={cropOpen}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Crop image"
+              className="w-full max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-[#0f1722] text-white shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+            >
             <div className="border-b border-white/10 px-6 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
               Crop image
             </div>
@@ -344,7 +338,8 @@ export default function RichTextEditor({
                 </button>
               </div>
             </div>
-          </div>
+            </div>
+          </FocusTrap>
         </div>
       ) : null}
     </div>

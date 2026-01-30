@@ -1,27 +1,14 @@
 import type { Metadata } from "next";
 import { getCmsPageBySlug } from "@/lib/api/public";
 import { API_BASE_URL } from "@/lib/constants";
+import { resolveSchemaJson } from "@/lib/sanitize";
 
 const resolveOgImage = (value?: string | null) => {
   if (!value) return undefined;
   return value.startsWith("/") ? `${API_BASE_URL}${value}` : value;
 };
 
-export const resolveSchemaJson = (schemaJson: unknown) => {
-  if (!schemaJson) return "";
-  if (typeof schemaJson === "string") {
-    try {
-      return JSON.stringify(JSON.parse(schemaJson));
-    } catch {
-      return "";
-    }
-  }
-  try {
-    return JSON.stringify(schemaJson);
-  } catch {
-    return "";
-  }
-};
+export { resolveSchemaJson };
 
 export const buildCmsMetadata = async (
   slug: string,

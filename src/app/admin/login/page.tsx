@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { authSchema, type AuthFormValues } from "@/lib/schemas/authSchema";
 import { loginAdmin, verifyMfaLogin } from "@/lib/api/admin";
+import { useZodForm } from "@/lib/forms/useZodForm";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { ApiError } from "@/lib/api/client";
@@ -25,9 +24,7 @@ export default function AdminLogin() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<AuthFormValues>({
-    resolver: zodResolver(authSchema),
-  });
+  } = useZodForm<AuthFormValues>(authSchema);
 
   const onSubmit = async (data: AuthFormValues) => {
     setError(null);

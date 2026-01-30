@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getCmsPageBySlug } from "@/lib/api/public";
 import { isSupportedLang } from "@/lib/i18n";
-import { sanitizeHtml } from "@/lib/sanitize";
+import { renderCmsHtml, resolveSchemaJson } from "@/lib/sanitize";
 import Container from "@/components/common/Container";
 import { API_BASE_URL } from "@/lib/constants";
 
@@ -93,27 +93,9 @@ export default async function CmsPage({
   }
 
   const rawContent = typeof translation.content === "string" ? translation.content : "";
-  const withLazyImages = rawContent.replace(
-    /<img(?![^>]*loading=)/gi,
-    '<img loading="lazy" decoding="async" '
-  );
-  const content = sanitizeHtml(withLazyImages);
+  const content = renderCmsHtml(rawContent);
   const schemaJson = data?.seo?.schemaJson ?? translation.schemaJson ?? null;
-  const resolvedSchema = (() => {
-    if (!schemaJson) return "";
-    if (typeof schemaJson === "string") {
-      try {
-        return JSON.stringify(JSON.parse(schemaJson));
-      } catch {
-        return "";
-      }
-    }
-    try {
-      return JSON.stringify(schemaJson);
-    } catch {
-      return "";
-    }
-  })();
+  const resolvedSchema = resolveSchemaJson(schemaJson);
 
   return (
     <section className="py-16">

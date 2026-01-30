@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   exportBookings,
@@ -24,6 +24,7 @@ import type { Booking } from "@/types/admin-dashboard.types";
 import type { PublicService } from "@/types/api.types";
 import { DEFAULT_LANG } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
+import { useAdminQuery } from "@/lib/api/adminHooks";
 
 const statusColor: Record<Booking["status"], string> = {
   NEW: "bg-sky-500/15 text-sky-200 border-sky-500/30",
@@ -78,21 +79,26 @@ export default function AdminBookings() {
   const [wechatId, setWechatId] = useState("");
   const [bookingError, setBookingError] = useState("");
 
-  const { data } = useQuery({
+  const bookingsQuery = useAdminQuery({
     queryKey: ["admin-bookings"],
-    queryFn: () => getBookings(undefined, { page: 1, pageSize: 20 }),
+    queryFn: ({ signal }) =>
+      getBookings(undefined, { page: 1, pageSize: 20 }, { signal }),
+    toastOnError: true,
+    errorMessage: "Không thể tải danh sách booking.",
   });
 
-  const meQuery = useQuery({
+  const meQuery = useAdminQuery({
     queryKey: ["admin-me"],
-    queryFn: () => getAdminMe(undefined),
+    queryFn: ({ signal }) => getAdminMe(undefined, signal),
+    toastOnError: false,
   });
   const permissions = meQuery.data?.data?.permissions || [];
   const canEditBookings = permissions.includes("edit_bookings") || permissions.includes("manage_bookings");
 
-  const servicesQuery = useQuery({
+  const servicesQuery = useAdminQuery({
     queryKey: ["admin-booking-services", lang],
-    queryFn: () => getServices(lang),
+    queryFn: ({ signal }) => getServices(lang, signal),
+    toastOnError: false,
   });
 
   const mutation = useMutation({
@@ -347,7 +353,20 @@ export default function AdminBookings() {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={data?.items || []} searchColumn="customer" />
+          {bookingsQuery.isError ? (
+            <div className="rounded-2xl border border-white/10 bg-[#111a25] p-4 text-sm text-white/70">
+              Không thể tải booking.
+              <button
+                type="button"
+                onClick={() => bookingsQuery.refetch()}
+                className="ml-2 rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/70 hover:text-white"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <DataTable columns={columns} data={bookingsQuery.data?.items || []} searchColumn="customer" />
+          )}
         </CardContent>
       </Card>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

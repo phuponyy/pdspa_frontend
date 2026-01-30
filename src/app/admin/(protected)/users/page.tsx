@@ -291,6 +291,10 @@ function UserRow({
     }
     return roles.find((role) => role.key === roleKey) || null;
   }, [roleKey, roles, user.role, user.roleKey]);
+  const securityRole = useMemo(
+    () => roles.find((role) => role.key === "SECURITY_ADMIN") || null,
+    [roles]
+  );
 
   return (
     <div className="rounded-3xl border border-white/10 bg-[#16202c] p-5 text-sm">
@@ -316,6 +320,29 @@ function UserRow({
           </span>
         </div>
       </div>
+      {securityRole ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/60">
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={roleKey === "SECURITY_ADMIN"}
+            onClick={async () => {
+              try {
+                await updateAdminUser(undefined, user.id, {
+                  roleKey: securityRole.key,
+                });
+                setRoleKey(securityRole.key);
+                await onUpdated();
+                onSuccess("Đã gán quyền Security.", "success");
+              } catch (err) {
+                onError(err);
+              }
+            }}
+          >
+            Gán Security
+          </Button>
+        </div>
+      ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
