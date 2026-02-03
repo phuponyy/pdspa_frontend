@@ -37,14 +37,14 @@ export const baseChartOptions = {
   },
   interaction: {
     intersect: false,
-    mode: "index",
+    mode: "index" as const,
   },
   plugins: {
     legend: {
       position: "bottom" as const,
       labels: {
         color: "#cbd5f5",
-        font: { size: 11, weight: "600" },
+        font: { size: 11, weight: "bold" as const },
         usePointStyle: true,
         boxWidth: 8,
         boxHeight: 8,
@@ -60,8 +60,8 @@ export const baseChartOptions = {
       displayColors: true,
       usePointStyle: true,
       callbacks: {
-        label: (context: { parsed?: { y?: number } }) =>
-          ` ${context.parsed?.y?.toLocaleString?.() ?? 0}`,
+        label: (context: any) =>
+          ` ${context?.parsed?.y?.toLocaleString?.() ?? 0}`,
       },
     },
   },

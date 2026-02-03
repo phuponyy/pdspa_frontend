@@ -17,22 +17,32 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   getHomeHero,
   getHomeIntro,
+  getHomeHighlights,
+  getHomeServices,
   getHomeRecovery,
+  getHomeSectionsOrder,
   getHomeMeta,
   getHomeStatus,
   updateHomeHero,
   updateHomeIntro,
+  updateHomeHighlights,
+  updateHomeServices,
   updateHomeRecovery,
+  updateHomeSectionsOrder,
   updateHomeMeta,
   updateHomeStatus,
+  getMediaLibrary,
+  getAdminServices,
   uploadHeroImage,
 } from "@/lib/api/admin";
 import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/constants";
 import type { HeroSlide } from "@/types/page.types";
+import { useAdminQuery } from "@/lib/api/adminHooks";
 import {
   analyzeSeo,
   buildSchemaTemplate,
@@ -79,6 +89,7 @@ type RecoveryItem = {
 
 type RecoveryState = {
   heading: string;
+  description: string;
   items: RecoveryItem[];
 };
 
@@ -147,6 +158,7 @@ export default function PageEditor({ lang }: { lang: string }) {
   const [recoveryByLang, setRecoveryByLang] = useState<Record<string, RecoveryState>>({
     vi: {
       heading: "Recover your energy through relaxation",
+      description: "",
       items: [
         { title: "Deep Massage Therapy", description: "", imageUrl: "" },
         { title: "Shuttle Service Spa", description: "", imageUrl: "" },
@@ -155,6 +167,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     },
     en: {
       heading: "Recover your energy through relaxation",
+      description: "",
       items: [
         { title: "Deep Massage Therapy", description: "", imageUrl: "" },
         { title: "Shuttle Service Spa", description: "", imageUrl: "" },
@@ -162,6 +175,62 @@ export default function PageEditor({ lang }: { lang: string }) {
       ],
     },
   });
+  const [highlightsByLang, setHighlightsByLang] = useState<Record<string, RecoveryState>>({
+    vi: {
+      heading: "Recover your energy through relaxation",
+      description: "",
+      items: [
+        { title: "Deep Massage Therapy", description: "", imageUrl: "" },
+        { title: "Shuttle Service Spa", description: "", imageUrl: "" },
+        { title: "Dedicated, Professional Service", description: "", imageUrl: "" },
+      ],
+    },
+    en: {
+      heading: "Recover your energy through relaxation",
+      description: "",
+      items: [
+        { title: "Deep Massage Therapy", description: "", imageUrl: "" },
+        { title: "Shuttle Service Spa", description: "", imageUrl: "" },
+        { title: "Dedicated, Professional Service", description: "", imageUrl: "" },
+      ],
+    },
+  });
+  const [servicesByLang, setServicesByLang] = useState<
+    Record<
+      string,
+      {
+        heading: string;
+        description: string;
+        items: {
+          serviceId?: number;
+          imageUrl?: string;
+          label?: string;
+          priceNote?: string;
+        }[];
+      }
+    >
+  >({
+    vi: {
+      heading: "Services massage at Panda Spa",
+      description: "",
+      items: [],
+    },
+    en: {
+      heading: "Services massage at Panda Spa",
+      description: "",
+      items: [],
+    },
+  });
+  const defaultSectionOrder = [
+    "hero",
+    "intro",
+    "services",
+    "highlights",
+    "recovery",
+  ];
+  const [sectionOrder, setSectionOrder] = useState<string[]>(defaultSectionOrder);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [draggingSection, setDraggingSection] = useState<string | null>(null);
   const [focusKeywordByLang, setFocusKeywordByLang] = useState<Record<string, string>>(
     () => ({
       vi: "",
@@ -198,6 +267,15 @@ export default function PageEditor({ lang }: { lang: string }) {
   const [mounted, setMounted] = useState(false);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const [showFloatingBar, setShowFloatingBar] = useState(false);
+  const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
+  const [mediaQuery, setMediaQuery] = useState("");
+  const [mediaTarget, setMediaTarget] = useState<
+    | {
+        section: "highlights" | "recovery" | "services";
+        index: number;
+      }
+    | null
+  >(null);
   const storageKey = "home-editor-draft";
   const toast = useToast();
 
@@ -212,6 +290,52 @@ export default function PageEditor({ lang }: { lang: string }) {
     }
     notify("Unable to reach the server. Please try again.", "error");
   };
+
+  const formatVnd = (value: number) => {
+    try {
+      return value.toLocaleString("vi-VN");
+    } catch {
+      return String(value);
+    }
+  };
+
+  const normalizeMediaUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith(API_BASE_URL)) {
+      return url.replace(API_BASE_URL, "");
+    }
+    return url;
+  };
+
+  const resolveMediaUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${API_BASE_URL}${url}`;
+  };
+
+  const mediaQueryResult = useAdminQuery({
+    queryKey: ["cms-media-library", mediaQuery],
+    queryFn: () => getMediaLibrary(undefined, 1, 60, { q: mediaQuery }),
+    enabled: mediaDialogOpen,
+    staleTime: 30_000,
+    toastOnError: false,
+  });
+  const mediaItems = mediaQueryResult.data?.data?.items ?? [];
+
+  const servicesQuery = useAdminQuery({
+    queryKey: ["admin-services"],
+    queryFn: () => getAdminServices(undefined),
+    staleTime: 60_000,
+    toastOnError: false,
+  });
+  const adminServices = servicesQuery.data?.data ?? [];
+
+  const sectionOrderQuery = useAdminQuery({
+    queryKey: ["admin-home-sections-order"],
+    queryFn: () => getHomeSectionsOrder(undefined),
+    staleTime: 60_000,
+    toastOnError: false,
+  });
 
   const parseSchemaJson = (raw?: string) => {
     const trimmed = raw?.trim();
@@ -250,22 +374,30 @@ export default function PageEditor({ lang }: { lang: string }) {
         metaByLang?: Record<string, MetaState>;
         heroByLang?: Record<string, HeroState>;
         introByLang?: Record<string, IntroState>;
+        highlightsByLang?: Record<string, RecoveryState>;
+        servicesByLang?: Record<string, typeof servicesByLang["vi"]>;
         recoveryByLang?: Record<string, RecoveryState>;
         focusKeywordByLang?: Record<string, string>;
         schemaTemplateByLang?: Record<string, SchemaTemplateType>;
         schemaOrgByLang?: Record<string, string>;
         schemaFaqByLang?: Record<string, { question: string; answer: string }[]>;
+        sectionOrder?: string[];
         activeLang?: string;
         status?: "DRAFT" | "PUBLISHED";
       };
       if (parsed?.metaByLang) setMetaByLang(parsed.metaByLang);
       if (parsed?.heroByLang) setHeroByLang(parsed.heroByLang);
       if (parsed?.introByLang) setIntroByLang(parsed.introByLang);
+      if (parsed?.highlightsByLang) setHighlightsByLang(parsed.highlightsByLang);
+      if (parsed?.servicesByLang) setServicesByLang(parsed.servicesByLang);
       if (parsed?.recoveryByLang) setRecoveryByLang(parsed.recoveryByLang);
       if (parsed?.focusKeywordByLang) setFocusKeywordByLang(parsed.focusKeywordByLang);
       if (parsed?.schemaTemplateByLang) setSchemaTemplateByLang(parsed.schemaTemplateByLang);
       if (parsed?.schemaOrgByLang) setSchemaOrgByLang(parsed.schemaOrgByLang);
       if (parsed?.schemaFaqByLang) setSchemaFaqByLang(parsed.schemaFaqByLang);
+      if (Array.isArray(parsed?.sectionOrder) && parsed.sectionOrder.length) {
+        setSectionOrder(parsed.sectionOrder);
+      }
       if (parsed?.status) setStatus(parsed.status);
       if (parsed?.activeLang && languages.includes(parsed.activeLang)) {
         setActiveLang(parsed.activeLang);
@@ -277,6 +409,29 @@ export default function PageEditor({ lang }: { lang: string }) {
   }, [languages]);
 
   useEffect(() => {
+    if (sectionOrderQuery.data?.data?.length) {
+      const ordered = sectionOrderQuery.data.data
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((item) => item.key);
+      const merged = [
+        ...ordered,
+        ...defaultSectionOrder.filter((key) => !ordered.includes(key)),
+      ];
+      setSectionOrder(merged);
+      return;
+    }
+    if (!sectionOrderQuery.isLoading && sectionOrder.length === 0) {
+      setSectionOrder(defaultSectionOrder);
+    }
+  }, [
+    sectionOrderQuery.data,
+    sectionOrderQuery.isLoading,
+    defaultSectionOrder,
+    sectionOrder.length,
+  ]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isDirty) return;
     window.localStorage.setItem(
@@ -285,11 +440,14 @@ export default function PageEditor({ lang }: { lang: string }) {
         metaByLang,
         heroByLang,
         introByLang,
+        highlightsByLang,
+        servicesByLang,
         recoveryByLang,
         focusKeywordByLang,
         schemaTemplateByLang,
         schemaOrgByLang,
         schemaFaqByLang,
+        sectionOrder,
         activeLang,
         status,
       })
@@ -298,11 +456,14 @@ export default function PageEditor({ lang }: { lang: string }) {
     metaByLang,
     heroByLang,
     introByLang,
+    highlightsByLang,
+    servicesByLang,
     recoveryByLang,
     focusKeywordByLang,
     schemaTemplateByLang,
     schemaOrgByLang,
     schemaFaqByLang,
+    sectionOrder,
     activeLang,
     status,
     isDirty,
@@ -344,18 +505,33 @@ export default function PageEditor({ lang }: { lang: string }) {
   const seoContent = useMemo(() => {
     const hero = heroByLang[activeLang];
     const intro = introByLang[activeLang];
+    const highlights = highlightsByLang[activeLang];
+    const services = servicesByLang[activeLang];
     const recovery = recoveryByLang[activeLang];
     return [
       hero?.heading,
       hero?.subheading,
       intro?.heading,
       intro?.description,
+      services?.heading,
+      services?.description,
+      ...(services?.items || []).map((item) => item.label || item.priceNote),
+      highlights?.heading,
+      highlights?.description,
+      ...(highlights?.items || []).map((item) => item.title || item.description),
       recovery?.heading,
       ...(recovery?.items || []).map((item) => item.title || item.description),
     ]
       .filter(Boolean)
       .join(" ");
-  }, [activeLang, heroByLang, introByLang, recoveryByLang]);
+  }, [
+    activeLang,
+    heroByLang,
+    introByLang,
+    highlightsByLang,
+    servicesByLang,
+    recoveryByLang,
+  ]);
 
   const seoAnalysis = useMemo(
     () =>
@@ -390,9 +566,23 @@ export default function PageEditor({ lang }: { lang: string }) {
     buttonLabel: "SPA DA NANG",
     buttonLink: "",
   };
-  const currentRecovery = recoveryByLang[activeLang] || {
+  const currentHighlights = {
     heading: "",
+    description: "",
     items: [],
+    ...(highlightsByLang[activeLang] || {}),
+  };
+  const currentServices = {
+    heading: "",
+    description: "",
+    items: [],
+    ...(servicesByLang[activeLang] || {}),
+  };
+  const currentRecovery = {
+    heading: "",
+    description: "",
+    items: [],
+    ...(recoveryByLang[activeLang] || {}),
   };
 
   useEffect(() => {
@@ -414,15 +604,35 @@ export default function PageEditor({ lang }: { lang: string }) {
       !intro?.description &&
       !intro?.imageUrl &&
       !intro?.videoUrl;
+    const isEmptyHighlights = (section: RecoveryState | undefined) =>
+      !section?.heading &&
+      !section?.description &&
+      !(section?.items?.length ?? 0);
+    const isEmptyServices = (
+      section:
+        | {
+            heading?: string;
+            description?: string;
+            items?: { serviceId?: number }[];
+          }
+        | undefined,
+    ) =>
+      !section?.heading &&
+      !section?.description &&
+      !(section?.items?.length ?? 0);
     const isEmptyRecovery = (section: RecoveryState | undefined) =>
-      !section?.heading && !(section?.items?.length ?? 0);
+      !section?.heading &&
+      !section?.description &&
+      !(section?.items?.length ?? 0);
 
     const load = async () => {
       try {
-        const [meta, hero, intro, recovery] = await Promise.all([
+        const [meta, hero, intro, highlights, servicesData, recovery] = await Promise.all([
           getHomeMeta(undefined, activeLang),
           getHomeHero(undefined, activeLang),
           getHomeIntro(undefined, activeLang),
+          getHomeHighlights(undefined, activeLang),
+          getHomeServices(undefined, activeLang),
           getHomeRecovery(undefined, activeLang),
         ]);
         if (cancelled) return;
@@ -489,12 +699,50 @@ export default function PageEditor({ lang }: { lang: string }) {
           };
         });
 
+        setHighlightsByLang((prev) => {
+          if (hasDraft && !isEmptyHighlights(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: highlights?.heading ?? "",
+              description: highlights?.description ?? "",
+              items: Array.isArray(highlights?.items)
+                ? highlights.items.map((item) => ({
+                    title: item?.title ?? "",
+                    description: item?.description ?? "",
+                    imageUrl: item?.imageUrl ?? "",
+                  }))
+                : [],
+            },
+          };
+        });
+
+        setServicesByLang((prev) => {
+          if (hasDraft && !isEmptyServices(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: servicesData?.heading ?? "",
+              description: servicesData?.description ?? "",
+              items: Array.isArray(servicesData?.items)
+                ? servicesData.items.map((item) => ({
+                    serviceId: item?.serviceId ?? undefined,
+                    imageUrl: item?.imageUrl ?? "",
+                    label: item?.label ?? "",
+                    priceNote: item?.priceNote ?? "",
+                  }))
+                : [],
+            },
+          };
+        });
+
         setRecoveryByLang((prev) => {
           if (hasDraft && !isEmptyRecovery(prev[activeLang])) return prev;
           return {
             ...prev,
             [activeLang]: {
               heading: recovery?.heading ?? "",
+              description: recovery?.description ?? "",
               items: Array.isArray(recovery?.items)
                 ? recovery.items.map((item) => ({
                     title: item?.title ?? "",
@@ -570,8 +818,11 @@ export default function PageEditor({ lang }: { lang: string }) {
 
   const sectionNav = [
     { label: "SEO Metadata", href: "#seo" },
+    { label: "Section Order", href: "#sections-order" },
     { label: "Hero Banner", href: "#hero" },
     { label: "Intro Section", href: "#intro" },
+    { label: "Services Section", href: "#services" },
+    { label: "Highlights Section", href: "#highlights" },
     { label: "Recovery Section", href: "#recovery" },
     { label: "Live Status", href: "#status" },
   ];
@@ -580,455 +831,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-6">
         <div ref={headerRef} className="h-px" />
-        <section
-          id="seo"
-          className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
-        >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 6h16M4 12h10M4 18h7" />
-                </svg>
-              </span>
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">SEO Metadata</p>
-                <p className="text-sm text-slate-500">Tối ưu hóa khả năng hiển thị tìm kiếm.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-slate-400">
-              <button type="button" className="rounded-full p-2 hover:bg-slate-100">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 5c4.5 0 8.3 2.9 9.5 7-1.2 4.1-5 7-9.5 7S3.7 16.1 2.5 12C3.7 7.9 7.5 5 12 5z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </button>
-              <button type="button" className="rounded-full p-2 text-rose-500 hover:bg-rose-50">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 6h18" />
-                  <path d="M8 6V4h8v2" />
-                  <path d="M6 6l1 14h10l1-14" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div className="mt-5 space-y-4">
-            <Input
-              label="Focus keyword"
-              value={focusKeyword}
-              onChange={(event) =>
-                setFocusKeywordByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: event.target.value,
-                }))
-              }
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const generated = generateSeoFromContent({
-                    title:
-                      currentMeta.metaTitle ||
-                      heroByLang[activeLang]?.heading ||
-                      "Panda Spa",
-                    contentHtml: seoContent,
-                  });
-                  setIsDirty(true);
-                  setMetaByLang((prev) => ({
-                    ...prev,
-                    [activeLang]: {
-                      ...prev[activeLang],
-                      metaTitle: generated.seoTitle,
-                      metaDescription: generated.seoDescription,
-                      ogTitle: generated.ogTitle,
-                      ogDescription: generated.ogDescription,
-                    },
-                  }));
-                }}
-              >
-                Auto generate SEO
-              </Button>
-              <span className="text-xs text-slate-400">
-                Tự động lấy từ nội dung trang
-              </span>
-            </div>
-            <Input
-              label="Meta title"
-              value={currentMeta.metaTitle}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    metaTitle: event.target.value,
-                  },
-                }));
-              }}
-            />
-            <Textarea
-              label="Meta description"
-              value={currentMeta.metaDescription}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    metaDescription: event.target.value,
-                  },
-                }));
-              }}
-            />
-            <Input
-              label="Canonical URL"
-              value={currentMeta.canonical}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    canonical: event.target.value,
-                  },
-                }));
-              }}
-            />
-            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
-              Robots
-              <select
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
-                value={currentMeta.robots || "index,follow"}
-                onChange={(event) => {
-                  setIsDirty(true);
-                  setMetaByLang((prev) => ({
-                    ...prev,
-                    [activeLang]: {
-                      ...prev[activeLang],
-                      robots: event.target.value,
-                    },
-                  }));
-                }}
-              >
-                <option value="index,follow">index,follow</option>
-                <option value="noindex,follow">noindex,follow</option>
-                <option value="noindex,nofollow">noindex,nofollow</option>
-              </select>
-            </label>
-            <Input
-              label="OG Title"
-              value={currentMeta.ogTitle}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    ogTitle: event.target.value,
-                  },
-                }));
-              }}
-            />
-            <Textarea
-              label="OG Description"
-              value={currentMeta.ogDescription}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    ogDescription: event.target.value,
-                  },
-                }));
-              }}
-            />
-            <Input
-              label="OG Image"
-              value={currentMeta.ogImage}
-              onChange={(event) => {
-                setIsDirty(true);
-                setMetaByLang((prev) => ({
-                  ...prev,
-                  [activeLang]: {
-                    ...prev[activeLang],
-                    ogImage: event.target.value,
-                  },
-                }));
-              }}
-            />
 
-            <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white seo-panel">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-                    SEO Score
-                  </p>
-                  <p className="text-sm text-white/70">Phân tích realtime</p>
-                </div>
-                <div className="seo-score-ring">
-                  <svg width="64" height="64">
-                    <circle
-                      className="ring-track"
-                      cx="32"
-                      cy="32"
-                      r={seoRadius}
-                      fill="none"
-                      strokeWidth="6"
-                    />
-                    <circle
-                      className="ring-progress"
-                      cx="32"
-                      cy="32"
-                      r={seoRadius}
-                      fill="none"
-                      strokeWidth="6"
-                      strokeDasharray={seoCircumference}
-                      strokeDashoffset={seoDashOffset}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span className="seo-score-value">{seoScore}</span>
-                </div>
-              </div>
-              <div className="mt-3 space-y-2 text-xs">
-                {seoAnalysis.checks.map((check, index) => (
-                  <div
-                    key={check.label}
-                    className="flex items-center gap-2 seo-checklist-item"
-                    style={{ animationDelay: `${index * 40}ms` }}
-                  >
-                    <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
-                        check.ok
-                          ? "bg-emerald-500/20 text-emerald-300"
-                          : "bg-red-500/20 text-red-300"
-                      }`}
-                    >
-                      {check.ok ? "✓" : "!"}
-                    </span>
-                    <span className="text-white/80">{check.label}</span>
-                    {check.hint ? (
-                      <span className="ml-auto text-[10px] text-white/40">{check.hint}</span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                SERP Preview
-              </p>
-              <div className="mt-3 space-y-1">
-                <p className="text-sm font-semibold text-[#1a73e8]">
-                  {currentMeta.metaTitle || "SEO title"}
-                </p>
-                <p className="text-xs text-emerald-700">{serpUrl}</p>
-                <p className="text-xs text-slate-500">
-                  {currentMeta.metaDescription || "Meta description sẽ hiển thị ở đây."}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 seo-panel">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                Schema Builder
-              </p>
-              <div className="mt-3 grid gap-3">
-                <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
-                  Template
-                  <select
-                    className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
-                    value={schemaTemplate}
-                    onChange={(event) =>
-                      setSchemaTemplateByLang((prev) => ({
-                        ...prev,
-                        [activeLang]: event.target.value as SchemaTemplateType,
-                      }))
-                    }
-                  >
-                    <option value="WebPage">WebPage</option>
-                    <option value="Article">Article</option>
-                    <option value="FAQPage">FAQPage</option>
-                    <option value="LocalBusiness">LocalBusiness</option>
-                    <option value="Service">Service</option>
-                  </select>
-                </label>
-                <Input
-                  label="Organization"
-                  value={schemaOrg}
-                  onChange={(event) =>
-                    setSchemaOrgByLang((prev) => ({
-                      ...prev,
-                      [activeLang]: event.target.value,
-                    }))
-                  }
-                />
-                {schemaTemplate === "FAQPage" ? (
-                  <div className="space-y-2">
-                    {schemaFaqItems.map((item, index) => (
-                      <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-slate-200 p-2">
-                        <Input
-                          label={`Question ${index + 1}`}
-                          value={item.question}
-                          onChange={(event) => {
-                            const next = [...schemaFaqItems];
-                            next[index] = { ...next[index], question: event.target.value };
-                            setSchemaFaqByLang((prev) => ({
-                              ...prev,
-                              [activeLang]: next,
-                            }));
-                          }}
-                        />
-                        <Textarea
-                          label="Answer"
-                          value={item.answer}
-                          onChange={(event) => {
-                            const next = [...schemaFaqItems];
-                            next[index] = { ...next[index], answer: event.target.value };
-                            setSchemaFaqByLang((prev) => ({
-                              ...prev,
-                              [activeLang]: next,
-                            }));
-                          }}
-                        />
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setSchemaFaqByLang((prev) => ({
-                          ...prev,
-                          [activeLang]: [...schemaFaqItems, { question: "", answer: "" }],
-                        }))
-                      }
-                    >
-                      Thêm câu hỏi
-                    </Button>
-                  </div>
-                ) : null}
-                <div className="rounded-xl border border-slate-200 bg-[#0f1722] p-3 text-xs text-white/80">
-                  <pre className="whitespace-pre-wrap">
-                    {JSON.stringify(
-                      buildSchemaTemplate({
-                        type: schemaTemplate,
-                        title: currentMeta.metaTitle || "Panda Spa",
-                        description: currentMeta.metaDescription || "",
-                        url: serpUrl,
-                        image: currentMeta.ogImage || "",
-                        organization: schemaOrg,
-                        faqItems: schemaFaqItems,
-                      }),
-                      null,
-                      2
-                    )}
-                  </pre>
-                </div>
-                <Button
-                  onClick={() => {
-                    const schema = buildSchemaTemplate({
-                      type: schemaTemplate,
-                      title: currentMeta.metaTitle || "Panda Spa",
-                      description: currentMeta.metaDescription || "",
-                      url: serpUrl,
-                      image: currentMeta.ogImage || "",
-                      organization: schemaOrg,
-                      faqItems: schemaFaqItems,
-                    });
-                    setIsDirty(true);
-                    setMetaByLang((prev) => ({
-                      ...prev,
-                      [activeLang]: {
-                        ...prev[activeLang],
-                        schemaJson: JSON.stringify(schema, null, 2),
-                      },
-                    }));
-                  }}
-                >
-                  Áp dụng schema
-                </Button>
-                <Textarea
-                  label="Schema JSON (có thể chỉnh sửa)"
-                  value={currentMeta.schemaJson || ""}
-                  onChange={(event) => {
-                    setIsDirty(true);
-                    setMetaByLang((prev) => ({
-                      ...prev,
-                      [activeLang]: { ...prev[activeLang], schemaJson: event.target.value },
-                    }));
-                  }}
-                  className="min-h-[160px]"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                onClick={async () => {
-                  try {
-                    const schemaJson = parseSchemaJson(currentMeta.schemaJson);
-                    if (schemaJson === null) return;
-                    await updateHomeMeta(undefined, activeLang, {
-                      metaTitle: currentMeta.metaTitle,
-                      metaDescription: currentMeta.metaDescription,
-                      canonical: currentMeta.canonical,
-                      robots: currentMeta.robots,
-                      ogTitle: currentMeta.ogTitle,
-                      ogDescription: currentMeta.ogDescription,
-                      ogImage: currentMeta.ogImage,
-                      schemaJson,
-                    });
-                    const fresh = await getHomeMeta(undefined, activeLang);
-                    if (fresh) {
-                      setMetaByLang((prev) => ({
-                        ...prev,
-                        [activeLang]: {
-                          metaTitle: fresh.metaTitle ?? "",
-                          metaDescription: fresh.metaDescription ?? "",
-                          canonical: fresh.canonical ?? "",
-                          robots: fresh.robots ?? "index,follow",
-                          ogTitle: fresh.ogTitle ?? "",
-                          ogDescription: fresh.ogDescription ?? "",
-                          ogImage: fresh.ogImage ?? "",
-                          schemaJson: fresh.schemaJson ? JSON.stringify(fresh.schemaJson, null, 2) : "",
-                        },
-                      }));
-                    }
-                    notify("SEO metadata updated.", "success");
-                    setIsDirty(false);
-                    if (typeof window !== "undefined") {
-                      window.localStorage.removeItem(storageKey);
-                    }
-                  } catch (err) {
-                    handleError(err);
-                  }
-                }}
-              >
-                Save metadata
-              </Button>
-              {activeLang !== lang ? (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setMetaByLang((prev) => ({
-                      ...prev,
-                      [activeLang]: { ...prev[lang] },
-                    }));
-                    setHeroByLang((prev) => ({
-                      ...prev,
-                      [activeLang]: { ...prev[lang] },
-                    }));
-                    setIsDirty(true);
-                  }}
-                >
-                  Clone from {lang.toUpperCase()}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        </section>
 
         <section
           id="hero"
@@ -1591,6 +1394,386 @@ export default function PageEditor({ lang }: { lang: string }) {
         </section>
 
         <section
+          id="services"
+          className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16" />
+                  <path d="M4 12h12" />
+                  <path d="M4 18h8" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Services Section</p>
+                <p className="text-sm text-slate-500">Chọn dịch vụ hiển thị trên trang chủ.</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-4">
+            <Input
+              label="Heading"
+              value={currentServices.heading}
+              onChange={(event) => {
+                setIsDirty(true);
+                setServicesByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: { ...prev[activeLang], heading: event.target.value },
+                }));
+              }}
+            />
+            <Textarea
+              label="Description"
+              value={currentServices.description}
+              onChange={(event) => {
+                setIsDirty(true);
+                setServicesByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: { ...prev[activeLang], description: event.target.value },
+                }));
+              }}
+            />
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chọn dịch vụ</p>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                {adminServices.map((service) => {
+                  const checked = currentServices.items.some(
+                    (item) => item.serviceId === service.id
+                  );
+                  return (
+                    <label
+                      key={`svc-${service.id}`}
+                      className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(event) => {
+                          setIsDirty(true);
+                          setServicesByLang((prev) => {
+                            const items = [...(prev[activeLang]?.items ?? [])];
+                            if (event.target.checked) {
+                              items.push({
+                                serviceId: service.id,
+                                imageUrl: "",
+                                label: service.name,
+                                priceNote: "",
+                              });
+                            } else {
+                              const index = items.findIndex(
+                                (item) => item.serviceId === service.id
+                              );
+                              if (index >= 0) items.splice(index, 1);
+                            }
+                            return {
+                              ...prev,
+                              [activeLang]: { ...prev[activeLang], items },
+                            };
+                          });
+                        }}
+                      />
+                      <span className="font-semibold">{service.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {currentServices.items.map((item, index) => (
+                <div
+                  key={`service-item-${item.serviceId}-${index}`}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  {(() => {
+                    const service = adminServices.find(
+                      (svc) => svc.id === item.serviceId
+                    );
+                    const prices = service?.priceOptions?.map((opt) => opt.price) ?? [];
+                    const minPrice = prices.length ? Math.min(...prices) : null;
+                    const previewTitle = item.label?.trim() || service?.name || "Service";
+                    const previewPrice =
+                      item.priceNote?.trim() ||
+                      (minPrice !== null ? `From ${formatVnd(minPrice)} VND` : "Liên hệ");
+                    return (
+                      <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                        <div className="font-semibold text-slate-700">
+                          Preview: {previewTitle}
+                        </div>
+                        <div className="text-slate-500">{previewPrice}</div>
+                      </div>
+                    );
+                  })()}
+                  <Input
+                    label="Custom title"
+                    value={item.label || ""}
+                    placeholder={
+                      adminServices.find((svc) => svc.id === item.serviceId)?.name ||
+                      "Service name"
+                    }
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setServicesByLang((prev) => {
+                        const next = [...(prev[activeLang]?.items ?? [])];
+                        next[index] = { ...next[index], label: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <Input
+                    label="Price note"
+                    value={item.priceNote || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setServicesByLang((prev) => {
+                        const next = [...(prev[activeLang]?.items ?? [])];
+                        next[index] = { ...next[index], priceNote: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <Input
+                    label="Image URL"
+                    value={item.imageUrl || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setServicesByLang((prev) => {
+                        const next = [...(prev[activeLang]?.items ?? [])];
+                        next[index] = { ...next[index], imageUrl: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      type="button"
+                      className="px-4 py-2 text-xs"
+                      onClick={() => {
+                        setMediaTarget({ section: "services", index });
+                        setMediaDialogOpen(true);
+                      }}
+                    >
+                      Chọn từ Media
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button
+              onClick={async () => {
+                try {
+                  const normalizedItems = (currentServices.items || []).map((item) => ({
+                    serviceId: item.serviceId,
+                    imageUrl: item.imageUrl?.trim() || "",
+                    label: item.label?.trim() || "",
+                    priceNote: item.priceNote?.trim() || "",
+                  }));
+                  await updateHomeServices(undefined, activeLang, {
+                    heading: currentServices.heading,
+                    description: currentServices.description,
+                    items: normalizedItems,
+                  });
+                  const fresh = await getHomeServices(undefined, activeLang);
+                  if (fresh) {
+                    setServicesByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        heading: fresh.heading ?? "",
+                        description: fresh.description ?? "",
+                        items: Array.isArray(fresh.items)
+                          ? fresh.items.map((entry) => ({
+                              serviceId: entry?.serviceId ?? undefined,
+                              imageUrl: entry?.imageUrl ?? "",
+                              label: entry?.label ?? "",
+                              priceNote: entry?.priceNote ?? "",
+                            }))
+                          : [],
+                      },
+                    }));
+                  }
+                  notify("Services section updated.", "success");
+                  setIsDirty(false);
+                  if (typeof window !== "undefined") {
+                    window.localStorage.removeItem(storageKey);
+                  }
+                } catch (err) {
+                  handleError(err);
+                }
+              }}
+            >
+              Save services
+            </Button>
+          </div>
+        </section>
+
+
+
+        <section
+          id="highlights"
+          className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16" />
+                  <path d="M4 12h12" />
+                  <path d="M4 18h8" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Highlights Section</p>
+                <p className="text-sm text-slate-500">Phần minh hoạ nổi bật ngay dưới Intro.</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-4">
+            <Input
+              label="Heading"
+              value={currentHighlights.heading}
+              onChange={(event) => {
+                setIsDirty(true);
+                setHighlightsByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: { ...prev[activeLang], heading: event.target.value },
+                }));
+              }}
+            />
+            <Textarea
+              label="Description"
+              value={currentHighlights.description}
+              onChange={(event) => {
+                setIsDirty(true);
+                setHighlightsByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: { ...prev[activeLang], description: event.target.value },
+                }));
+              }}
+            />
+            <div className="grid gap-4 lg:grid-cols-3">
+              {ensureRecoveryItems(currentHighlights.items).map((item, index) => (
+                <div
+                  key={`highlight-item-${index}`}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <Input
+                    label={`Card ${index + 1} title`}
+                    value={item.title || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setHighlightsByLang((prev) => {
+                        const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+                        next[index] = { ...next[index], title: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <Textarea
+                    label="Description"
+                    value={item.description || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setHighlightsByLang((prev) => {
+                        const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+                        next[index] = { ...next[index], description: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <Input
+                    label="Image URL"
+                    value={item.imageUrl || ""}
+                    onChange={(event) => {
+                      setIsDirty(true);
+                      setHighlightsByLang((prev) => {
+                        const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+                        next[index] = { ...next[index], imageUrl: event.target.value };
+                        return {
+                          ...prev,
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      type="button"
+                      className="px-4 py-2 text-xs"
+                      onClick={() => {
+                        setMediaTarget({ section: "highlights", index });
+                        setMediaDialogOpen(true);
+                      }}
+                    >
+                      Chọn từ Media
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button
+              onClick={async () => {
+                try {
+                  const normalizedItems = (currentHighlights.items || [])
+                    .slice(0, 3)
+                    .map((item) => ({
+                      title: item.title?.trim() || "",
+                      description: item.description?.trim() || "",
+                      imageUrl: item.imageUrl?.trim() || "",
+                    }));
+                  await updateHomeHighlights(undefined, activeLang, {
+                    heading: currentHighlights.heading,
+                    description: currentHighlights.description,
+                    items: normalizedItems,
+                  });
+                  const fresh = await getHomeHighlights(undefined, activeLang);
+                  if (fresh) {
+                    setHighlightsByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        heading: fresh.heading ?? "",
+                        description: fresh.description ?? "",
+                        items: Array.isArray(fresh.items)
+                          ? fresh.items.map((item) => ({
+                              title: item?.title ?? "",
+                              description: item?.description ?? "",
+                              imageUrl: item?.imageUrl ?? "",
+                            }))
+                          : [],
+                      },
+                    }));
+                  }
+                  notify("Highlights section updated.", "success");
+                  setIsDirty(false);
+                  if (typeof window !== "undefined") {
+                    window.localStorage.removeItem(storageKey);
+                  }
+                } catch (err) {
+                  handleError(err);
+                }
+              }}
+            >
+              Save highlights
+            </Button>
+          </div>
+        </section>
+
+        <section
           id="recovery"
           className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
         >
@@ -1618,6 +1801,17 @@ export default function PageEditor({ lang }: { lang: string }) {
                 setRecoveryByLang((prev) => ({
                   ...prev,
                   [activeLang]: { ...prev[activeLang], heading: event.target.value },
+                }));
+              }}
+            />
+            <Textarea
+              label="Description"
+              value={currentRecovery.description}
+              onChange={(event) => {
+                setIsDirty(true);
+                setRecoveryByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: { ...prev[activeLang], description: event.target.value },
                 }));
               }}
             />
@@ -1668,14 +1862,26 @@ export default function PageEditor({ lang }: { lang: string }) {
                           next[index] = { ...next[index], imageUrl: event.target.value };
                           return {
                             ...prev,
-                            [activeLang]: { ...prev[activeLang], items: next },
-                          };
-                        });
+                          [activeLang]: { ...prev[activeLang], items: next },
+                        };
+                      });
+                    }}
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <Button
+                      type="button"
+                      className="px-4 py-2 text-xs"
+                      onClick={() => {
+                        setMediaTarget({ section: "recovery", index });
+                        setMediaDialogOpen(true);
                       }}
-                    />
+                    >
+                      Chọn từ Media
+                    </Button>
                   </div>
-                )
-              )}
+                </div>
+              )
+            )}
             </div>
             <Button
               onClick={async () => {
@@ -1689,6 +1895,7 @@ export default function PageEditor({ lang }: { lang: string }) {
                     }));
                   await updateHomeRecovery(undefined, activeLang, {
                     heading: currentRecovery.heading,
+                    description: currentRecovery.description,
                     items: normalizedItems,
                   });
                   const fresh = await getHomeRecovery(undefined, activeLang);
@@ -1697,6 +1904,7 @@ export default function PageEditor({ lang }: { lang: string }) {
                       ...prev,
                       [activeLang]: {
                         heading: fresh.heading ?? "",
+                        description: fresh.description ?? "",
                         items: Array.isArray(fresh.items)
                           ? fresh.items.map((item) => ({
                               title: item?.title ?? "",
@@ -1865,7 +2073,687 @@ export default function PageEditor({ lang }: { lang: string }) {
             </div>
           </div>
         </div>
+
+        <section
+          id="seo"
+          className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16M4 12h10M4 18h7" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">SEO Metadata</p>
+                <p className="text-sm text-slate-500">Tối ưu hóa khả năng hiển thị tìm kiếm.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-slate-400">
+              <button type="button" className="rounded-full p-2 hover:bg-slate-100">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5c4.5 0 8.3 2.9 9.5 7-1.2 4.1-5 7-9.5 7S3.7 16.1 2.5 12C3.7 7.9 7.5 5 12 5z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+              <button type="button" className="rounded-full p-2 text-rose-500 hover:bg-rose-50">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M6 6l1 14h10l1-14" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div className="mt-5 space-y-4">
+            <Input
+              label="Focus keyword"
+              value={focusKeyword}
+              onChange={(event) =>
+                setFocusKeywordByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: event.target.value,
+                }))
+              }
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const generated = generateSeoFromContent({
+                    title:
+                      currentMeta.metaTitle ||
+                      heroByLang[activeLang]?.heading ||
+                      "Panda Spa",
+                    contentHtml: seoContent,
+                  });
+                  setIsDirty(true);
+                  setMetaByLang((prev) => ({
+                    ...prev,
+                    [activeLang]: {
+                      ...prev[activeLang],
+                      metaTitle: generated.seoTitle,
+                      metaDescription: generated.seoDescription,
+                      ogTitle: generated.ogTitle,
+                      ogDescription: generated.ogDescription,
+                    },
+                  }));
+                }}
+              >
+                Auto generate SEO
+              </Button>
+              <span className="text-xs text-slate-400">
+                Tự động lấy từ nội dung trang
+              </span>
+            </div>
+            <Input
+              label="Meta title"
+              value={currentMeta.metaTitle}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    metaTitle: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Textarea
+              label="Meta description"
+              value={currentMeta.metaDescription}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    metaDescription: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Input
+              label="Canonical URL"
+              value={currentMeta.canonical}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    canonical: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+              Robots
+              <select
+                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+                value={currentMeta.robots || "index,follow"}
+                onChange={(event) => {
+                  setIsDirty(true);
+                  setMetaByLang((prev) => ({
+                    ...prev,
+                    [activeLang]: {
+                      ...prev[activeLang],
+                      robots: event.target.value,
+                    },
+                  }));
+                }}
+              >
+                <option value="index,follow">index,follow</option>
+                <option value="noindex,follow">noindex,follow</option>
+                <option value="noindex,nofollow">noindex,nofollow</option>
+              </select>
+            </label>
+            <Input
+              label="OG Title"
+              value={currentMeta.ogTitle}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogTitle: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Textarea
+              label="OG Description"
+              value={currentMeta.ogDescription}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogDescription: event.target.value,
+                  },
+                }));
+              }}
+            />
+            <Input
+              label="OG Image"
+              value={currentMeta.ogImage}
+              onChange={(event) => {
+                setIsDirty(true);
+                setMetaByLang((prev) => ({
+                  ...prev,
+                  [activeLang]: {
+                    ...prev[activeLang],
+                    ogImage: event.target.value,
+                  },
+                }));
+              }}
+            />
+
+            <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white seo-panel">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+                    SEO Score
+                  </p>
+                  <p className="text-sm text-white/70">Phân tích realtime</p>
+                </div>
+                <div className="seo-score-ring">
+                  <svg width="64" height="64">
+                    <circle
+                      className="ring-track"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      className="ring-progress"
+                      cx="32"
+                      cy="32"
+                      r={seoRadius}
+                      fill="none"
+                      strokeWidth="6"
+                      strokeDasharray={seoCircumference}
+                      strokeDashoffset={seoDashOffset}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="seo-score-value">{seoScore}</span>
+                </div>
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                {seoAnalysis.checks.map((check, index) => (
+                  <div
+                    key={check.label}
+                    className="flex items-center gap-2 seo-checklist-item"
+                    style={{ animationDelay: `${index * 40}ms` }}
+                  >
+                    <span
+                      className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        check.ok
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-red-500/20 text-red-300"
+                      }`}
+                    >
+                      {check.ok ? "✓" : "!"}
+                    </span>
+                    <span className="text-white/80">{check.label}</span>
+                    {check.hint ? (
+                      <span className="ml-auto text-[10px] text-white/40">{check.hint}</span>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                SERP Preview
+              </p>
+              <div className="mt-3 space-y-1">
+                <p className="text-sm font-semibold text-[#1a73e8]">
+                  {currentMeta.metaTitle || "SEO title"}
+                </p>
+                <p className="text-xs text-emerald-700">{serpUrl}</p>
+                <p className="text-xs text-slate-500">
+                  {currentMeta.metaDescription || "Meta description sẽ hiển thị ở đây."}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 seo-panel">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                Schema Builder
+              </p>
+              <div className="mt-3 grid gap-3">
+                <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+                  Template
+                  <select
+                    className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+                    value={schemaTemplate}
+                    onChange={(event) =>
+                      setSchemaTemplateByLang((prev) => ({
+                        ...prev,
+                        [activeLang]: event.target.value as SchemaTemplateType,
+                      }))
+                    }
+                  >
+                    <option value="WebPage">WebPage</option>
+                    <option value="Article">Article</option>
+                    <option value="FAQPage">FAQPage</option>
+                    <option value="LocalBusiness">LocalBusiness</option>
+                    <option value="Service">Service</option>
+                  </select>
+                </label>
+                <Input
+                  label="Organization"
+                  value={schemaOrg}
+                  onChange={(event) =>
+                    setSchemaOrgByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: event.target.value,
+                    }))
+                  }
+                />
+                {schemaTemplate === "FAQPage" ? (
+                  <div className="space-y-2">
+                    {schemaFaqItems.map((item, index) => (
+                      <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-slate-200 p-2">
+                        <Input
+                          label={`Question ${index + 1}`}
+                          value={item.question}
+                          onChange={(event) => {
+                            const next = [...schemaFaqItems];
+                            next[index] = { ...next[index], question: event.target.value };
+                            setSchemaFaqByLang((prev) => ({
+                              ...prev,
+                              [activeLang]: next,
+                            }));
+                          }}
+                        />
+                        <Textarea
+                          label="Answer"
+                          value={item.answer}
+                          onChange={(event) => {
+                            const next = [...schemaFaqItems];
+                            next[index] = { ...next[index], answer: event.target.value };
+                            setSchemaFaqByLang((prev) => ({
+                              ...prev,
+                              [activeLang]: next,
+                            }));
+                          }}
+                        />
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setSchemaFaqByLang((prev) => ({
+                          ...prev,
+                          [activeLang]: [...schemaFaqItems, { question: "", answer: "" }],
+                        }))
+                      }
+                    >
+                      Thêm câu hỏi
+                    </Button>
+                  </div>
+                ) : null}
+                <div className="rounded-xl border border-slate-200 bg-[#0f1722] p-3 text-xs text-white/80">
+                  <pre className="whitespace-pre-wrap">
+                    {JSON.stringify(
+                      buildSchemaTemplate({
+                        type: schemaTemplate,
+                        title: currentMeta.metaTitle || "Panda Spa",
+                        description: currentMeta.metaDescription || "",
+                        url: serpUrl,
+                        image: currentMeta.ogImage || "",
+                        organization: schemaOrg,
+                        faqItems: schemaFaqItems,
+                      }),
+                      null,
+                      2
+                    )}
+                  </pre>
+                </div>
+                <Button
+                  onClick={() => {
+                    const schema = buildSchemaTemplate({
+                      type: schemaTemplate,
+                      title: currentMeta.metaTitle || "Panda Spa",
+                      description: currentMeta.metaDescription || "",
+                      url: serpUrl,
+                      image: currentMeta.ogImage || "",
+                      organization: schemaOrg,
+                      faqItems: schemaFaqItems,
+                    });
+                    setIsDirty(true);
+                    setMetaByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: {
+                        ...prev[activeLang],
+                        schemaJson: JSON.stringify(schema, null, 2),
+                      },
+                    }));
+                  }}
+                >
+                  Áp dụng schema
+                </Button>
+                <Textarea
+                  label="Schema JSON (có thể chỉnh sửa)"
+                  value={currentMeta.schemaJson || ""}
+                  onChange={(event) => {
+                    setIsDirty(true);
+                    setMetaByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: { ...prev[activeLang], schemaJson: event.target.value },
+                    }));
+                  }}
+                  className="min-h-[160px]"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={async () => {
+                  try {
+                    const schemaJson = parseSchemaJson(currentMeta.schemaJson);
+                    if (schemaJson === null) return;
+                    await updateHomeMeta(undefined, activeLang, {
+                      metaTitle: currentMeta.metaTitle,
+                      metaDescription: currentMeta.metaDescription,
+                      canonical: currentMeta.canonical,
+                      robots: currentMeta.robots,
+                      ogTitle: currentMeta.ogTitle,
+                      ogDescription: currentMeta.ogDescription,
+                      ogImage: currentMeta.ogImage,
+                      schemaJson,
+                    });
+                    const fresh = await getHomeMeta(undefined, activeLang);
+                    if (fresh) {
+                      setMetaByLang((prev) => ({
+                        ...prev,
+                        [activeLang]: {
+                          metaTitle: fresh.metaTitle ?? "",
+                          metaDescription: fresh.metaDescription ?? "",
+                          canonical: fresh.canonical ?? "",
+                          robots: fresh.robots ?? "index,follow",
+                          ogTitle: fresh.ogTitle ?? "",
+                          ogDescription: fresh.ogDescription ?? "",
+                          ogImage: fresh.ogImage ?? "",
+                          schemaJson: fresh.schemaJson ? JSON.stringify(fresh.schemaJson, null, 2) : "",
+                        },
+                      }));
+                    }
+                    notify("SEO metadata updated.", "success");
+                    setIsDirty(false);
+                    if (typeof window !== "undefined") {
+                      window.localStorage.removeItem(storageKey);
+                    }
+                  } catch (err) {
+                    handleError(err);
+                  }
+                }}
+              >
+                Save metadata
+              </Button>
+              {activeLang !== lang ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setMetaByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: { ...prev[lang] },
+                    }));
+                    setHeroByLang((prev) => ({
+                      ...prev,
+                      [activeLang]: { ...prev[lang] },
+                    }));
+                    setIsDirty(true);
+                  }}
+                >
+                  Clone from {lang.toUpperCase()}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+
+        <section
+          id="sections-order"
+          className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 18h16" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Section Order
+                </p>
+                <p className="text-sm text-slate-500">
+                  Kéo hoặc đổi vị trí để sắp xếp thứ tự hiển thị trên trang chủ.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3">
+            {sectionOrder.map((key, index) => (
+              <div
+                key={`section-order-${key}`}
+                draggable
+                onDragStart={() => setDraggingSection(key)}
+                onDragEnd={() => setDraggingSection(null)}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  if (!draggingSection || draggingSection === key) return;
+                  setIsDirty(true);
+                  setSectionOrder((prev) => {
+                    const next = prev.filter((item) => item !== draggingSection);
+                    const dropIndex = next.indexOf(key);
+                    next.splice(dropIndex, 0, draggingSection);
+                    return next;
+                  });
+                  setDraggingSection(null);
+                }}
+                className={`flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition ${
+                  draggingSection === key ? "border-[#ff9f40] bg-[#fff6eb]" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full bg-[#0f1722] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                    {index + 1}
+                  </span>
+                  <span className="font-semibold capitalize">
+                    {key.replace(/-/g, " ")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="cursor-grab rounded-full border border-slate-200 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] text-slate-500">
+                    Drag
+                  </span>
+                  <Button
+                    type="button"
+                    className="px-1.5 py-1 text-[9px] leading-none"
+                    disabled={index === 0}
+                    onClick={() => {
+                      setIsDirty(true);
+                      setSectionOrder((prev) => {
+                        const next = [...prev];
+                        [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                        return next;
+                      });
+                    }}
+                  >
+                    ↑
+                  </Button>
+                  <Button
+                    type="button"
+                    className="px-1.5 py-1 text-[9px] leading-none"
+                    disabled={index === sectionOrder.length - 1}
+                    onClick={() => {
+                      setIsDirty(true);
+                      setSectionOrder((prev) => {
+                        const next = [...prev];
+                        [next[index + 1], next[index]] = [next[index], next[index + 1]];
+                        return next;
+                      });
+                    }}
+                  >
+                    ↓
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button
+            className="mt-5"
+            disabled={isSavingOrder}
+            onClick={async () => {
+              try {
+                setIsSavingOrder(true);
+                const payload = sectionOrder.map((key, index) => ({
+                  key,
+                  order: index + 1,
+                }));
+                await updateHomeSectionsOrder(undefined, { items: payload });
+                notify("Section order updated.", "success");
+                setIsDirty(false);
+                if (typeof window !== "undefined") {
+                  window.localStorage.removeItem(storageKey);
+                }
+              } catch (err) {
+                handleError(err);
+              } finally {
+                setIsSavingOrder(false);
+              }
+            }}
+          >
+            Save order
+          </Button>
+        </section>
+
       </aside>
+      <Dialog
+        open={mediaDialogOpen}
+        onOpenChange={(open) => {
+          setMediaDialogOpen(open);
+          if (!open) {
+            setMediaTarget(null);
+            setMediaQuery("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Chọn ảnh từ Media</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <input
+              type="text"
+              placeholder="Tìm kiếm ảnh..."
+              value={mediaQuery}
+              onChange={(event) => setMediaQuery(event.target.value)}
+              className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm text-slate-700"
+            />
+            <div className="grid max-h-[420px] gap-3 overflow-y-auto md:grid-cols-3">
+              {mediaItems.length ? (
+                mediaItems.map((item) => {
+                  const url = resolveMediaUrl(item.url);
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        if (!mediaTarget) return;
+                        const nextUrl = normalizeMediaUrl(item.url);
+                        if (mediaTarget.section === "highlights") {
+                          setHighlightsByLang((prev) => {
+                            const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+                            next[mediaTarget.index] = {
+                              ...next[mediaTarget.index],
+                              imageUrl: nextUrl,
+                            };
+                            return {
+                              ...prev,
+                              [activeLang]: { ...prev[activeLang], items: next },
+                            };
+                          });
+                        } else if (mediaTarget.section === "services") {
+                          setServicesByLang((prev) => {
+                            const next = [...(prev[activeLang]?.items ?? [])];
+                            if (next[mediaTarget.index]) {
+                              next[mediaTarget.index] = {
+                                ...next[mediaTarget.index],
+                                imageUrl: nextUrl,
+                              };
+                            }
+                            return {
+                              ...prev,
+                              [activeLang]: { ...prev[activeLang], items: next },
+                            };
+                          });
+                        } else {
+                          setRecoveryByLang((prev) => {
+                            const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+                            next[mediaTarget.index] = {
+                              ...next[mediaTarget.index],
+                              imageUrl: nextUrl,
+                            };
+                            return {
+                              ...prev,
+                              [activeLang]: { ...prev[activeLang], items: next },
+                            };
+                          });
+                        }
+                        setIsDirty(true);
+                        setMediaDialogOpen(false);
+                      }}
+                      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:border-[#ff9f40]"
+                    >
+                      <div className="h-32 w-full overflow-hidden bg-slate-100">
+                        <img
+                          src={url}
+                          alt={item.filename}
+                          className="h-full w-full object-cover transition group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="p-3 text-xs text-slate-600">
+                        <p className="line-clamp-1 font-semibold text-slate-800">
+                          {item.filename}
+                        </p>
+                        <p className="line-clamp-1">{item.mimeType}</p>
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-slate-500">Không có ảnh.</p>
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button type="button" onClick={() => setMediaDialogOpen(false)}>
+                Đóng
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div
         className={`fixed bottom-6 left-1/2 z-[120] w-[92vw] max-w-5xl -translate-x-1/2 transition-all duration-300 ${
           showFloatingBar

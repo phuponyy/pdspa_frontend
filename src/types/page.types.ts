@@ -35,6 +35,7 @@ export type HomeSection = {
   id?: number | string;
   key?: string;
   type?: string;
+  order?: number;
   heading?: string;
   subheading?: string;
   description?: string;

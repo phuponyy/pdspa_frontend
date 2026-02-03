@@ -246,12 +246,48 @@ export type HomeIntroUpdateRequest = {
 
 export type HomeRecoveryResponse = {
   heading: string;
+  description?: string;
   items?: { title?: string; description?: string; imageUrl?: string }[];
 };
 
 export type HomeRecoveryUpdateRequest = {
   heading: string;
+  description?: string;
   items?: { title?: string; description?: string; imageUrl?: string }[];
+};
+
+export type HomeHighlightsResponse = {
+  heading: string;
+  description?: string;
+  items?: { title?: string; description?: string; imageUrl?: string }[];
+};
+
+export type HomeHighlightsUpdateRequest = {
+  heading: string;
+  description?: string;
+  items?: { title?: string; description?: string; imageUrl?: string }[];
+};
+
+export type HomeServicesResponse = {
+  heading: string;
+  description?: string;
+  items?: {
+    serviceId?: number;
+    imageUrl?: string;
+    label?: string;
+    priceNote?: string;
+  }[];
+};
+
+export type HomeServicesUpdateRequest = {
+  heading: string;
+  description?: string;
+  items?: {
+    serviceId?: number;
+    imageUrl?: string;
+    label?: string;
+    priceNote?: string;
+  }[];
 };
 
 export type HeroImageUploadResponse = ApiSuccess<{

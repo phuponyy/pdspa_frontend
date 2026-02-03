@@ -98,6 +98,7 @@ export default function Header({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileQuery, setMobileQuery] = useState("");
+  const [pendingServiceId, setPendingServiceId] = useState<number | null>(null);
 
   useEffect(() => {
     if (isAdminRoute) {
@@ -236,7 +237,11 @@ export default function Header({
 
   useEffect(() => {
     if (!isBookingOpen) return;
-    const firstService = services[0];
+    const preferred =
+      pendingServiceId && services.length
+        ? services.find((service) => service.id === pendingServiceId)
+        : undefined;
+    const firstService = preferred || services[0];
     setBookingServices([
       {
         id: `service-${Date.now()}`,
@@ -260,7 +265,10 @@ export default function Header({
     setBookingError("");
     setIsSubmitting(false);
     setFieldErrors({});
-  }, [isBookingOpen, services]);
+    if (preferred) {
+      setPendingServiceId(null);
+    }
+  }, [isBookingOpen, services, pendingServiceId]);
 
   const segments = pathname.split("/").filter(Boolean);
   const currentLang = SUPPORTED_LANGS.includes(segments[0] as "vi" | "en")
@@ -333,6 +341,21 @@ export default function Header({
       document.body.style.touchAction = "";
     };
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleOpen = (event: Event) => {
+      const detail = (event as CustomEvent<{ serviceId?: number }>).detail;
+      if (detail?.serviceId) {
+        setPendingServiceId(detail.serviceId);
+      }
+      setIsBookingOpen(true);
+    };
+    window.addEventListener("public-booking-open", handleOpen as EventListener);
+    return () => {
+      window.removeEventListener("public-booking-open", handleOpen as EventListener);
+    };
+  }, []);
 
   const filteredMobileLinks = useMemo(() => {
     const q = mobileQuery.trim().toLowerCase();

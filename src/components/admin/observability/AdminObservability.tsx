@@ -46,7 +46,7 @@ export default function AdminObservability() {
 
   const summary = data?.data;
   const topSlow = useMemo(() => summary?.topSlow ?? [], [summary?.topSlow]);
-  const healthBadge = summary?.health?.database === "ok" ? "success" : "destructive";
+  const healthBadge = summary?.health?.database === "ok" ? "success" : "warning";
   const rum = rumQuery.data?.data;
   const lighthouse = labQuery.data?.data || [];
 
@@ -151,7 +151,7 @@ export default function AdminObservability() {
                 >
                   <div className="min-w-[240px]">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{item.method}</Badge>
+                      <Badge variant="default">{item.method}</Badge>
                       <span className="text-sm text-white/80">{item.route}</span>
                     </div>
                     <p className="mt-1 text-xs text-white/50">
@@ -334,7 +334,7 @@ export default function AdminObservability() {
                   <CardTitle className="text-sm text-white/70">
                     {report.url}
                   </CardTitle>
-                  <Badge variant="outline">{report.device || "default"}</Badge>
+                  <Badge variant="default">{report.device || "default"}</Badge>
                 </CardHeader>
                 <CardContent className="space-y-2 text-xs text-white/70">
                   <div className="flex flex-wrap gap-3">

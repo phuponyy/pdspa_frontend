@@ -45,6 +45,10 @@ import type {
   HomeMetaResponse,
   HomeRecoveryResponse,
   HomeStatusResponse,
+  HomeHighlightsResponse,
+  HomeHighlightsUpdateRequest,
+  HomeServicesResponse,
+  HomeServicesUpdateRequest,
   SiteConfigResponse,
 } from "@/types/api.types";
 import type {
@@ -269,6 +273,43 @@ export const updateHomeRecovery = async (
     body: JSON.stringify(payload),
   });
 
+export const updateHomeHighlights = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeHighlightsUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/highlights", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
+export const updateHomeServices = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeServicesUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/services", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
+export const updateHomeSectionsOrder = async (
+  token: string | undefined,
+  payload: { items: { key: string; order: number; isActive?: boolean }[] }
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>(
+    "/admin/pages/home/sections/order",
+    {
+      token,
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }
+  );
+
 export const updateHomeStatus = async (
   token: string | undefined,
   payload: HomeStatusUpdateRequest
@@ -304,6 +345,28 @@ export const getHomeRecovery = async (token: string | undefined, lang: string) =
   apiFetch<HomeRecoveryResponse>("/admin/pages/home/recovery", {
     token,
     query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeHighlights = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeHighlightsResponse>("/admin/pages/home/highlights", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeServices = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeServicesResponse>("/admin/pages/home/services", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeSectionsOrder = async (token: string | undefined) =>
+  apiFetch<
+    ApiSuccess<{ key: string; order: number; isActive: boolean }[]>
+  >("/admin/pages/home/sections/order", {
+    token,
     cache: "no-store",
   });
 
