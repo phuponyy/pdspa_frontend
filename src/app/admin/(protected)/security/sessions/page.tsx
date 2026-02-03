@@ -31,9 +31,8 @@ export default function AdminSessionsPage() {
   const toast = useToast();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "expired">(
-    "all"
-  );
+  const [activeFilter, setActiveFilter] = useState<"all" | "active" | "expired">("all");
+  const [deviceType, setDeviceType] = useState<"all" | "desktop" | "mobile">("all");
   const [query, setQuery] = useState("");
   const [ipFilter, setIpFilter] = useState("");
   const [deviceFilter, setDeviceFilter] = useState("");
@@ -71,6 +70,17 @@ export default function AdminSessionsPage() {
     () => Boolean(ipFilter.trim() || deviceFilter.trim() || userIdFilter.trim()),
     [ipFilter, deviceFilter, userIdFilter]
   );
+
+  const filteredItems = useMemo(() => {
+    if (deviceType === "all") return items;
+    const isMobile = (value?: string | null) =>
+      Boolean(value && /iphone|android|mobile|ipad|ios/i.test(value));
+    return items.filter((item) => {
+      const token = item.device || item.userAgent || "";
+      const mobile = isMobile(token);
+      return deviceType === "mobile" ? mobile : !mobile;
+    });
+  }, [items, deviceType]);
 
   const revokeByFilter = async () => {
     if (!canBulkRevoke) {
@@ -146,30 +156,70 @@ export default function AdminSessionsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
-          Security
-        </p>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">Phiên đăng nhập</h1>
-        <p className="mt-2 text-sm text-[var(--ink-muted)]">
-          Theo dõi và thu hồi phiên đăng nhập theo IP hoặc thiết bị.
-        </p>
+    <div className="space-y-6 text-white">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
+            Security
+          </p>
+          <h1 className="text-2xl font-semibold">Phiên đăng nhập</h1>
+          <p className="mt-2 text-sm text-white/60">
+            Theo dõi và thu hồi phiên đăng nhập theo IP hoặc thiết bị của người dùng.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
+            onClick={() => setActiveFilter("all")}
+          >
+            Bộ lọc
+          </Button>
+          <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
+            <AlertDialogTrigger asChild>
+              <Button className="bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90">
+                Thu hồi tất cả
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogTitle>Thu hồi toàn bộ phiên?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Hành động này sẽ đăng xuất tất cả thiết bị và không thể hoàn tác.
+              </AlertDialogDescription>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    setConfirmRevokeAll(false);
+                    void revokeAll();
+                  }}
+                >
+                  Thu hồi
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-white/10 bg-[#111827] text-white">
         <CardContent className="space-y-4 py-5">
           <div className="grid gap-3 md:grid-cols-4">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Tìm theo email, tên, UA"
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            />
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                🔍
+              </span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Tìm theo email, tên, UA"
+                className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-9 pr-4 text-sm text-white"
+              />
+            </div>
             <input
               value={ipFilter}
               onChange={(event) => setIpFilter(event.target.value)}
-              placeholder="IP"
+              placeholder="IP Address"
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
             <input
@@ -200,38 +250,32 @@ export default function AdminSessionsPage() {
                 {item.label}
               </Button>
             ))}
-            <Button size="sm" variant="outline" onClick={revokeByFilter} disabled={!canBulkRevoke}>
+            {[
+              { key: "desktop", label: "Desktop" },
+              { key: "mobile", label: "Mobile" },
+            ].map((item) => (
+              <Button
+                key={item.key}
+                variant={deviceType === item.key ? "default" : "secondary"}
+                size="sm"
+                onClick={() => setDeviceType(item.key as typeof deviceType)}
+              >
+                {item.label}
+              </Button>
+            ))}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={revokeByFilter}
+              disabled={!canBulkRevoke}
+            >
               Thu hồi theo bộ lọc
             </Button>
-            <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
-              <AlertDialogTrigger asChild>
-                <Button size="sm" variant="outline">
-                  Thu hồi tất cả
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogTitle>Thu hồi toàn bộ phiên?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Hành động này sẽ đăng xuất tất cả thiết bị và không thể hoàn tác.
-                </AlertDialogDescription>
-                <div className="mt-6 flex items-center justify-end gap-3">
-                  <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      setConfirmRevokeAll(false);
-                      void revokeAll();
-                    }}
-                  >
-                    Thu hồi
-                  </AlertDialogAction>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-white/10 bg-[#101826] text-white">
         <CardContent className="py-5">
           {sessionsQuery.isLoading ? (
             <Loading label="Loading sessions" />
@@ -239,7 +283,7 @@ export default function AdminSessionsPage() {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
                 <span>
-                  Tổng <span className="text-white">{totalItems}</span> phiên
+                  Tổng <span className="text-white">{filteredItems.length}</span> phiên
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -265,37 +309,43 @@ export default function AdminSessionsPage() {
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10">
-                <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr_200px] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
+                <div className="grid grid-cols-[1.4fr_1fr_1fr_220px] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
                   <span>Người dùng</span>
                   <span>IP / Device</span>
                   <span>Hoạt động gần nhất</span>
-                  <span>Hết hạn</span>
                   <span>Thao tác</span>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {items.length ? (
-                    items.map((session) => (
+                  {filteredItems.length ? (
+                    filteredItems.map((session) => (
                       <div
                         key={session.id}
-                        className="grid grid-cols-[1.3fr_1fr_1fr_1fr_200px] items-center gap-4 px-4 py-3 text-sm text-white/80"
+                        className="grid grid-cols-[1.4fr_1fr_1fr_220px] items-center gap-4 px-4 py-3 text-sm text-white/80"
                       >
-                        <div>
-                          <p className="text-white">{session.name || session.email || "Unknown"}</p>
-                          <p className="text-xs text-white/50">
-                            #{session.userId} · {session.roleKey || "ROLE"}
-                          </p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                            {(session.name || session.email || "A").slice(0, 1).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-white">{session.name || session.email || "Unknown"}</p>
+                            <p className="text-xs text-white/50">
+                              #{session.userId} · {session.roleKey || "ROLE"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="space-y-1 text-xs text-white/50">
+                          <p className="text-sm text-white">{session.ip || "-"}</p>
+                          <p>{session.device || session.userAgent || "-"}</p>
                         </div>
                         <div className="space-y-1">
-                          <p>{session.ip || "-"}</p>
-                          <p className="text-xs text-white/50">{session.device || session.userAgent || "-"}</p>
-                        </div>
-                        <div>
-                          <p>{formatDate(session.lastUsedAt)}</p>
+                          <p className="text-white">{formatDate(session.lastUsedAt)}</p>
                           <Badge variant={session.isActive ? "success" : "draft"}>
                             {session.isActive ? "Active" : "Expired"}
                           </Badge>
+                          <p className="text-xs text-white/40">
+                            Hết hạn: {formatDate(session.expiresAt)}
+                          </p>
                         </div>
-                        <p>{formatDate(session.expiresAt)}</p>
                         <div className="flex flex-wrap items-center gap-2">
                           <Button
                             size="sm"

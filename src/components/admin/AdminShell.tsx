@@ -13,32 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAdminQuery } from "@/lib/api/adminHooks";
-import {
-  getAdminMe,
-  getAdminOverview,
-  getAdminRoles,
-  getAdminServices,
-  getAdminUsers,
-  getBookings,
-  getCmsCategories,
-  getCmsPosts,
-  getCmsTags,
-  getMediaFolders,
-  getMediaTags,
-} from "@/lib/api/admin";
+import { getAdminMe } from "@/lib/api/admin";
 import AdminRequestFeedback from "./AdminRequestFeedback";
-import type { Booking } from "@/types/admin-dashboard.types";
 import { useTranslation } from "react-i18next";
-import { ADMIN_BASE, ADMIN_ROUTES } from "@/lib/admin/constants";
-
-type AccessRule = {
-  prefix: string;
-  permissions?: string[];
-  roles?: string[];
-  requireAnyPermission?: boolean;
-};
+import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import { buildBreadcrumbTrail, getAdminPath } from "@/components/admin/shell/utils";
+import { isAdminPathAllowed } from "@/components/admin/shell/access";
+import { useAdminPrefetch } from "@/components/admin/shell/hooks/useAdminPrefetch";
+import { useBookingNotifications } from "@/components/admin/shell/hooks/useBookingNotifications";
 
 export default function AdminShell({
   children,
@@ -59,17 +42,12 @@ export default function AdminShell({
     return <div className="min-h-screen bg-[var(--mist)]">{children}</div>;
   }
 
-  const breadcrumb = (adminIndex >= 0 ? segments.slice(adminIndex + 1) : segments.slice(2)).map(
-    (segment) => segment.replace(/-/g, " ")
-  );
-  const breadcrumbTrail = ["Admin", ...breadcrumb];
-  const displayTrail = breadcrumbTrail.length > 1 ? breadcrumbTrail : ["Admin", "Overview"];
+  const displayTrail = useMemo(() => buildBreadcrumbTrail(pathname), [pathname]);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -123,85 +101,22 @@ export default function AdminShell({
     return links.length ? links[0].href : "";
   }, [filteredSections]);
 
-  const adminPath = useMemo(() => {
-    const segments = pathname.split("/").filter(Boolean);
-    const adminIndex = segments.indexOf("admin");
-    if (adminIndex === -1) return "";
-    return `/${segments.slice(adminIndex).join("/")}`;
-  }, [pathname]);
+  const adminPath = useMemo(() => getAdminPath(pathname), [pathname]);
 
-  const isAllowed = useMemo(() => {
-    if (!roleKey) return false;
-    const rules: AccessRule[] = [
-      { prefix: ADMIN_BASE, requireAnyPermission: true },
-      { prefix: ADMIN_ROUTES.overview, permissions: ["view_dashboard"] },
-      { prefix: ADMIN_ROUTES.dashboard, permissions: ["view_dashboard"] },
-      { prefix: ADMIN_ROUTES.analytics, permissions: ["view_dashboard"] },
-      { prefix: ADMIN_ROUTES.live, permissions: ["view_live"] },
-      { prefix: ADMIN_ROUTES.customers, permissions: ["manage_customers"] },
-      { prefix: ADMIN_ROUTES.bookings, permissions: ["view_bookings"] },
-      { prefix: ADMIN_ROUTES.leads, roles: ["ADMIN"] },
-      { prefix: ADMIN_ROUTES.posts, permissions: ["manage_posts"] },
-      { prefix: ADMIN_ROUTES.pages, permissions: ["manage_pages"] },
-      { prefix: ADMIN_ROUTES.services, permissions: ["manage_services"] },
-      { prefix: ADMIN_ROUTES.media, permissions: ["manage_media"] },
-      { prefix: ADMIN_ROUTES.seoRedirects, permissions: ["manage_redirects"] },
-      { prefix: ADMIN_ROUTES.seoBrokenLinks, permissions: ["manage_broken_links"] },
-      { prefix: ADMIN_ROUTES.seoKeywords, permissions: ["manage_keywords"] },
-      { prefix: ADMIN_ROUTES.users, permissions: ["manage_users"] },
-      { prefix: ADMIN_ROUTES.settings, permissions: ["manage_users"] },
-    ] as const;
-
-    const rule = rules
-      .filter((item) => adminPath.startsWith(item.prefix))
-      .sort((a, b) => b.prefix.length - a.prefix.length)[0];
-    if (!rule) return false;
-    if (rule.roles?.length && !rule.roles.includes(roleKey)) return false;
-    if (rule.permissions?.length) {
-      return rule.permissions.every((permission) =>
-        effectivePermissions.includes(permission)
-      );
-    }
-    if (rule.requireAnyPermission) {
-      return effectivePermissions.length > 0;
-    }
-    return true;
-  }, [adminPath, effectivePermissions, roleKey]);
-
-  const bookingsQuery = useAdminQuery({
-    queryKey: ["admin-booking-notifications"],
-    queryFn: ({ signal }) =>
-      getBookings(
-        undefined,
-        { status: "NEW", page: 1, limit: 5 },
-        { notify: false, timeoutMs: 8000, signal }
-      ),
-    enabled: canViewBookings,
-    refetchInterval: 15000,
-    refetchIntervalInBackground: true,
-    staleTime: 5_000,
-    cacheTime: 60_000,
-    toastOnError: false,
-  });
-
-  const newBookings = bookingsQuery.data?.items ?? [];
-  const totalNewBookings = bookingsQuery.data?.pagination.total ?? newBookings.length;
-  const badgeCount = totalNewBookings > 99 ? "99+" : totalNewBookings.toString();
-  const dateFormatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat("vi-VN", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-    []
+  const isAllowed = useMemo(
+    () => isAdminPathAllowed(adminPath, effectivePermissions, roleKey),
+    [adminPath, effectivePermissions, roleKey]
   );
 
-  const openBookingPopup = (booking: Booking) => {
-    if (typeof window === "undefined") return;
-    window.dispatchEvent(
-      new CustomEvent<Booking>("admin-booking-open", { detail: booking })
-    );
-  };
+  useAdminPrefetch(roleKey, effectivePermissions);
+  const {
+    bookingsQuery,
+    newBookings,
+    totalNewBookings,
+    badgeCount,
+    dateFormatter,
+    openBookingPopup,
+  } = useBookingNotifications(canViewBookings);
 
   useEffect(() => {
     setMounted(true);
@@ -214,37 +129,6 @@ export default function AdminShell({
       i18n.changeLanguage(stored);
     }
   }, [i18n]);
-
-  useEffect(() => {
-    if (!roleKey) return;
-    const prefetch = <T,>(key: unknown[], fn: () => Promise<T>) =>
-      queryClient.prefetchQuery({
-        queryKey: key,
-        queryFn: fn,
-        staleTime: 60_000,
-        gcTime: 5 * 60_000,
-      });
-
-    if (effectivePermissions.includes("view_dashboard")) {
-      prefetch(["admin-overview"], () => getAdminOverview(undefined, {}));
-    }
-    if (effectivePermissions.includes("manage_posts")) {
-      prefetch(["cms-posts", 1, 20], () => getCmsPosts(undefined, 1, 20));
-      prefetch(["cms-categories"], () => getCmsCategories(undefined));
-      prefetch(["cms-tags"], () => getCmsTags(undefined));
-    }
-    if (effectivePermissions.includes("manage_media")) {
-      prefetch(["cms-media-folders"], () => getMediaFolders());
-      prefetch(["cms-media-tags"], () => getMediaTags());
-    }
-    if (effectivePermissions.includes("manage_users")) {
-      prefetch(["admin-roles"], () => getAdminRoles(undefined));
-      prefetch(["admin-users"], () => getAdminUsers(undefined));
-    }
-    if (effectivePermissions.includes("manage_services")) {
-      prefetch(["admin-services"], () => getAdminServices(undefined));
-    }
-  }, [effectivePermissions, queryClient, roleKey]);
 
   useEffect(() => {
     if (!roleKey) return;
@@ -281,7 +165,7 @@ export default function AdminShell({
         }))
       )
       .filter((link) => link.label.toLowerCase().includes(query));
-  }, [navSections, searchQuery]);
+  }, [filteredSections, searchQuery]);
   const suggestedResults = useMemo(() => {
     return filteredSections.flatMap((section) =>
       section.links.slice(0, 2).map((link) => ({

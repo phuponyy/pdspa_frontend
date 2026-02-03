@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminAuditLogs } from "@/lib/api/admin";
 import Loading from "@/components/common/Loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import type { AdminAuditLog } from "@/types/api.types";
 
 const formatDate = (value?: string) => {
   if (!value) return "-";
@@ -15,6 +16,64 @@ const formatDate = (value?: string) => {
   } catch {
     return value;
   }
+};
+
+const formatDateOnly = (value?: string) => {
+  if (!value) return "";
+  try {
+    return new Date(value).toISOString().slice(0, 10);
+  } catch {
+    return "";
+  }
+};
+
+const ACTION_COLORS: Record<string, "success" | "warning" | "draft" | "default"> = {
+  CREATE: "success",
+  UPDATE: "warning",
+  DELETE: "draft",
+};
+
+const pickActionBadge = (action: string) => {
+  if (action.includes("CREATE")) return ACTION_COLORS.CREATE;
+  if (action.includes("UPDATE")) return ACTION_COLORS.UPDATE;
+  if (action.includes("DELETE")) return ACTION_COLORS.DELETE;
+  return "default";
+};
+
+const buildCsv = (items: AdminAuditLog[]) => {
+  const rows = [
+    [
+      "id",
+      "action",
+      "scope",
+      "entity",
+      "entityId",
+      "userId",
+      "name",
+      "email",
+      "ip",
+      "createdAt",
+    ],
+  ];
+  items.forEach((log) => {
+    rows.push([
+      String(log.id ?? ""),
+      log.action || "",
+      log.scope || "",
+      log.entity || "",
+      String(log.entityId ?? ""),
+      String(log.userId ?? ""),
+      log.name || "",
+      log.email || "",
+      log.ip || "",
+      log.createdAt || "",
+    ]);
+  });
+  return rows
+    .map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    )
+    .join("\n");
 };
 
 export default function AdminAuditLogsPage() {
@@ -26,6 +85,7 @@ export default function AdminAuditLogsPage() {
   const [userId, setUserId] = useState("");
   const [ip, setIp] = useState("");
   const [scope, setScope] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
 
   const auditQuery = useQuery({
     queryKey: ["admin-audit-logs", page, pageSize, query, action, entity, userId, ip, scope],
@@ -46,33 +106,119 @@ export default function AdminAuditLogsPage() {
   const totalPages = auditQuery.data?.data?.pagination?.totalPages || 1;
   const totalItems = auditQuery.data?.data?.pagination?.total || 0;
 
+  const actions = useMemo(
+    () =>
+      Array.from(new Set(items.map((item) => item.action))).filter(
+        (value): value is string => Boolean(value)
+      ),
+    [items]
+  );
+  const scopes = useMemo(
+    () =>
+      Array.from(new Set(items.map((item) => item.scope))).filter(
+        (value): value is string => Boolean(value)
+      ),
+    [items]
+  );
+
+  const filteredItems = useMemo(() => {
+    if (!dateFilter) return items;
+    return items.filter((item) => formatDateOnly(item.createdAt) === dateFilter);
+  }, [items, dateFilter]);
+
+  const last24hStats = useMemo(() => {
+    const now = Date.now();
+    const within24h = filteredItems.filter((item) => {
+      if (!item.createdAt) return false;
+      const created = Date.parse(item.createdAt);
+      return !Number.isNaN(created) && now - created <= 24 * 60 * 60 * 1000;
+    });
+    const stats = { create: 0, update: 0, delete: 0 };
+    within24h.forEach((item) => {
+      if (item.action.includes("CREATE")) stats.create += 1;
+      if (item.action.includes("UPDATE")) stats.update += 1;
+      if (item.action.includes("DELETE")) stats.delete += 1;
+    });
+    return stats;
+  }, [filteredItems]);
+
+  const handleExport = () => {
+    const csv = buildCsv(filteredItems);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
-          Security
-        </p>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">Audit Log</h1>
-        <p className="mt-2 text-sm text-[var(--ink-muted)]">
-          Lịch sử thao tác: ai làm gì, khi nào, IP và payload hash.
-        </p>
+    <div className="space-y-6 text-white">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Nhật ký hoạt động</h1>
+          <p className="mt-1 text-sm text-white/60">
+            Giám sát và quản lý các thay đổi hệ thống theo thời gian thực.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
+            onClick={handleExport}
+          >
+            Xuất báo cáo
+          </Button>
+          <Button onClick={() => auditQuery.refetch()}>Làm mới</Button>
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-white/10 bg-[#111827] text-white">
         <CardContent className="space-y-4 py-5">
-          <div className="grid gap-3 md:grid-cols-6">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Tìm kiếm"
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            />
-            <input
+          <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_1.2fr]">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                🔍
+              </span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Tìm kiếm hành động, ID hoặc IP..."
+                className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-9 pr-4 text-sm text-white"
+              />
+            </div>
+            <select
               value={action}
               onChange={(event) => setAction(event.target.value)}
-              placeholder="Action"
+              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
+            >
+              <option value="">Tất cả hành động</option>
+              {actions.map((value) => (
+                <option key={value} value={value} className="bg-[#0f1722]">
+                  {value}
+                </option>
+              ))}
+            </select>
+            <select
+              value={scope}
+              onChange={(event) => setScope(event.target.value)}
+              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
+            >
+              <option value="all">Phạm vi (All Scope)</option>
+              {scopes.map((value) => (
+                <option key={value} value={value} className="bg-[#0f1722]">
+                  {value}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(event) => setDateFilter(event.target.value)}
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
             <input
               value={entity}
               onChange={(event) => setEntity(event.target.value)}
@@ -91,24 +237,11 @@ export default function AdminAuditLogsPage() {
               placeholder="IP"
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
-            <select
-              value={scope}
-              onChange={(event) => setScope(event.target.value)}
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            >
-              <option value="all">All scope</option>
-              <option value="CMS">CMS</option>
-              <option value="SEO">SEO</option>
-              <option value="AUTH">AUTH</option>
-              <option value="SERVICE">SERVICE</option>
-              <option value="BOOKING">BOOKING</option>
-              <option value="ADMIN">ADMIN</option>
-            </select>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-white/10 bg-[#101826] text-white">
         <CardContent className="py-5">
           {auditQuery.isLoading ? (
             <Loading label="Loading audit logs" />
@@ -116,7 +249,12 @@ export default function AdminAuditLogsPage() {
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-white/60">
                 <span>
-                  Tổng <span className="text-white">{totalItems}</span> log
+                  Hiển thị{" "}
+                  <span className="text-white">
+                    {filteredItems.length ? (page - 1) * pageSize + 1 : 0}-
+                    {Math.min(page * pageSize, totalItems)}
+                  </span>{" "}
+                  trong {totalItems} bản ghi
                 </span>
                 <div className="flex items-center gap-2">
                   <label className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-white/50">
@@ -142,7 +280,7 @@ export default function AdminAuditLogsPage() {
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                     disabled={page <= 1}
                   >
-                    Trước
+                    &lt;
                   </Button>
                   <span className="text-xs uppercase tracking-[0.2em] text-white/50">
                     {page} / {totalPages}
@@ -153,23 +291,22 @@ export default function AdminAuditLogsPage() {
                     onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={page >= totalPages}
                   >
-                    Sau
+                    &gt;
                   </Button>
                 </div>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-white/10">
-                <div className="grid grid-cols-[1.1fr_0.8fr_1fr_1fr_0.8fr_1fr] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
-                  <span>Action</span>
-                  <span>Scope</span>
-                  <span>Entity</span>
-                  <span>User</span>
-                  <span>IP</span>
-                  <span>Thời gian</span>
+                <div className="grid grid-cols-[1.3fr_0.6fr_0.8fr_0.9fr_0.8fr] gap-4 border-b border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/50">
+                  <span>Hành động &amp; kỹ thuật</span>
+                  <span>Phạm vi</span>
+                  <span>Đối tượng</span>
+                  <span>Người dùng</span>
+                  <span>Thời gian &amp; IP</span>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {items.length ? (
-                    items.map((log) => {
+                  {filteredItems.length ? (
+                    filteredItems.map((log) => {
                       const metadata = log.metadata as
                         | { payloadHash?: string; endpoint?: string; userAgent?: string }
                         | undefined;
@@ -179,31 +316,39 @@ export default function AdminAuditLogsPage() {
                       return (
                         <div
                           key={log.id}
-                          className="grid grid-cols-[1.1fr_0.8fr_1fr_1fr_0.8fr_1fr] items-center gap-4 px-4 py-3 text-sm text-white/80"
+                          className="grid grid-cols-[1.3fr_0.6fr_0.8fr_0.9fr_0.8fr] items-center gap-4 px-4 py-4 text-sm text-white/80"
                         >
-                          <div>
-                            <p className="text-white">{log.action}</p>
-                            {hash ? (
-                              <p className="text-xs text-white/40">hash: {hash.slice(0, 12)}…</p>
-                            ) : null}
-                            {endpoint ? (
-                              <p className="text-xs text-white/40">endpoint: {endpoint}</p>
-                            ) : null}
-                            {userAgent ? (
-                              <p className="text-xs text-white/40">ua: {userAgent}</p>
-                            ) : null}
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-white">{log.action}</p>
+                              <Badge variant={pickActionBadge(log.action)}>
+                                {log.action.split("_").slice(-1)[0]}
+                              </Badge>
+                            </div>
+                            <div className="rounded-xl border border-white/10 bg-[#0f1722] px-3 py-2 text-xs text-white/50">
+                              {hash ? <p>hash: {hash.slice(0, 12)}…</p> : null}
+                              {endpoint ? <p>endpoint: {endpoint}</p> : null}
+                              {userAgent ? <p>ua: {userAgent}</p> : null}
+                            </div>
                           </div>
                           <Badge variant="default">{log.scope || "-"}</Badge>
                           <div>
                             <p>{log.entity}</p>
-                            <p className="text-xs text-white/40">#{log.entityId ?? "-"}</p>
+                            <p className="text-xs text-white/40">ID: {log.entityId ?? "-"}</p>
                           </div>
-                          <div>
-                            <p>{log.name || log.email || "-"}</p>
-                            <Badge variant="default">ID {log.userId ?? "-"}</Badge>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xs font-semibold text-white">
+                              {(log.name || log.email || "A").slice(0, 1).toUpperCase()}
+                            </div>
+                            <div>
+                              <p>{log.name || log.email || "-"}</p>
+                              <p className="text-xs text-white/40">UID: {log.userId ?? "-"}</p>
+                            </div>
                           </div>
-                          <p>{log.ip || "-"}</p>
-                          <p>{formatDate(log.createdAt)}</p>
+                          <div className="text-right text-xs text-white/60">
+                            <p className="text-sm text-white">{formatDate(log.createdAt)}</p>
+                            <p>{log.ip || "-"}</p>
+                          </div>
                         </div>
                       );
                     })
@@ -216,6 +361,22 @@ export default function AdminAuditLogsPage() {
           )}
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          { label: "TẠO MỚI (24H)", value: last24hStats.create, color: "border-emerald-500/40" },
+          { label: "CẬP NHẬT (24H)", value: last24hStats.update, color: "border-amber-500/40" },
+          { label: "XÓA (24H)", value: last24hStats.delete, color: "border-rose-500/40" },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className={`rounded-2xl border ${item.color} bg-[#111827] p-4 text-white shadow-[0_18px_40px_rgba(0,0,0,0.25)]`}
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">{item.label}</p>
+            <p className="mt-2 text-2xl font-semibold">{item.value}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

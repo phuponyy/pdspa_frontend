@@ -1,73 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  getLighthouseReports,
-  getObservabilitySummary,
-  getWebVitalsSummary,
-} from "@/lib/api/admin";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 import LineChart from "@/components/admin/charts/LineChart";
-
-const formatDuration = (seconds: number) => {
-  const total = Math.max(0, Math.floor(seconds));
-  const days = Math.floor(total / 86400);
-  const hours = Math.floor((total % 86400) / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-};
-
-const formatPercent = (value: number) =>
-  `${Math.round(Math.min(Math.max(value * 100, 0), 10000)) / 100}%`;
+import { useObservabilityQueries } from "@/components/admin/observability/hooks/useObservabilityQueries";
+import { formatDuration, formatPercent, getRumScore } from "@/components/admin/observability/utils";
 
 export default function AdminObservability() {
   const [rumRange, setRumRange] = useState<"7d" | "14d" | "30d">("7d");
   const [labRange, setLabRange] = useState<"7d" | "30d" | "90d">("30d");
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-observability"],
-    queryFn: () => getObservabilitySummary(undefined),
-    refetchInterval: 15000,
-  });
-  const rumQuery = useQuery({
-    queryKey: ["admin-web-vitals", rumRange],
-    queryFn: () => getWebVitalsSummary(undefined, rumRange),
-    refetchInterval: 60000,
-  });
-  const labQuery = useQuery({
-    queryKey: ["admin-lighthouse", labRange],
-    queryFn: () => getLighthouseReports(undefined, labRange),
-    refetchInterval: 120000,
-  });
-
-  const summary = data?.data;
-  const topSlow = useMemo(() => summary?.topSlow ?? [], [summary?.topSlow]);
+  const { summary, isLoading, topSlow, rum, lighthouse } = useObservabilityQueries(
+    rumRange,
+    labRange
+  );
   const healthBadge = summary?.health?.database === "ok" ? "success" : "warning";
-  const rum = rumQuery.data?.data;
-  const lighthouse = labQuery.data?.data || [];
-
-  const rumScore = (value: number, name: string) => {
-    if (name === "CLS") {
-      if (value <= 0.1) return "good";
-      if (value <= 0.25) return "needs";
-      return "bad";
-    }
-    if (name === "LCP") {
-      if (value <= 2500) return "good";
-      if (value <= 4000) return "needs";
-      return "bad";
-    }
-    if (name === "INP") {
-      if (value <= 200) return "good";
-      if (value <= 500) return "needs";
-      return "bad";
-    }
-    return "neutral";
-  };
 
   return (
     <div className="space-y-8">
@@ -217,7 +165,7 @@ export default function AdminObservability() {
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {(["LCP", "INP", "CLS"] as const).map((metric) => {
             const value = rum?.summary?.[metric]?.p75 ?? 0;
-            const status = rumScore(value, metric);
+            const status = getRumScore(value, metric);
             return (
               <Card key={metric} className="border-white/5">
                 <CardHeader>
