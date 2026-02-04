@@ -20,6 +20,7 @@
     "@tinymce/tinymce-react": "^6.3.0",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
+    "gsap": "^3.13.0",
     "i18next": "^23.12.2",
     "next": "16.1.1",
     "qrcode": "^1.5.4",

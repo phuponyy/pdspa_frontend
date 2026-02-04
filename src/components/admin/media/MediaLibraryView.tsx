@@ -120,6 +120,7 @@ export default function MediaLibraryView() {
               tags={media.tags}
               onBulkDelete={media.handleBulkDelete}
               onBulkDownload={media.handleBulkDownload}
+              onBulkConvertWebp={media.handleBulkConvertWebp}
               onBulkMove={media.handleBulkMove}
               onBulkTag={media.handleBulkTag}
             />
@@ -145,6 +146,7 @@ export default function MediaLibraryView() {
                   dimensions={media.selectedDimensions}
                   onSaveMeta={media.handleUpdateMeta}
                   onReplace={() => media.openReplace(media.selected?.id ?? 0)}
+                  onConvertWebp={media.handleConvertWebp}
                   onDelete={() => media.handleDelete(media.selected?.id ?? 0)}
                   onDownload={() => media.selected && media.handleDownload(media.selected)}
                   onClose={() => media.setSelectedId(null)}

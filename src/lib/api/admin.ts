@@ -772,6 +772,20 @@ export const updateMediaMeta = async (
     body: JSON.stringify(payload),
   });
 
+export const convertMediaToWebp = async (id: number) =>
+  apiFetch<MediaUploadResponse>(`/admin/cms/media/${id}/webp`, {
+    method: "POST",
+  });
+
+export const convertMediaToWebpBulk = async (ids: number[]) =>
+  apiFetch<ApiSuccess<{ converted: number; skipped: number; failed: number }>>(
+    "/admin/cms/media/convert-webp",
+    {
+      method: "POST",
+      body: JSON.stringify({ ids }),
+    }
+  );
+
 export const getMediaFolders = async () =>
   apiFetch<ApiSuccess<MediaFolder[]>>("/admin/cms/media/folders", {
     cache: "no-store",

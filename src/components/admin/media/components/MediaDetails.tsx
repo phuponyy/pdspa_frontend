@@ -17,6 +17,7 @@ export type MediaDetailsProps = {
   dimensions: { width: number; height: number } | null;
   onSaveMeta: () => void;
   onReplace: () => void;
+  onConvertWebp: () => void;
   onDelete: () => void;
   onDownload: () => void;
   onClose: () => void;
@@ -35,6 +36,7 @@ export const MediaDetails = ({
   dimensions,
   onSaveMeta,
   onReplace,
+  onConvertWebp,
   onDelete,
   onDownload,
   onClose,
@@ -137,6 +139,14 @@ export const MediaDetails = ({
         </Button>
         <Button variant="outline" className="w-full border-white/10 bg-white/5 text-white" onClick={onReplace}>
           Replace
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full border-white/10 bg-white/5 text-white"
+          onClick={onConvertWebp}
+          disabled={item.mimeType === "image/webp" || item.mimeType === "image/svg+xml" || item.mimeType === "image/gif"}
+        >
+          Convert to WebP
         </Button>
         <DeleteDialog onConfirm={onDelete}>
           <Button variant="outline" className="w-full border-white/10 bg-white/5 text-white">

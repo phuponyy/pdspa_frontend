@@ -4,6 +4,8 @@ import {
   createMediaFolder,
   createMediaTag,
   deleteMedia,
+  convertMediaToWebp,
+  convertMediaToWebpBulk,
   getMediaFolders,
   getMediaLibrary,
   getMediaTags,
@@ -211,6 +213,23 @@ export const useMediaLibrary = () => {
       .forEach((item) => handleDownload(item));
   };
 
+  const handleBulkConvertWebp = async () => {
+    const targets = selectedIds
+      .map((id) => items.find((item) => item.id === id))
+      .filter((item): item is MediaItem => Boolean(item))
+      .filter(
+        (item) =>
+          item.mimeType === "image/jpeg" || item.mimeType === "image/png"
+      );
+    if (!targets.length) {
+      toast.push({ message: "Không có ảnh JPEG/PNG để chuyển đổi.", type: "info" });
+      return;
+    }
+    await convertMediaToWebpBulk(targets.map((item) => item.id));
+    toast.push({ message: "Đã chuyển đổi WebP hàng loạt.", type: "success" });
+    refetch();
+  };
+
   const handleUpdateMeta = async () => {
     if (!selected) return;
     await updateMediaMeta(selected.id, {
@@ -219,6 +238,25 @@ export const useMediaLibrary = () => {
       tagIds: selectedTagIds,
     });
     toast.push({ message: "Đã cập nhật metadata", type: "success" });
+    refetch();
+  };
+
+  const handleConvertWebp = async () => {
+    if (!selected) return;
+    if (selected.mimeType === "image/webp") {
+      toast.push({ message: "Ảnh đã là WebP.", type: "info" });
+      return;
+    }
+    if (selected.mimeType === "image/svg+xml" || selected.mimeType === "image/gif") {
+      toast.push({ message: "Không hỗ trợ WebP cho SVG/GIF.", type: "error" });
+      return;
+    }
+    if (!selected.mimeType?.startsWith("image/")) {
+      toast.push({ message: "Định dạng không hỗ trợ.", type: "error" });
+      return;
+    }
+    await convertMediaToWebp(selected.id);
+    toast.push({ message: "Đã chuyển sang WebP.", type: "success" });
     refetch();
   };
 
@@ -313,6 +351,8 @@ export const useMediaLibrary = () => {
     handleBulkTag,
     handleDownload,
     handleBulkDownload,
+    handleBulkConvertWebp,
+    handleConvertWebp,
     onDrop,
     onDragOver,
     onDragLeave,

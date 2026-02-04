@@ -8,6 +8,7 @@ type BulkActionBarProps = {
   tags: MediaTag[];
   onBulkDelete: () => void;
   onBulkDownload: () => void;
+  onBulkConvertWebp: () => void;
   onBulkMove: (folderId: number | null) => void;
   onBulkTag: (tagIds: number[]) => void;
 };
@@ -18,6 +19,7 @@ export const BulkActionBar = ({
   tags,
   onBulkDelete,
   onBulkDownload,
+  onBulkConvertWebp,
   onBulkMove,
   onBulkTag,
 }: BulkActionBarProps) => {
@@ -62,6 +64,14 @@ export const BulkActionBar = ({
             onClick={onBulkDownload}
           >
             Download
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
+            onClick={onBulkConvertWebp}
+          >
+            Convert WebP
           </Button>
           <Button type="button" className="h-9" onClick={onBulkDelete}>
             Delete
