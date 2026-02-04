@@ -3,6 +3,9 @@ import type {
   IntroState,
   MetaState,
   RecoveryState,
+  BlogState,
+  ReviewsState,
+  GalleryState,
   ServicesState,
 } from "./types";
 
@@ -120,7 +123,117 @@ export const defaultServicesByLang: Record<string, ServicesState> = {
   },
 };
 
-export const defaultSectionOrder = ["intro", "hero", "highlights", "services", "recovery"];
+export const defaultBlogByLang: Record<string, BlogState> = {
+  vi: {
+    heading: "Massage Guide",
+    description: "",
+    featuredSlug: "",
+  },
+  en: {
+    heading: "Massage Guide",
+    description: "",
+    featuredSlug: "",
+  },
+};
+
+export const defaultReviewsByLang: Record<string, ReviewsState> = {
+  vi: {
+    heading: "Reviews of the massage & spa Da Nang at Panda Spa",
+    description: "",
+    items: [
+      {
+        name: "Raj Patel",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "After a long day of walking, I needed a full body spa near me. Panda Spa saved my legs!",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+      {
+        name: "Lena Müller",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "I was walking around the city and Googled massage near me. Great service without a reservation.",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+      {
+        name: "David Kim",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "Clean place, friendly staff, and calming ambience. We will be back for another treatment.",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+    ],
+  },
+  en: {
+    heading: "Reviews of the massage & spa Da Nang at Panda Spa",
+    description: "",
+    items: [
+      {
+        name: "Raj Patel",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "After a long day of walking, I needed a full body spa near me. Panda Spa saved my legs!",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+      {
+        name: "Lena Müller",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "I was walking around the city and Googled massage near me. Great service without a reservation.",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+      {
+        name: "David Kim",
+        contributions: "4 contributions",
+        rating: 5,
+        review:
+          "Clean place, friendly staff, and calming ambience. We will be back for another treatment.",
+        visit: "Visit 2025",
+        tag: "Traveled",
+        avatarUrl: "",
+      },
+    ],
+  },
+};
+
+export const defaultGalleryByLang: Record<string, GalleryState> = {
+  vi: {
+    heading: "Panda Spa Photo Gallery",
+    description: "",
+    items: [],
+  },
+  en: {
+    heading: "Panda Spa Photo Gallery",
+    description: "",
+    items: [],
+  },
+};
+
+export const defaultSectionOrder = [
+  "intro",
+  "hero",
+  "highlights",
+  "services",
+  "blog",
+  "recovery",
+  "gallery",
+  "reviews",
+];
 
 export const defaultSchemaTemplateByLang: Record<string, string> = {
   vi: "WebPage",

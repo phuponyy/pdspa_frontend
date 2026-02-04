@@ -15,10 +15,18 @@ export type HomeSectionItem = {
   title?: string;
   description?: string;
   imageUrl?: string;
+  caption?: string;
   price?: number;
   priceNote?: string;
   serviceId?: number;
   priceOptions?: PriceOption[];
+  name?: string;
+  avatarUrl?: string;
+  rating?: number;
+  contributions?: string;
+  visit?: string;
+  tag?: string;
+  review?: string;
 };
 
 export type HeroSlide = {

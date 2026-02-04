@@ -2,13 +2,25 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 import {
   getHomeHero,
   getHomeHighlights,
+  getHomeGallery,
   getHomeIntro,
+  getHomeBlog,
   getHomeMeta,
   getHomeRecovery,
+  getHomeReviews,
   getHomeServices,
   getHomeStatus,
 } from "@/lib/api/admin";
-import type { HeroState, IntroState, MetaState, RecoveryState, ServicesState } from "@/components/admin/page-editor/types";
+import type {
+  HeroState,
+  IntroState,
+  MetaState,
+  RecoveryState,
+  BlogState,
+  ReviewsState,
+  GalleryState,
+  ServicesState,
+} from "@/components/admin/page-editor/types";
 
 type LoadHookParams = {
   activeLang: "vi" | "en";
@@ -22,6 +34,9 @@ type LoadHookParams = {
   setHighlightsByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
   setServicesByLang: Dispatch<SetStateAction<Record<string, ServicesState>>>;
   setRecoveryByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
+  setGalleryByLang: Dispatch<SetStateAction<Record<string, GalleryState>>>;
+  setReviewsByLang: Dispatch<SetStateAction<Record<string, ReviewsState>>>;
+  setBlogByLang: Dispatch<SetStateAction<Record<string, BlogState>>>;
   setStatus: Dispatch<SetStateAction<"DRAFT" | "PUBLISHED">>;
   handleError: (err: unknown) => void;
 };
@@ -38,6 +53,9 @@ export const usePageEditorLoad = ({
   setHighlightsByLang,
   setServicesByLang,
   setRecoveryByLang,
+  setGalleryByLang,
+  setReviewsByLang,
+  setBlogByLang,
   setStatus,
   handleError,
 }: LoadHookParams) => {
@@ -63,16 +81,25 @@ export const usePageEditorLoad = ({
       !section?.heading && !section?.description && !(section?.items?.length ?? 0);
     const isEmptyRecovery = (section: RecoveryState | undefined) =>
       !section?.heading && !section?.description && !(section?.items?.length ?? 0);
+    const isEmptyGallery = (section: GalleryState | undefined) =>
+      !section?.heading && !section?.description && !(section?.items?.length ?? 0);
+    const isEmptyReviews = (section: ReviewsState | undefined) =>
+      !section?.heading && !section?.description && !(section?.items?.length ?? 0);
+    const isEmptyBlog = (section: BlogState | undefined) =>
+      !section?.heading && !section?.description && !section?.featuredSlug;
 
     const load = async () => {
       try {
-        const [meta, hero, intro, highlights, servicesData, recovery] = await Promise.all([
+        const [meta, hero, intro, highlights, servicesData, recovery, gallery, reviews, blog] = await Promise.all([
           getHomeMeta(undefined, activeLang),
           getHomeHero(undefined, activeLang),
           getHomeIntro(undefined, activeLang),
           getHomeHighlights(undefined, activeLang),
           getHomeServices(undefined, activeLang),
           getHomeRecovery(undefined, activeLang),
+          getHomeGallery(undefined, activeLang),
+          getHomeReviews(undefined, activeLang),
+          getHomeBlog(undefined, activeLang),
         ]);
         if (cancelled) return;
 
@@ -189,6 +216,57 @@ export const usePageEditorLoad = ({
                     imageUrl: item?.imageUrl ?? "",
                   }))
                 : [],
+            },
+          };
+        });
+
+        setGalleryByLang((prev) => {
+          if (hasDraft && !isEmptyGallery(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: gallery?.heading ?? "",
+              description: gallery?.description ?? "",
+              items: Array.isArray(gallery?.items)
+                ? gallery.items.map((item) => ({
+                    imageUrl: item?.imageUrl ?? "",
+                    caption: item?.caption ?? "",
+                  }))
+                : [],
+            },
+          };
+        });
+
+        setReviewsByLang((prev) => {
+          if (hasDraft && !isEmptyReviews(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: reviews?.heading ?? "",
+              description: reviews?.description ?? "",
+              items: Array.isArray(reviews?.items)
+                ? reviews.items.map((item) => ({
+                    name: item?.name ?? "",
+                    contributions: item?.contributions ?? "",
+                    rating: item?.rating ?? 5,
+                    review: item?.review ?? "",
+                    visit: item?.visit ?? "",
+                    tag: item?.tag ?? "",
+                    avatarUrl: item?.avatarUrl ?? "",
+                  }))
+                : [],
+            },
+          };
+        });
+
+        setBlogByLang((prev) => {
+          if (hasDraft && !isEmptyBlog(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: blog?.heading ?? "",
+              description: blog?.description ?? "",
+              featuredSlug: blog?.featuredSlug ?? "",
             },
           };
         });

@@ -7,6 +7,9 @@ import HomeIntroSection from "@/components/home/HomeIntroSection";
 import HomeHighlightsSection from "@/components/home/HomeHighlightsSection";
 import HomeServicesSection from "@/components/home/HomeServicesSection";
 import HomeRecoverySection from "@/components/home/HomeRecoverySection";
+import HomeReviewsSection from "@/components/home/HomeReviewsSection";
+import HomeBlogSection from "@/components/home/HomeBlogSection";
+import HomePhotoGallerySection from "@/components/home/HomePhotoGallerySection";
 import SectionRenderer from "@/components/home/SectionRenderer";
 import ContactForm from "@/components/home/ContactForm";
 import Container from "@/components/common/Container";
@@ -113,9 +116,7 @@ export default async function HomePage({
   ]);
   const services = servicesResponse?.data ?? [];
   const config = siteConfigResponse?.data ?? {};
-  const schemaJson =
-    (homeData?.meta as { schemaJson?: Record<string, unknown> | null } | null)
-      ?.schemaJson ?? null;
+  const schemaJson = homeData?.meta?.schemaJson ?? null;
   const resolvedSchema = resolveSchemaJson(schemaJson);
 
   const heroFromPage = (homeData?.page as { hero?: HomeSection })?.hero;
@@ -271,6 +272,52 @@ export default async function HomePage({
           }
           description={section?.description as string | undefined}
           items={section?.items}
+        />
+      );
+    }
+    if (key === "reviews" || key === "review" || key === "testimonials") {
+      return (
+        <HomeReviewsSection
+          key="reviews"
+          heading={
+            (section?.heading as string) ||
+            "Reviews of the massage & spa Da Nang at Panda Spa"
+          }
+          description={section?.description as string | undefined}
+          items={section?.items}
+        />
+      );
+    }
+    if (key === "gallery" || key === "photo-gallery" || key === "photos") {
+      const galleryBody = (section?.body || {}) as {
+        items?: HomeSection["items"];
+        text?: string;
+      };
+      const galleryItems =
+        (section?.items as HomeSection["items"] | undefined) ||
+        (galleryBody.items as HomeSection["items"] | undefined) ||
+        [];
+      return (
+        <HomePhotoGallerySection
+          key="gallery"
+          heading={(section?.heading as string) || "Panda Spa Photo Gallery"}
+          description={
+            (section?.description as string | undefined) ||
+            (galleryBody.text as string | undefined)
+          }
+          items={galleryItems}
+        />
+      );
+    }
+    if (key === "blog" || key === "posts" || key === "news") {
+      const blogBody = (section?.body || {}) as { featuredSlug?: string };
+      return (
+        <HomeBlogSection
+          key="blog"
+          heading={(section?.heading as string) || "Massage Guide"}
+          description={section?.description as string | undefined}
+          featuredSlug={blogBody.featuredSlug}
+          lang={lang}
         />
       );
     }

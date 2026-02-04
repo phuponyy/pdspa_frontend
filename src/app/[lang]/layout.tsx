@@ -1,7 +1,6 @@
 import Header from "@/components/common/Header";
 import Footer from "@/components/common/Footer";
 import I18nProvider from "@/components/common/I18nProvider";
-import PublicHeartbeat from "@/components/common/PublicHeartbeat";
 import { getSiteConfig } from "@/lib/api/public";
 import { HOTLINE, SITE_NAME, SPA_ADDRESS, SPA_HOURS } from "@/lib/constants";
 import { isSupportedLang } from "@/lib/i18n";
@@ -32,7 +31,6 @@ export default async function LangLayout({
   return (
     <div lang={lang} className="min-h-screen">
       <I18nProvider lang={lang}>
-        <PublicHeartbeat />
         <Header lang={lang} hotline={hotline} />
         <main className="flex min-h-[70vh] flex-col">{children}</main>
         <Footer

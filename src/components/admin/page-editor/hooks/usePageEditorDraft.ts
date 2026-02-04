@@ -1,5 +1,14 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { HeroState, IntroState, MetaState, RecoveryState, ServicesState } from "@/components/admin/page-editor/types";
+import type {
+  HeroState,
+  IntroState,
+  MetaState,
+  RecoveryState,
+  BlogState,
+  ReviewsState,
+  GalleryState,
+  ServicesState,
+} from "@/components/admin/page-editor/types";
 import type { SchemaTemplateType } from "@/lib/seo/seoUtils";
 
 type DraftPayload = {
@@ -9,6 +18,9 @@ type DraftPayload = {
   highlightsByLang?: Record<string, RecoveryState>;
   servicesByLang?: Record<string, ServicesState>;
   recoveryByLang?: Record<string, RecoveryState>;
+  reviewsByLang?: Record<string, ReviewsState>;
+  galleryByLang?: Record<string, GalleryState>;
+  blogByLang?: Record<string, BlogState>;
   focusKeywordByLang?: Record<string, string>;
   schemaTemplateByLang?: Record<string, SchemaTemplateType>;
   schemaOrgByLang?: Record<string, string>;
@@ -29,6 +41,9 @@ type DraftHookParams = {
   highlightsByLang: Record<string, RecoveryState>;
   servicesByLang: Record<string, ServicesState>;
   recoveryByLang: Record<string, RecoveryState>;
+  reviewsByLang: Record<string, ReviewsState>;
+  galleryByLang: Record<string, GalleryState>;
+  blogByLang: Record<string, BlogState>;
   focusKeywordByLang: Record<string, string>;
   schemaTemplateByLang: Record<string, SchemaTemplateType>;
   schemaOrgByLang: Record<string, string>;
@@ -42,6 +57,9 @@ type DraftHookParams = {
   setHighlightsByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
   setServicesByLang: Dispatch<SetStateAction<Record<string, ServicesState>>>;
   setRecoveryByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
+  setReviewsByLang: Dispatch<SetStateAction<Record<string, ReviewsState>>>;
+  setGalleryByLang: Dispatch<SetStateAction<Record<string, GalleryState>>>;
+  setBlogByLang: Dispatch<SetStateAction<Record<string, BlogState>>>;
   setFocusKeywordByLang: Dispatch<SetStateAction<Record<string, string>>>;
   setSchemaTemplateByLang: Dispatch<SetStateAction<Record<string, SchemaTemplateType>>>;
   setSchemaOrgByLang: Dispatch<SetStateAction<Record<string, string>>>;
@@ -63,6 +81,9 @@ export const usePageEditorDraft = ({
   highlightsByLang,
   servicesByLang,
   recoveryByLang,
+  reviewsByLang,
+  galleryByLang,
+  blogByLang,
   focusKeywordByLang,
   schemaTemplateByLang,
   schemaOrgByLang,
@@ -76,6 +97,9 @@ export const usePageEditorDraft = ({
   setHighlightsByLang,
   setServicesByLang,
   setRecoveryByLang,
+  setReviewsByLang,
+  setGalleryByLang,
+  setBlogByLang,
   setFocusKeywordByLang,
   setSchemaTemplateByLang,
   setSchemaOrgByLang,
@@ -97,6 +121,9 @@ export const usePageEditorDraft = ({
       if (parsed?.highlightsByLang) setHighlightsByLang(parsed.highlightsByLang);
       if (parsed?.servicesByLang) setServicesByLang(parsed.servicesByLang);
       if (parsed?.recoveryByLang) setRecoveryByLang(parsed.recoveryByLang);
+      if (parsed?.reviewsByLang) setReviewsByLang(parsed.reviewsByLang);
+      if (parsed?.galleryByLang) setGalleryByLang(parsed.galleryByLang);
+      if (parsed?.blogByLang) setBlogByLang(parsed.blogByLang);
       if (parsed?.focusKeywordByLang) setFocusKeywordByLang(parsed.focusKeywordByLang);
       if (parsed?.schemaTemplateByLang) setSchemaTemplateByLang(parsed.schemaTemplateByLang);
       if (parsed?.schemaOrgByLang) setSchemaOrgByLang(parsed.schemaOrgByLang);
@@ -124,6 +151,9 @@ export const usePageEditorDraft = ({
       highlightsByLang,
       servicesByLang,
       recoveryByLang,
+      reviewsByLang,
+      galleryByLang,
+      blogByLang,
       focusKeywordByLang,
       schemaTemplateByLang,
       schemaOrgByLang,
@@ -142,6 +172,8 @@ export const usePageEditorDraft = ({
     isDirty,
     metaByLang,
     recoveryByLang,
+    reviewsByLang,
+    galleryByLang,
     schemaFaqByLang,
     schemaOrgByLang,
     schemaTemplateByLang,

@@ -7,8 +7,14 @@ import { MediaGrid } from "./components/MediaGrid";
 import { MediaDetails } from "./components/MediaDetails";
 import { BulkActionBar } from "./components/BulkActionBar";
 import { useMediaLibrary } from "./hooks/useMediaLibrary";
+import type { MediaItem } from "@/types/api.types";
 
-export default function MediaLibraryView() {
+export type MediaLibraryViewProps = {
+  onPick?: (item: MediaItem) => void;
+  pickLabel?: string;
+};
+
+export default function MediaLibraryView({ onPick, pickLabel }: MediaLibraryViewProps) {
   const media = useMediaLibrary();
 
   return (
@@ -144,6 +150,8 @@ export default function MediaLibraryView() {
                   folders={media.folders}
                   tags={media.tags}
                   dimensions={media.selectedDimensions}
+                  onPick={onPick}
+                  pickLabel={pickLabel}
                   onSaveMeta={media.handleUpdateMeta}
                   onReplace={() => media.openReplace(media.selected?.id ?? 0)}
                   onConvertWebp={media.handleConvertWebp}

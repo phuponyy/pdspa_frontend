@@ -4,7 +4,7 @@ import { API_BASE_URL } from "@/lib/constants";
 export type ThumbnailPanelProps = {
   thumbnailUrl: string | null | undefined;
   onOpenMediaDialog: () => void;
-  onUploadFile: (file: File) => void;
+  onUploadFile?: (file: File) => void;
   onClearThumbnail: () => void;
 };
 
@@ -40,21 +40,23 @@ export default function ThumbnailPanel({
         <Button variant="outline" size="sm" onClick={onOpenMediaDialog}>
           Chọn từ Media
         </Button>
-        <label className="inline-flex cursor-pointer items-center rounded-full border border-[var(--line)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-          Upload ảnh
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(event) => {
-              const inputEl = event.currentTarget;
-              const file = inputEl.files?.[0];
-              if (!file) return;
-              inputEl.value = "";
-              onUploadFile(file);
-            }}
-          />
-        </label>
+        {onUploadFile ? (
+          <label className="inline-flex cursor-pointer items-center rounded-full border border-[var(--line)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
+            Upload ảnh
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => {
+                const inputEl = event.currentTarget;
+                const file = inputEl.files?.[0];
+                if (!file) return;
+                inputEl.value = "";
+                onUploadFile(file);
+              }}
+            />
+          </label>
+        ) : null}
         {thumbnailUrl ? (
           <Button variant="outline" size="sm" onClick={onClearThumbnail}>
             Xoá

@@ -18,6 +18,14 @@ type HomePageRawSection = {
   key?: string;
   order?: number;
   settings?: Record<string, unknown> | null;
+  heading?: string | null;
+  subheading?: string | null;
+  imageUrl?: string | null;
+  description?: string | null;
+  images?: string[];
+  slides?: Record<string, unknown>[];
+  items?: Record<string, unknown>[];
+  body?: Record<string, unknown> | null;
   t?: {
     heading?: string | null;
     subheading?: string | null;
@@ -33,6 +41,9 @@ type HomePageRawResponse = {
     ogTitle?: string;
     ogDescription?: string;
     ogImage?: string;
+    canonical?: string | null;
+    robots?: string | null;
+    schemaJson?: Record<string, unknown> | null;
   };
   seo?: {
     canonical?: string;
@@ -42,10 +53,27 @@ type HomePageRawResponse = {
 } | null;
 
 const mapSection = (section: HomePageRawSection): HomeSection => {
-  const body = section.t?.body ?? null;
-  const items = Array.isArray((body as { items?: unknown }).items)
-    ? ((body as { items: HomeSection["items"] }).items ?? [])
-    : undefined;
+  const body = section.t?.body ?? section.body ?? null;
+  const rawItems = Array.isArray(section.items)
+    ? (section.items as HomeSection["items"])
+    : Array.isArray((body as { items?: unknown }).items)
+      ? ((body as { items: HomeSection["items"] }).items ?? [])
+      : undefined;
+  const normalizeAssetUrl = (value?: string | null) => {
+    if (!value) return value ?? undefined;
+    if (value.startsWith("http") || value.startsWith("data:")) return value;
+    if (value.startsWith("/")) return `${API_BASE_URL}${value}`;
+    return value;
+  };
+  const items = rawItems?.map((item) => ({
+    ...item,
+    imageUrl: normalizeAssetUrl(
+      typeof item?.imageUrl === "string" ? item.imageUrl : undefined
+    ),
+    avatarUrl: normalizeAssetUrl(
+      typeof item?.avatarUrl === "string" ? item.avatarUrl : undefined
+    ),
+  }));
   const images = Array.isArray((body as { images?: unknown }).images)
     ? ((body as { images: string[] }).images ?? []).map((src) =>
       src && src.startsWith("/") ? `${API_BASE_URL}${src}` : src
@@ -61,23 +89,23 @@ const mapSection = (section: HomePageRawSection): HomeSection => {
     }))
     : undefined;
   const description =
-    typeof (body as { text?: unknown }).text === "string"
+    section.description ??
+    (typeof (body as { text?: unknown }).text === "string"
       ? (body as { text: string }).text
-      : undefined;
+      : undefined);
   const rawImageUrl =
-    typeof (body as { imageUrl?: unknown }).imageUrl === "string"
+    section.imageUrl ??
+    (typeof (body as { imageUrl?: unknown }).imageUrl === "string"
       ? (body as { imageUrl: string }).imageUrl
-      : undefined;
-  const imageUrl =
-    rawImageUrl && rawImageUrl.startsWith("/")
-      ? `${API_BASE_URL}${rawImageUrl}`
-      : rawImageUrl;
+      : undefined);
+  const imageUrl = normalizeAssetUrl(rawImageUrl) ?? undefined;
 
   return {
     key: section.key,
     type: section.key,
-    heading: section.t?.heading ?? undefined,
-    subheading: section.t?.subheading ?? undefined,
+    order: section.order,
+    heading: section.t?.heading ?? section.heading ?? undefined,
+    subheading: section.t?.subheading ?? section.subheading ?? undefined,
     description,
     imageUrl,
     images,

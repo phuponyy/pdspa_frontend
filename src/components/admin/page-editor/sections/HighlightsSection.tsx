@@ -3,13 +3,12 @@ import Input from "@/components/common/Input";
 import Textarea from "@/components/common/Textarea";
 import { getHomeHighlights, updateHomeHighlights } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
-import type { RecoveryItem, RecoveryState } from "@/components/admin/page-editor/types";
+import type {
+  PageEditorMediaTarget,
+  RecoveryItem,
+  RecoveryState,
+} from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
-
-type MediaTarget = {
-  section: "highlights" | "recovery" | "services";
-  index: number;
-};
 
 export type HighlightsSectionProps = {
   activeLang: "vi" | "en";
@@ -17,7 +16,7 @@ export type HighlightsSectionProps = {
   ensureRecoveryItems: (items: RecoveryItem[]) => RecoveryItem[];
   setHighlightsByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
   setIsDirty: (value: boolean) => void;
-  setMediaTarget: (value: MediaTarget | null) => void;
+  setMediaTarget: (value: PageEditorMediaTarget | null) => void;
   setMediaDialogOpen: (value: boolean) => void;
   notify: (text: string, type?: "success" | "error" | "info") => void;
   handleError: (err: unknown) => void;

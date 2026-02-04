@@ -1,61 +1,34 @@
-import Input from "@/components/common/Input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { API_BASE_URL } from "@/lib/constants";
-
-export type MediaItem = { id: number | string; url: string; filename: string };
+import MediaLibraryView from "@/components/admin/media/MediaLibraryView";
+import type { MediaItem } from "@/types/api.types";
 
 export type MediaDialogProps = {
   open: boolean;
-  mediaQuery: string;
-  mediaItems: MediaItem[];
   onOpenChange: (open: boolean) => void;
-  onQueryChange: (value: string) => void;
-  onSelect: (url: string) => void;
+  onPick: (item: MediaItem) => void;
+  pickLabel?: string;
 };
 
 export default function MediaDialog({
   open,
-  mediaQuery,
-  mediaItems,
   onOpenChange,
-  onQueryChange,
-  onSelect,
+  onPick,
+  pickLabel,
 }: MediaDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Chọn ảnh</DialogTitle>
+      <DialogContent className="max-h-[92vh] w-[min(1280px,96vw)] overflow-hidden p-0">
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle>Chọn ảnh từ Media</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            label="Tìm ảnh"
-            value={mediaQuery}
-            onChange={(event) => onQueryChange(event.target.value)}
+        <div className="max-h-[calc(92vh-76px)] overflow-y-auto px-6 pb-6">
+          <MediaLibraryView
+            onPick={(item) => {
+              onPick(item);
+              onOpenChange(false);
+            }}
+            pickLabel={pickLabel}
           />
-          <div className="grid max-h-[420px] grid-cols-2 gap-3 overflow-auto md:grid-cols-3">
-            {mediaItems.length ? (
-              mediaItems.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onSelect(item.url)}
-                  className="group overflow-hidden rounded-xl border border-[var(--line)] bg-white"
-                >
-                  <img
-                    src={item.url.startsWith("http") ? item.url : `${API_BASE_URL}${item.url}`}
-                    alt={item.filename}
-                    className="h-28 w-full object-cover"
-                  />
-                  <div className="p-2 text-left text-[10px] text-[var(--ink-muted)]">
-                    {item.filename}
-                  </div>
-                </button>
-              ))
-            ) : (
-              <p className="text-xs text-[var(--ink-muted)]">Không có ảnh phù hợp.</p>
-            )}
-          </div>
         </div>
       </DialogContent>
     </Dialog>

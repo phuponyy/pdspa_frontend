@@ -43,6 +43,33 @@ export type RecoveryState = {
   items: RecoveryItem[];
 };
 
+export type ReviewItem = {
+  name: string;
+  contributions?: string;
+  rating?: number;
+  review?: string;
+  visit?: string;
+  tag?: string;
+  avatarUrl?: string;
+};
+
+export type ReviewsState = {
+  heading: string;
+  description: string;
+  items: ReviewItem[];
+};
+
+export type GalleryItem = {
+  imageUrl: string;
+  caption?: string;
+};
+
+export type GalleryState = {
+  heading: string;
+  description: string;
+  items: GalleryItem[];
+};
+
 export type ServicesItem = {
   serviceId?: number;
   imageUrl?: string;
@@ -54,4 +81,15 @@ export type ServicesState = {
   heading: string;
   description: string;
   items: ServicesItem[];
+};
+
+export type PageEditorMediaTarget = {
+  section: "highlights" | "recovery" | "services" | "reviews" | "gallery";
+  index: number;
+};
+
+export type BlogState = {
+  heading: string;
+  description: string;
+  featuredSlug: string;
 };

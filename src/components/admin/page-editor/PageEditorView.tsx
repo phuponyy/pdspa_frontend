@@ -11,7 +11,10 @@ import {
   defaultHighlightsByLang,
   defaultHeroByLang,
   defaultIntroByLang,
+  defaultBlogByLang,
+  defaultGalleryByLang,
   defaultMetaByLang,
+  defaultReviewsByLang,
   defaultRecoveryByLang,
   defaultSchemaFaqByLang,
   defaultSchemaOrgByLang,
@@ -25,20 +28,29 @@ import type {
   MetaState,
   HeroState,
   IntroState,
+  BlogState,
   RecoveryState,
   RecoveryItem,
+  GalleryState,
+  GalleryItem,
+  ReviewsState,
+  ReviewItem,
   ServicesState,
 } from "@/components/admin/page-editor/types";
 import { usePageEditorDraft } from "@/components/admin/page-editor/hooks/usePageEditorDraft";
 import { usePageEditorLoad } from "@/components/admin/page-editor/hooks/usePageEditorLoad";
 import { usePageEditorMedia } from "@/components/admin/page-editor/hooks/usePageEditorMedia";
-import type { AdminService } from "@/types/api.types";
+import type { AdminService, MediaItem } from "@/types/api.types";
+import { normalizeMediaUrl } from "@/components/admin/page-editor/utils";
 import { pageEditorSectionNav } from "@/components/admin/page-editor/sectionNav";
 import HeroSection from "@/components/admin/page-editor/sections/HeroSection";
 import IntroSection from "@/components/admin/page-editor/sections/IntroSection";
 import ServicesSection from "@/components/admin/page-editor/sections/ServicesSection";
+import BlogSection from "@/components/admin/page-editor/sections/BlogSection";
 import HighlightsSection from "@/components/admin/page-editor/sections/HighlightsSection";
 import RecoverySection from "@/components/admin/page-editor/sections/RecoverySection";
+import ReviewsSection from "@/components/admin/page-editor/sections/ReviewsSection";
+import PhotoGallerySection from "@/components/admin/page-editor/sections/PhotoGallerySection";
 import SeoSchemaSection from "@/components/admin/page-editor/sections/SeoSchemaSection";
 import SectionOrderSection from "@/components/admin/page-editor/sections/SectionOrderSection";
 import MediaDialog from "@/components/admin/page-editor/sections/MediaDialog";
@@ -67,6 +79,15 @@ export default function PageEditor({ lang }: { lang: string }) {
   );
   const [highlightsByLang, setHighlightsByLang] = useState<Record<string, RecoveryState>>(
     () => defaultHighlightsByLang
+  );
+  const [reviewsByLang, setReviewsByLang] = useState<Record<string, ReviewsState>>(
+    () => defaultReviewsByLang
+  );
+  const [galleryByLang, setGalleryByLang] = useState<Record<string, GalleryState>>(
+    () => defaultGalleryByLang
+  );
+  const [blogByLang, setBlogByLang] = useState<Record<string, BlogState>>(
+    () => defaultBlogByLang
   );
   const [servicesByLang, setServicesByLang] = useState<Record<string, ServicesState>>(
     () => defaultServicesByLang
@@ -123,11 +144,8 @@ export default function PageEditor({ lang }: { lang: string }) {
   const {
     mediaDialogOpen,
     setMediaDialogOpen,
-    mediaQuery,
-    setMediaQuery,
     mediaTarget,
     setMediaTarget,
-    mediaItems,
   } = usePageEditorMedia();
 
   const servicesQuery = useAdminQuery({
@@ -160,6 +178,9 @@ export default function PageEditor({ lang }: { lang: string }) {
     highlightsByLang,
     servicesByLang,
     recoveryByLang,
+    reviewsByLang,
+    galleryByLang,
+    blogByLang,
     focusKeywordByLang,
     schemaTemplateByLang,
     schemaOrgByLang,
@@ -173,6 +194,9 @@ export default function PageEditor({ lang }: { lang: string }) {
     setHighlightsByLang,
     setServicesByLang,
     setRecoveryByLang,
+    setReviewsByLang,
+    setGalleryByLang,
+    setBlogByLang,
     setFocusKeywordByLang,
     setSchemaTemplateByLang,
     setSchemaOrgByLang,
@@ -193,6 +217,9 @@ export default function PageEditor({ lang }: { lang: string }) {
     setHighlightsByLang,
     setServicesByLang,
     setRecoveryByLang,
+    setGalleryByLang,
+    setReviewsByLang,
+    setBlogByLang,
     setStatus,
     handleError,
   });
@@ -272,6 +299,9 @@ export default function PageEditor({ lang }: { lang: string }) {
     const highlights = highlightsByLang[activeLang];
     const services = servicesByLang[activeLang];
     const recovery = recoveryByLang[activeLang];
+    const gallery = galleryByLang[activeLang];
+    const reviews = reviewsByLang[activeLang];
+    const blog = blogByLang[activeLang];
     return [
       hero?.heading,
       hero?.subheading,
@@ -285,6 +315,14 @@ export default function PageEditor({ lang }: { lang: string }) {
       ...(highlights?.items || []).map((item) => item.title || item.description),
       recovery?.heading,
       ...(recovery?.items || []).map((item) => item.title || item.description),
+      gallery?.heading,
+      gallery?.description,
+      ...(gallery?.items || []).map((item) => item.caption || item.imageUrl),
+      reviews?.heading,
+      reviews?.description,
+      ...(reviews?.items || []).map((item) => item.name || item.review),
+      blog?.heading,
+      blog?.description,
     ]
       .filter(Boolean)
       .join(" ");
@@ -295,6 +333,9 @@ export default function PageEditor({ lang }: { lang: string }) {
     highlightsByLang,
     servicesByLang,
     recoveryByLang,
+    galleryByLang,
+    reviewsByLang,
+    blogByLang,
   ]);
 
   const currentHero = heroByLang[activeLang] || {
@@ -321,6 +362,12 @@ export default function PageEditor({ lang }: { lang: string }) {
     servicesByLang[activeLang] || ({ heading: "", description: "", items: [] } as ServicesState);
   const currentRecovery =
     recoveryByLang[activeLang] || ({ heading: "", description: "", items: [] } as RecoveryState);
+  const currentGallery =
+    galleryByLang[activeLang] || ({ heading: "", description: "", items: [] } as GalleryState);
+  const currentReviews =
+    reviewsByLang[activeLang] || ({ heading: "", description: "", items: [] } as ReviewsState);
+  const currentBlog =
+    blogByLang[activeLang] || ({ heading: "", description: "", featuredSlug: "" } as BlogState);
 
   const persistStatus = async (nextStatus: "DRAFT" | "PUBLISHED") => {
     const previousStatus = status;
@@ -351,6 +398,95 @@ export default function PageEditor({ lang }: { lang: string }) {
       next.push({ title: "", description: "", imageUrl: "" });
     }
     return next.slice(0, 3);
+  };
+
+  const ensureReviewItems = (items: ReviewItem[]) => {
+    const next = [...items];
+    while (next.length < 3) {
+      next.push({
+        name: "",
+        contributions: "",
+        rating: 5,
+        review: "",
+        visit: "",
+        tag: "",
+        avatarUrl: "",
+      });
+    }
+    return next;
+  };
+
+  const handleMediaPick = (item: MediaItem) => {
+    if (!mediaTarget) return;
+    const nextUrl = normalizeMediaUrl(item.url);
+    if (mediaTarget.section === "highlights") {
+      setHighlightsByLang((prev) => {
+        const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+        next[mediaTarget.index] = {
+          ...next[mediaTarget.index],
+          imageUrl: nextUrl,
+        };
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    } else if (mediaTarget.section === "services") {
+      setServicesByLang((prev) => {
+        const next = [...(prev[activeLang]?.items ?? [])];
+        if (next[mediaTarget.index]) {
+          next[mediaTarget.index] = {
+            ...next[mediaTarget.index],
+            imageUrl: nextUrl,
+          };
+        }
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    } else if (mediaTarget.section === "reviews") {
+      setReviewsByLang((prev) => {
+        const next = [...(prev[activeLang]?.items ?? [])];
+        if (next[mediaTarget.index]) {
+          next[mediaTarget.index] = {
+            ...next[mediaTarget.index],
+            avatarUrl: nextUrl,
+          };
+        }
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    } else if (mediaTarget.section === "gallery") {
+      setGalleryByLang((prev) => {
+        const next = [...(prev[activeLang]?.items ?? [])];
+        if (next[mediaTarget.index]) {
+          next[mediaTarget.index] = {
+            ...next[mediaTarget.index],
+            imageUrl: nextUrl,
+          };
+        }
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    } else {
+      setRecoveryByLang((prev) => {
+        const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
+        next[mediaTarget.index] = {
+          ...next[mediaTarget.index],
+          imageUrl: nextUrl,
+        };
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    }
+    setIsDirty(true);
   };
 
   return (
@@ -392,6 +528,15 @@ export default function PageEditor({ lang }: { lang: string }) {
           handleError={handleError}
         />
 
+        <BlogSection
+          activeLang={activeLang}
+          currentBlog={currentBlog}
+          setBlogByLang={setBlogByLang}
+          setIsDirty={setIsDirty}
+          notify={notify}
+          handleError={handleError}
+        />
+
 
 
         <HighlightsSection
@@ -411,6 +556,29 @@ export default function PageEditor({ lang }: { lang: string }) {
           currentRecovery={currentRecovery}
           ensureRecoveryItems={ensureRecoveryItems}
           setRecoveryByLang={setRecoveryByLang}
+          setIsDirty={setIsDirty}
+          setMediaTarget={setMediaTarget}
+          setMediaDialogOpen={setMediaDialogOpen}
+          notify={notify}
+          handleError={handleError}
+        />
+
+        <PhotoGallerySection
+          activeLang={activeLang}
+          currentGallery={currentGallery}
+          setGalleryByLang={setGalleryByLang}
+          setIsDirty={setIsDirty}
+          setMediaTarget={setMediaTarget}
+          setMediaDialogOpen={setMediaDialogOpen}
+          notify={notify}
+          handleError={handleError}
+        />
+
+        <ReviewsSection
+          activeLang={activeLang}
+          currentReviews={currentReviews}
+          ensureReviewItems={ensureReviewItems}
+          setReviewsByLang={setReviewsByLang}
           setIsDirty={setIsDirty}
           setMediaTarget={setMediaTarget}
           setMediaDialogOpen={setMediaDialogOpen}
@@ -489,19 +657,15 @@ export default function PageEditor({ lang }: { lang: string }) {
         />
       </PageEditorSidebar>
       <MediaDialog
-        activeLang={activeLang}
-        mediaDialogOpen={mediaDialogOpen}
-        mediaQuery={mediaQuery}
-        mediaItems={mediaItems}
-        mediaTarget={mediaTarget}
-        setMediaDialogOpen={setMediaDialogOpen}
-        setMediaQuery={setMediaQuery}
-        setMediaTarget={setMediaTarget}
-        setHighlightsByLang={setHighlightsByLang}
-        setServicesByLang={setServicesByLang}
-        setRecoveryByLang={setRecoveryByLang}
-        ensureRecoveryItems={ensureRecoveryItems}
-        setIsDirty={setIsDirty}
+        open={mediaDialogOpen}
+        onOpenChange={(open) => {
+          setMediaDialogOpen(open);
+          if (!open) {
+            setMediaTarget(null);
+          }
+        }}
+        onPick={handleMediaPick}
+        pickLabel="Chọn ảnh này"
       />
       <FloatingBar
         showFloatingBar={showFloatingBar}

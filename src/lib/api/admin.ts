@@ -47,8 +47,14 @@ import type {
   HomeStatusResponse,
   HomeHighlightsResponse,
   HomeHighlightsUpdateRequest,
+  HomeGalleryResponse,
+  HomeGalleryUpdateRequest,
   HomeServicesResponse,
   HomeServicesUpdateRequest,
+  HomeReviewsResponse,
+  HomeReviewsUpdateRequest,
+  HomeBlogResponse,
+  HomeBlogUpdateRequest,
   SiteConfigResponse,
 } from "@/types/api.types";
 import type {
@@ -297,6 +303,42 @@ export const updateHomeServices = async (
     body: JSON.stringify(payload),
   });
 
+export const updateHomeGallery = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeGalleryUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/gallery", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
+export const updateHomeReviews = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeReviewsUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/reviews", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
+export const updateHomeBlog = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeBlogUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/blog", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
 export const updateHomeSectionsOrder = async (
   token: string | undefined,
   payload: { items: { key: string; order: number; isActive?: boolean }[] }
@@ -357,6 +399,27 @@ export const getHomeHighlights = async (token: string | undefined, lang: string)
 
 export const getHomeServices = async (token: string | undefined, lang: string) =>
   apiFetch<HomeServicesResponse>("/admin/pages/home/services", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeGallery = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeGalleryResponse>("/admin/pages/home/gallery", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeReviews = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeReviewsResponse>("/admin/pages/home/reviews", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeBlog = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeBlogResponse>("/admin/pages/home/blog", {
     token,
     query: { lang },
     cache: "no-store",

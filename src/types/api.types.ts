@@ -24,6 +24,12 @@ export type HomePageResponse = {
   meta?: {
     metaTitle?: string;
     metaDescription?: string;
+    canonical?: string | null;
+    robots?: string | null;
+    ogTitle?: string | null;
+    ogDescription?: string | null;
+    ogImage?: string | null;
+    schemaJson?: Record<string, unknown> | null;
   };
   seo?: HomeSeo;
   sections?: HomeSection[];
@@ -288,6 +294,58 @@ export type HomeServicesUpdateRequest = {
     label?: string;
     priceNote?: string;
   }[];
+};
+
+export type HomeGalleryResponse = {
+  heading: string;
+  description?: string;
+  items?: { imageUrl?: string; caption?: string }[];
+};
+
+export type HomeGalleryUpdateRequest = {
+  heading: string;
+  description?: string;
+  items?: { imageUrl?: string; caption?: string }[];
+};
+
+export type HomeReviewsResponse = {
+  heading: string;
+  description?: string;
+  items?: {
+    name?: string;
+    contributions?: string;
+    rating?: number;
+    review?: string;
+    visit?: string;
+    tag?: string;
+    avatarUrl?: string;
+  }[];
+};
+
+export type HomeBlogResponse = {
+  heading: string;
+  description?: string;
+  featuredSlug?: string;
+};
+
+export type HomeReviewsUpdateRequest = {
+  heading: string;
+  description?: string;
+  items?: {
+    name?: string;
+    contributions?: string;
+    rating?: number;
+    review?: string;
+    visit?: string;
+    tag?: string;
+    avatarUrl?: string;
+  }[];
+};
+
+export type HomeBlogUpdateRequest = {
+  heading: string;
+  description?: string;
+  featuredSlug?: string;
 };
 
 export type HeroImageUploadResponse = ApiSuccess<{

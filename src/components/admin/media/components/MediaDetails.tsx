@@ -15,6 +15,8 @@ export type MediaDetailsProps = {
   folders: MediaFolder[];
   tags: MediaTag[];
   dimensions: { width: number; height: number } | null;
+  onPick?: (item: MediaItem) => void;
+  pickLabel?: string;
   onSaveMeta: () => void;
   onReplace: () => void;
   onConvertWebp: () => void;
@@ -34,6 +36,8 @@ export const MediaDetails = ({
   folders,
   tags,
   dimensions,
+  onPick,
+  pickLabel = "Chọn ảnh này",
   onSaveMeta,
   onReplace,
   onConvertWebp,
@@ -131,6 +135,11 @@ export const MediaDetails = ({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
+        {onPick ? (
+          <Button className="w-full" onClick={() => onPick(item)}>
+            {pickLabel}
+          </Button>
+        ) : null}
         <Button className="w-full" onClick={onSaveMeta}>
           Save changes
         </Button>
