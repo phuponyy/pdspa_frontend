@@ -53,6 +53,8 @@ import type {
   HomeServicesUpdateRequest,
   HomeReviewsResponse,
   HomeReviewsUpdateRequest,
+  HomeMentionsResponse,
+  HomeMentionsUpdateRequest,
   HomeBlogResponse,
   HomeBlogUpdateRequest,
   SiteConfigResponse,
@@ -327,6 +329,18 @@ export const updateHomeReviews = async (
     body: JSON.stringify(payload),
   });
 
+export const updateHomeMentions = async (
+  token: string | undefined,
+  lang: string,
+  payload: HomeMentionsUpdateRequest
+) =>
+  apiFetch<ApiSuccess<Record<string, unknown>>>("/admin/pages/home/mentions", {
+    token,
+    method: "PATCH",
+    query: { lang },
+    body: JSON.stringify(payload),
+  });
+
 export const updateHomeBlog = async (
   token: string | undefined,
   lang: string,
@@ -413,6 +427,13 @@ export const getHomeGallery = async (token: string | undefined, lang: string) =>
 
 export const getHomeReviews = async (token: string | undefined, lang: string) =>
   apiFetch<HomeReviewsResponse>("/admin/pages/home/reviews", {
+    token,
+    query: { lang },
+    cache: "no-store",
+  });
+
+export const getHomeMentions = async (token: string | undefined, lang: string) =>
+  apiFetch<HomeMentionsResponse>("/admin/pages/home/mentions", {
     token,
     query: { lang },
     cache: "no-store",

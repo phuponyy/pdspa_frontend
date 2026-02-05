@@ -322,6 +322,16 @@ export type HomeReviewsResponse = {
   }[];
 };
 
+export type HomeMentionsResponse = {
+  heading: string;
+  description?: string;
+  items?: {
+    name?: string;
+    imageUrl?: string;
+    link?: string;
+  }[];
+};
+
 export type HomeBlogResponse = {
   heading: string;
   description?: string;
@@ -339,6 +349,16 @@ export type HomeReviewsUpdateRequest = {
     visit?: string;
     tag?: string;
     avatarUrl?: string;
+  }[];
+};
+
+export type HomeMentionsUpdateRequest = {
+  heading: string;
+  description?: string;
+  items?: {
+    name?: string;
+    imageUrl?: string;
+    link?: string;
   }[];
 };
 

@@ -6,6 +6,7 @@ import type {
   BlogState,
   ReviewsState,
   GalleryState,
+  MentionsState,
   ServicesState,
 } from "./types";
 
@@ -224,6 +225,19 @@ export const defaultGalleryByLang: Record<string, GalleryState> = {
   },
 };
 
+export const defaultMentionsByLang: Record<string, MentionsState> = {
+  vi: {
+    heading: "Press Mentions",
+    description: "",
+    items: [],
+  },
+  en: {
+    heading: "Press Mentions",
+    description: "",
+    items: [],
+  },
+};
+
 export const defaultSectionOrder = [
   "intro",
   "hero",
@@ -233,6 +247,7 @@ export const defaultSectionOrder = [
   "recovery",
   "gallery",
   "reviews",
+  "mentions",
 ];
 
 export const defaultSchemaTemplateByLang: Record<string, string> = {

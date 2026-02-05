@@ -10,6 +10,7 @@ import HomeRecoverySection from "@/components/home/HomeRecoverySection";
 import HomeReviewsSection from "@/components/home/HomeReviewsSection";
 import HomeBlogSection from "@/components/home/HomeBlogSection";
 import HomePhotoGallerySection from "@/components/home/HomePhotoGallerySection";
+import HomeMentionsSection from "@/components/home/HomeMentionsSection";
 import SectionRenderer from "@/components/home/SectionRenderer";
 import ContactForm from "@/components/home/ContactForm";
 import Container from "@/components/common/Container";
@@ -174,11 +175,14 @@ export default async function HomePage({
     (lang === "vi" ? config.topbar_hours_vn : undefined) ||
     SPA_HOURS;
 
-  const orderedSections = (homeData?.sections || []).slice().sort((a, b) => {
-    const orderA = Number.isFinite(a.order) ? (a.order as number) : 0;
-    const orderB = Number.isFinite(b.order) ? (b.order as number) : 0;
-    return orderA - orderB;
-  });
+  const orderedSections = (homeData?.sections || [])
+    .filter((section): section is HomeSection => Boolean(section))
+    .slice()
+    .sort((a, b) => {
+      const orderA = Number.isFinite(a.order) ? (a.order as number) : 0;
+      const orderB = Number.isFinite(b.order) ? (b.order as number) : 0;
+      return orderA - orderB;
+    });
 
   const renderHomeSection = (section: HomeSection) => {
     const key = section.key?.toLowerCase() || section.type?.toLowerCase();
@@ -283,6 +287,16 @@ export default async function HomePage({
             (section?.heading as string) ||
             "Reviews of the massage & spa Da Nang at Panda Spa"
           }
+          description={section?.description as string | undefined}
+          items={section?.items}
+        />
+      );
+    }
+    if (key === "mentions" || key === "press" || key === "press-mentions") {
+      return (
+        <HomeMentionsSection
+          key="mentions"
+          heading={(section?.heading as string) || "Press Mentions"}
           description={section?.description as string | undefined}
           items={section?.items}
         />

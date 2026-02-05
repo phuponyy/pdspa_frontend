@@ -8,6 +8,7 @@ import {
   getHomeMeta,
   getHomeRecovery,
   getHomeReviews,
+  getHomeMentions,
   getHomeServices,
   getHomeStatus,
 } from "@/lib/api/admin";
@@ -19,6 +20,7 @@ import type {
   BlogState,
   ReviewsState,
   GalleryState,
+  MentionsState,
   ServicesState,
 } from "@/components/admin/page-editor/types";
 
@@ -36,6 +38,7 @@ type LoadHookParams = {
   setRecoveryByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
   setGalleryByLang: Dispatch<SetStateAction<Record<string, GalleryState>>>;
   setReviewsByLang: Dispatch<SetStateAction<Record<string, ReviewsState>>>;
+  setMentionsByLang: Dispatch<SetStateAction<Record<string, MentionsState>>>;
   setBlogByLang: Dispatch<SetStateAction<Record<string, BlogState>>>;
   setStatus: Dispatch<SetStateAction<"DRAFT" | "PUBLISHED">>;
   handleError: (err: unknown) => void;
@@ -55,6 +58,7 @@ export const usePageEditorLoad = ({
   setRecoveryByLang,
   setGalleryByLang,
   setReviewsByLang,
+  setMentionsByLang,
   setBlogByLang,
   setStatus,
   handleError,
@@ -85,12 +89,14 @@ export const usePageEditorLoad = ({
       !section?.heading && !section?.description && !(section?.items?.length ?? 0);
     const isEmptyReviews = (section: ReviewsState | undefined) =>
       !section?.heading && !section?.description && !(section?.items?.length ?? 0);
+    const isEmptyMentions = (section: MentionsState | undefined) =>
+      !section?.heading && !section?.description && !(section?.items?.length ?? 0);
     const isEmptyBlog = (section: BlogState | undefined) =>
       !section?.heading && !section?.description && !section?.featuredSlug;
 
     const load = async () => {
       try {
-        const [meta, hero, intro, highlights, servicesData, recovery, gallery, reviews, blog] = await Promise.all([
+        const [meta, hero, intro, highlights, servicesData, recovery, gallery, reviews, mentions, blog] = await Promise.all([
           getHomeMeta(undefined, activeLang),
           getHomeHero(undefined, activeLang),
           getHomeIntro(undefined, activeLang),
@@ -99,6 +105,7 @@ export const usePageEditorLoad = ({
           getHomeRecovery(undefined, activeLang),
           getHomeGallery(undefined, activeLang),
           getHomeReviews(undefined, activeLang),
+          getHomeMentions(undefined, activeLang),
           getHomeBlog(undefined, activeLang),
         ]);
         if (cancelled) return;
@@ -253,6 +260,24 @@ export const usePageEditorLoad = ({
                     visit: item?.visit ?? "",
                     tag: item?.tag ?? "",
                     avatarUrl: item?.avatarUrl ?? "",
+                  }))
+                : [],
+            },
+          };
+        });
+
+        setMentionsByLang((prev) => {
+          if (hasDraft && !isEmptyMentions(prev[activeLang])) return prev;
+          return {
+            ...prev,
+            [activeLang]: {
+              heading: mentions?.heading ?? "",
+              description: mentions?.description ?? "",
+              items: Array.isArray(mentions?.items)
+                ? mentions.items.map((item) => ({
+                    name: item?.name ?? "",
+                    imageUrl: item?.imageUrl ?? "",
+                    link: item?.link ?? "",
                   }))
                 : [],
             },

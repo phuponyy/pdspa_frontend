@@ -29,7 +29,7 @@ type CmsPostMediaState = ReturnType<typeof useCmsPostMedia>;
 type CmsPostSeoMetrics = ReturnType<typeof useCmsPostSeo>;
 
 export type CmsPostFormViewProps = {
-  headerRef: RefObject<HTMLDivElement>;
+  headerRef: RefObject<HTMLDivElement | null>;
   header: CmsPostHeaderProps;
   content: PostContentSectionProps;
   taxonomy: CmsPostTaxonomyState;

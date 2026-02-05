@@ -70,6 +70,18 @@ export type GalleryState = {
   items: GalleryItem[];
 };
 
+export type MentionsItem = {
+  name: string;
+  imageUrl: string;
+  link?: string;
+};
+
+export type MentionsState = {
+  heading: string;
+  description: string;
+  items: MentionsItem[];
+};
+
 export type ServicesItem = {
   serviceId?: number;
   imageUrl?: string;
@@ -84,7 +96,7 @@ export type ServicesState = {
 };
 
 export type PageEditorMediaTarget = {
-  section: "highlights" | "recovery" | "services" | "reviews" | "gallery";
+  section: "highlights" | "recovery" | "services" | "reviews" | "gallery" | "mentions";
   index: number;
 };
 

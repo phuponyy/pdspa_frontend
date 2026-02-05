@@ -104,8 +104,12 @@ export default function HomeReviewsSection({
     if (!pageSize) return;
     const nextPage =
       direction === "next"
-        ? Math.min(totalPages, currentPage + 1)
-        : Math.max(1, currentPage - 1);
+        ? currentPage >= totalPages
+          ? 1
+          : currentPage + 1
+        : currentPage <= 1
+          ? totalPages
+          : currentPage - 1;
     track.scrollTo({ left: (nextPage - 1) * pageSize, behavior: "smooth" });
   };
 
@@ -201,7 +205,7 @@ export default function HomeReviewsSection({
                 type="button"
                 onClick={() => scrollByPage("prev")}
                 aria-label="Previous reviews"
-                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-[#0b0b0b]/70 p-2 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
+                className="absolute left-0 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 bg-[#0b0b0b]/70 p-2 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
@@ -211,7 +215,7 @@ export default function HomeReviewsSection({
                 type="button"
                 onClick={() => scrollByPage("next")}
                 aria-label="Next reviews"
-                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full border border-white/15 bg-[#0b0b0b]/70 p-2 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
+                className="absolute right-0 top-1/2 z-10 translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 bg-[#0b0b0b]/70 p-2 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 6l6 6-6 6" />

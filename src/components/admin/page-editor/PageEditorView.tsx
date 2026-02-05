@@ -21,6 +21,7 @@ import {
   defaultSchemaTemplateByLang,
   defaultSectionOrder,
   defaultServicesByLang,
+  defaultMentionsByLang,
   languages,
   storageKey,
 } from "@/components/admin/page-editor/defaults";
@@ -36,6 +37,7 @@ import type {
   ReviewsState,
   ReviewItem,
   ServicesState,
+  MentionsState,
 } from "@/components/admin/page-editor/types";
 import { usePageEditorDraft } from "@/components/admin/page-editor/hooks/usePageEditorDraft";
 import { usePageEditorLoad } from "@/components/admin/page-editor/hooks/usePageEditorLoad";
@@ -51,6 +53,7 @@ import HighlightsSection from "@/components/admin/page-editor/sections/Highlight
 import RecoverySection from "@/components/admin/page-editor/sections/RecoverySection";
 import ReviewsSection from "@/components/admin/page-editor/sections/ReviewsSection";
 import PhotoGallerySection from "@/components/admin/page-editor/sections/PhotoGallerySection";
+import MentionsSection from "@/components/admin/page-editor/sections/MentionsSection";
 import SeoSchemaSection from "@/components/admin/page-editor/sections/SeoSchemaSection";
 import SectionOrderSection from "@/components/admin/page-editor/sections/SectionOrderSection";
 import MediaDialog from "@/components/admin/page-editor/sections/MediaDialog";
@@ -85,6 +88,9 @@ export default function PageEditor({ lang }: { lang: string }) {
   );
   const [galleryByLang, setGalleryByLang] = useState<Record<string, GalleryState>>(
     () => defaultGalleryByLang
+  );
+  const [mentionsByLang, setMentionsByLang] = useState<Record<string, MentionsState>>(
+    () => defaultMentionsByLang
   );
   const [blogByLang, setBlogByLang] = useState<Record<string, BlogState>>(
     () => defaultBlogByLang
@@ -180,6 +186,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     recoveryByLang,
     reviewsByLang,
     galleryByLang,
+    mentionsByLang,
     blogByLang,
     focusKeywordByLang,
     schemaTemplateByLang,
@@ -196,6 +203,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     setRecoveryByLang,
     setReviewsByLang,
     setGalleryByLang,
+    setMentionsByLang,
     setBlogByLang,
     setFocusKeywordByLang,
     setSchemaTemplateByLang,
@@ -219,6 +227,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     setRecoveryByLang,
     setGalleryByLang,
     setReviewsByLang,
+    setMentionsByLang,
     setBlogByLang,
     setStatus,
     handleError,
@@ -301,6 +310,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     const recovery = recoveryByLang[activeLang];
     const gallery = galleryByLang[activeLang];
     const reviews = reviewsByLang[activeLang];
+    const mentions = mentionsByLang[activeLang];
     const blog = blogByLang[activeLang];
     return [
       hero?.heading,
@@ -321,6 +331,9 @@ export default function PageEditor({ lang }: { lang: string }) {
       reviews?.heading,
       reviews?.description,
       ...(reviews?.items || []).map((item) => item.name || item.review),
+      mentions?.heading,
+      mentions?.description,
+      ...(mentions?.items || []).map((item) => item.name || item.link),
       blog?.heading,
       blog?.description,
     ]
@@ -335,6 +348,7 @@ export default function PageEditor({ lang }: { lang: string }) {
     recoveryByLang,
     galleryByLang,
     reviewsByLang,
+    mentionsByLang,
     blogByLang,
   ]);
 
@@ -366,6 +380,8 @@ export default function PageEditor({ lang }: { lang: string }) {
     galleryByLang[activeLang] || ({ heading: "", description: "", items: [] } as GalleryState);
   const currentReviews =
     reviewsByLang[activeLang] || ({ heading: "", description: "", items: [] } as ReviewsState);
+  const currentMentions =
+    mentionsByLang[activeLang] || ({ heading: "", description: "", items: [] } as MentionsState);
   const currentBlog =
     blogByLang[activeLang] || ({ heading: "", description: "", featuredSlug: "" } as BlogState);
 
@@ -461,6 +477,20 @@ export default function PageEditor({ lang }: { lang: string }) {
       });
     } else if (mediaTarget.section === "gallery") {
       setGalleryByLang((prev) => {
+        const next = [...(prev[activeLang]?.items ?? [])];
+        if (next[mediaTarget.index]) {
+          next[mediaTarget.index] = {
+            ...next[mediaTarget.index],
+            imageUrl: nextUrl,
+          };
+        }
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], items: next },
+        };
+      });
+    } else if (mediaTarget.section === "mentions") {
+      setMentionsByLang((prev) => {
         const next = [...(prev[activeLang]?.items ?? [])];
         if (next[mediaTarget.index]) {
           next[mediaTarget.index] = {
@@ -579,6 +609,17 @@ export default function PageEditor({ lang }: { lang: string }) {
           currentReviews={currentReviews}
           ensureReviewItems={ensureReviewItems}
           setReviewsByLang={setReviewsByLang}
+          setIsDirty={setIsDirty}
+          setMediaTarget={setMediaTarget}
+          setMediaDialogOpen={setMediaDialogOpen}
+          notify={notify}
+          handleError={handleError}
+        />
+
+        <MentionsSection
+          activeLang={activeLang}
+          currentMentions={currentMentions}
+          setMentionsByLang={setMentionsByLang}
           setIsDirty={setIsDirty}
           setMediaTarget={setMediaTarget}
           setMediaDialogOpen={setMediaDialogOpen}

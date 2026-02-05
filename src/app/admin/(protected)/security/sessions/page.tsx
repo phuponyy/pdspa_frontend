@@ -157,7 +157,7 @@ export default function AdminSessionsPage() {
 
   return (
     <div className="space-y-6 text-white">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-6">
         <div>
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent-strong)]">
             Security
@@ -167,115 +167,134 @@ export default function AdminSessionsPage() {
             Theo dõi và thu hồi phiên đăng nhập theo IP hoặc thiết bị của người dùng.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="secondary"
-            className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
-            onClick={() => setActiveFilter("all")}
-          >
-            Bộ lọc
-          </Button>
-          <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
-            <AlertDialogTrigger asChild>
-              <Button className="bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90">
-                Thu hồi tất cả
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Thu hồi toàn bộ phiên?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Hành động này sẽ đăng xuất tất cả thiết bị và không thể hoàn tác.
-              </AlertDialogDescription>
-              <div className="mt-6 flex items-center justify-end gap-3">
-                <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    setConfirmRevokeAll(false);
-                    void revokeAll();
-                  }}
-                >
-                  Thu hồi
-                </AlertDialogAction>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
       </div>
 
-      <Card className="border-white/10 bg-[#111827] text-white">
-        <CardContent className="space-y-4 py-5">
-          <div className="grid gap-3 md:grid-cols-4">
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
-                🔍
-              </span>
+      <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
+        <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <CardContent className="space-y-4 py-5">
+            <div className="grid gap-3 md:grid-cols-4">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                  🔍
+                </span>
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Tìm theo email, tên, UA"
+                  className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-9 pr-4 text-sm text-white"
+                />
+              </div>
               <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Tìm theo email, tên, UA"
-                className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 pl-9 pr-4 text-sm text-white"
+                value={ipFilter}
+                onChange={(event) => setIpFilter(event.target.value)}
+                placeholder="IP Address"
+                className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
+              />
+              <input
+                value={deviceFilter}
+                onChange={(event) => setDeviceFilter(event.target.value)}
+                placeholder="Device"
+                className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
+              />
+              <input
+                value={userIdFilter}
+                onChange={(event) => setUserIdFilter(event.target.value)}
+                placeholder="User ID"
+                className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
               />
             </div>
-            <input
-              value={ipFilter}
-              onChange={(event) => setIpFilter(event.target.value)}
-              placeholder="IP Address"
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            />
-            <input
-              value={deviceFilter}
-              onChange={(event) => setDeviceFilter(event.target.value)}
-              placeholder="Device"
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            />
-            <input
-              value={userIdFilter}
-              onChange={(event) => setUserIdFilter(event.target.value)}
-              placeholder="User ID"
-              className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { key: "all", label: "Tất cả" },
-              { key: "active", label: "Đang hoạt động" },
-              { key: "expired", label: "Hết hạn" },
-            ].map((item) => (
-              <Button
-                key={item.key}
-                variant={activeFilter === item.key ? "default" : "secondary"}
-                size="sm"
-                onClick={() => setActiveFilter(item.key as typeof activeFilter)}
-              >
-                {item.label}
-              </Button>
-            ))}
-            {[
-              { key: "desktop", label: "Desktop" },
-              { key: "mobile", label: "Mobile" },
-            ].map((item) => (
-              <Button
-                key={item.key}
-                variant={deviceType === item.key ? "default" : "secondary"}
-                size="sm"
-                onClick={() => setDeviceType(item.key as typeof deviceType)}
-              >
-                {item.label}
-              </Button>
-            ))}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={revokeByFilter}
-              disabled={!canBulkRevoke}
-            >
-              Thu hồi theo bộ lọc
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { key: "all", label: "Tất cả" },
+                  { key: "active", label: "Đang hoạt động" },
+                  { key: "expired", label: "Hết hạn" },
+                ].map((item) => (
+                  <Button
+                    key={item.key}
+                    variant={activeFilter === item.key ? "default" : "secondary"}
+                    size="sm"
+                    className={
+                      activeFilter === item.key
+                        ? "bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90"
+                        : ""
+                    }
+                    onClick={() => setActiveFilter(item.key as typeof activeFilter)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+                {[
+                  { key: "desktop", label: "Desktop" },
+                  { key: "mobile", label: "Mobile" },
+                ].map((item) => (
+                  <Button
+                    key={item.key}
+                    variant={deviceType === item.key ? "default" : "secondary"}
+                    size="sm"
+                    className={deviceType === item.key ? "bg-white/10 text-white" : ""}
+                    onClick={() => setDeviceType(item.key as typeof deviceType)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={revokeByFilter}
+                  disabled={!canBulkRevoke}
+                >
+                  Thu hồi theo bộ lọc
+                </Button>
+                <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
+                  <AlertDialogTrigger asChild>
+                    <Button className="bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90">
+                      Thu hồi tất cả
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogTitle>Thu hồi toàn bộ phiên?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Hành động này sẽ đăng xuất tất cả thiết bị và không thể hoàn tác.
+                    </AlertDialogDescription>
+                    <div className="mt-6 flex items-center justify-end gap-3">
+                      <AlertDialogCancel>Huỷ</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          setConfirmRevokeAll(false);
+                          void revokeAll();
+                        }}
+                      >
+                        Thu hồi
+                      </AlertDialogAction>
+                    </div>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card className="border-white/10 bg-[#101826] text-white">
+        <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <CardContent className="flex h-full items-center justify-between gap-4 py-5">
+            <div>
+              <p className="text-xs uppercase tracking-[0.25em] text-white/50">
+                Tổng số phiên
+              </p>
+              <p className="mt-2 text-3xl font-semibold text-white">
+                {totalItems}
+              </p>
+            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-strong)]/15 text-[var(--accent-strong)]">
+              #
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
         <CardContent className="py-5">
           {sessionsQuery.isLoading ? (
             <Loading label="Loading sessions" />

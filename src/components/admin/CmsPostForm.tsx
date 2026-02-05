@@ -99,11 +99,13 @@ export default function CmsPostForm({
   });
   const media = useCmsPostMedia({ onUpdateTranslation: setCurrentTranslation });
   const handleChangeLang = useCallback(
-    (code: "vi" | "en") => {
-      setActiveLang(code);
+    (code: string) => {
+      if (!languages.includes(code as "vi" | "en")) return;
+      const nextCode = code as "vi" | "en";
+      setActiveLang(nextCode);
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
-        url.searchParams.set("lang", code);
+        url.searchParams.set("lang", nextCode);
         window.history.replaceState(null, "", url.toString());
       }
     },
@@ -264,7 +266,11 @@ export default function CmsPostForm({
 
   useEffect(() => {
     if (!loadedDraft) return;
-    applyDraft(setTranslations, setStatus, setActiveLang);
+    applyDraft(setTranslations, setStatus, (value) => {
+      if (languages.includes(value as "vi" | "en")) {
+        setActiveLang(value as "vi" | "en");
+      }
+    });
   }, [loadedDraft, applyDraft]);
 
   useEffect(() => {

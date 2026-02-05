@@ -118,21 +118,22 @@ export default function HomePhotoGallerySection({
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-[70] bg-black/90 text-white"
+          onClick={() => setActiveIndex(null)}
         >
-          <button
-            type="button"
-            onClick={() => setActiveIndex(null)}
-            className="absolute inset-0 z-0"
-            aria-label="Close gallery"
-          />
-          <div className="relative z-10 flex h-full flex-col">
-            <div className="flex items-center justify-between px-6 py-4 text-sm text-white/70">
+          <div className="relative z-10 flex h-full flex-col pointer-events-none">
+            <div
+              className="flex items-center justify-between px-6 py-4 text-sm text-white/70 pointer-events-auto"
+              onClick={(event) => event.stopPropagation()}
+            >
               <span>
                 {activeIndex! + 1} / {normalized.length}
               </span>
               <button
                 type="button"
-                onClick={() => setActiveIndex(null)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setActiveIndex(null);
+                }}
                 className="rounded-full border border-white/20 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/80 transition hover:border-[#ff9f40] hover:text-white"
               >
                 Close
@@ -141,16 +142,17 @@ export default function HomePhotoGallerySection({
             <div className="relative flex flex-1 items-center justify-center px-6">
               <button
                 type="button"
-                onClick={() =>
+                onClick={(event) => {
+                  event.stopPropagation();
                   setActiveIndex((prev) =>
                     prev === null
                       ? prev
                       : prev - 1 < 0
                       ? normalized.length - 1
                       : prev - 1
-                  )
-                }
-                className="absolute left-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 p-3 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
+                  );
+                }}
+                className="pointer-events-auto absolute left-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 p-3 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
                 aria-label="Previous image"
               >
                 <svg
@@ -163,23 +165,29 @@ export default function HomePhotoGallerySection({
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
-              <img
-                src={resolveMediaUrl(active.imageUrl)}
-                alt={active.caption || "Gallery item"}
-                className="max-h-[70vh] w-auto max-w-[90vw] rounded-2xl object-contain shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
-              />
+              <div
+                className="pointer-events-auto"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <img
+                  src={resolveMediaUrl(active.imageUrl)}
+                  alt={active.caption || "Gallery item"}
+                  className="max-h-[70vh] w-auto max-w-[90vw] rounded-2xl object-contain shadow-[0_30px_80px_rgba(0,0,0,0.5)]"
+                />
+              </div>
               <button
                 type="button"
-                onClick={() =>
+                onClick={(event) => {
+                  event.stopPropagation();
                   setActiveIndex((prev) =>
                     prev === null
                       ? prev
                       : prev + 1 >= normalized.length
                       ? 0
                       : prev + 1
-                  )
-                }
-                className="absolute right-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 p-3 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
+                  );
+                }}
+                className="pointer-events-auto absolute right-6 top-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-black/40 p-3 text-white/80 transition hover:border-[#ff9f40] hover:text-white"
                 aria-label="Next image"
               >
                 <svg
@@ -193,7 +201,10 @@ export default function HomePhotoGallerySection({
                 </svg>
               </button>
             </div>
-            <div className="px-6 pb-6">
+            <div
+              className="px-6 pb-6 pointer-events-auto"
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="flex items-center gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {normalized.map((item, index) => (
                   <button

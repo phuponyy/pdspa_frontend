@@ -7,6 +7,7 @@ import type {
   BlogState,
   ReviewsState,
   GalleryState,
+  MentionsState,
   ServicesState,
 } from "@/components/admin/page-editor/types";
 import type { SchemaTemplateType } from "@/lib/seo/seoUtils";
@@ -20,6 +21,7 @@ type DraftPayload = {
   recoveryByLang?: Record<string, RecoveryState>;
   reviewsByLang?: Record<string, ReviewsState>;
   galleryByLang?: Record<string, GalleryState>;
+  mentionsByLang?: Record<string, MentionsState>;
   blogByLang?: Record<string, BlogState>;
   focusKeywordByLang?: Record<string, string>;
   schemaTemplateByLang?: Record<string, SchemaTemplateType>;
@@ -43,6 +45,7 @@ type DraftHookParams = {
   recoveryByLang: Record<string, RecoveryState>;
   reviewsByLang: Record<string, ReviewsState>;
   galleryByLang: Record<string, GalleryState>;
+  mentionsByLang: Record<string, MentionsState>;
   blogByLang: Record<string, BlogState>;
   focusKeywordByLang: Record<string, string>;
   schemaTemplateByLang: Record<string, SchemaTemplateType>;
@@ -59,6 +62,7 @@ type DraftHookParams = {
   setRecoveryByLang: Dispatch<SetStateAction<Record<string, RecoveryState>>>;
   setReviewsByLang: Dispatch<SetStateAction<Record<string, ReviewsState>>>;
   setGalleryByLang: Dispatch<SetStateAction<Record<string, GalleryState>>>;
+  setMentionsByLang: Dispatch<SetStateAction<Record<string, MentionsState>>>;
   setBlogByLang: Dispatch<SetStateAction<Record<string, BlogState>>>;
   setFocusKeywordByLang: Dispatch<SetStateAction<Record<string, string>>>;
   setSchemaTemplateByLang: Dispatch<SetStateAction<Record<string, SchemaTemplateType>>>;
@@ -83,6 +87,7 @@ export const usePageEditorDraft = ({
   recoveryByLang,
   reviewsByLang,
   galleryByLang,
+  mentionsByLang,
   blogByLang,
   focusKeywordByLang,
   schemaTemplateByLang,
@@ -99,6 +104,7 @@ export const usePageEditorDraft = ({
   setRecoveryByLang,
   setReviewsByLang,
   setGalleryByLang,
+  setMentionsByLang,
   setBlogByLang,
   setFocusKeywordByLang,
   setSchemaTemplateByLang,
@@ -123,6 +129,7 @@ export const usePageEditorDraft = ({
       if (parsed?.recoveryByLang) setRecoveryByLang(parsed.recoveryByLang);
       if (parsed?.reviewsByLang) setReviewsByLang(parsed.reviewsByLang);
       if (parsed?.galleryByLang) setGalleryByLang(parsed.galleryByLang);
+      if (parsed?.mentionsByLang) setMentionsByLang(parsed.mentionsByLang);
       if (parsed?.blogByLang) setBlogByLang(parsed.blogByLang);
       if (parsed?.focusKeywordByLang) setFocusKeywordByLang(parsed.focusKeywordByLang);
       if (parsed?.schemaTemplateByLang) setSchemaTemplateByLang(parsed.schemaTemplateByLang);
@@ -153,6 +160,7 @@ export const usePageEditorDraft = ({
       recoveryByLang,
       reviewsByLang,
       galleryByLang,
+      mentionsByLang,
       blogByLang,
       focusKeywordByLang,
       schemaTemplateByLang,
@@ -174,6 +182,7 @@ export const usePageEditorDraft = ({
     recoveryByLang,
     reviewsByLang,
     galleryByLang,
+    mentionsByLang,
     schemaFaqByLang,
     schemaOrgByLang,
     schemaTemplateByLang,

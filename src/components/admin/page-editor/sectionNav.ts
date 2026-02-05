@@ -9,5 +9,6 @@ export const pageEditorSectionNav = [
   { label: "Recovery Section", href: "#recovery" },
   { label: "Photo Gallery", href: "#gallery" },
   { label: "Reviews Section", href: "#reviews" },
+  { label: "Mentions Section", href: "#mentions" },
   { label: "Live Status", href: "#status" },
 ];
