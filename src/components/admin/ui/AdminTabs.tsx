@@ -11,7 +11,7 @@ export function AdminTabsList(props: React.ComponentPropsWithoutRef<typeof TabsL
     <TabsList
       {...props}
       className={cn(
-        "bg-white/5 text-white border border-white/10",
+        "bg-[#0b1220] text-white border border-white/10",
         props.className
       )}
     />
@@ -23,7 +23,7 @@ export function AdminTabsTrigger(props: React.ComponentPropsWithoutRef<typeof Ta
     <TabsTrigger
       {...props}
       className={cn(
-        "data-[state=active]:bg-[var(--accent-strong)] data-[state=active]:text-black",
+        "text-white/70 data-[state=active]:bg-[#ff8a4b] data-[state=active]:text-white",
         props.className
       )}
     />

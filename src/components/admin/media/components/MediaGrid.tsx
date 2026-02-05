@@ -29,7 +29,7 @@ export const MediaGrid = ({
             key={item.id}
             role="button"
             tabIndex={0}
-            className={`group relative cursor-pointer overflow-hidden rounded-2xl border bg-[#141414] text-left transition ${
+            className={`group relative cursor-pointer overflow-hidden rounded-2xl border bg-[#262525] text-left transition ${
               isSelected ? "border-[var(--accent-strong)]" : "border-white/5 hover:border-white/20"
             }`}
             onClick={() => onSelect(item.id)}

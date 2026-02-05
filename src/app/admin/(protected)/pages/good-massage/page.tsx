@@ -219,7 +219,7 @@ export default function GoodMassageAdminPage() {
   const validate = () => {
     const result = goodMassageSchema.safeParse(currentContent);
     if (!result.success) {
-      setErrors(result.error.errors.map((err) => err.message));
+      setErrors(result.error.issues.map((issue) => issue.message));
       return false;
     }
     setErrors([]);
@@ -305,7 +305,7 @@ export default function GoodMassageAdminPage() {
 
       {errors.length ? (
         <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-100">
-          {errors.map((err, index) => (
+          {errors.map((err: string, index) => (
             <p key={`${err}-${index}`}>{err}</p>
           ))}
         </div>

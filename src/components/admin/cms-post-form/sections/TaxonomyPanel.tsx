@@ -47,16 +47,17 @@ export default function TaxonomyPanel({
 }: TaxonomyPanelProps) {
   return (
     <>
-      <div className="rounded-2xl border border-[var(--line)] bg-white p-3 shadow-[var(--shadow)]">
+      <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-[0_20px_50px_rgba(2,6,23,0.6)]">
         <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">Danh mục</p>
-          <span className="text-xs text-[var(--ink-muted)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-white/60">Danh mục</p>
+          <span className="text-xs text-white/60">
             {selectedCategoryIds.length} đã chọn
           </span>
         </div>
         <div className="mt-2">
           <AdminInput
             label="Tìm danh mục"
+            placeholder="Nhập kiếm danh mục..."
             value={categoryQuery}
             onChange={(event) => setCategoryQuery(event.target.value)}
           />
@@ -72,8 +73,8 @@ export default function TaxonomyPanel({
                   onClick={() => onToggleCategory(category.id)}
                   className={`rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] ${
                     active
-                      ? "bg-[var(--accent-strong)] text-white"
-                      : "border border-[var(--line)] text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                      ? "bg-[#ff8a4b] text-white"
+                      : "border border-white/10 text-white/60 hover:text-white"
                   }`}
                 >
                   {category.name}
@@ -81,12 +82,13 @@ export default function TaxonomyPanel({
               );
             })
           ) : (
-            <p className="text-xs text-[var(--ink-muted)]">Không có danh mục phù hợp.</p>
+            <p className="text-xs text-white/50">Không có danh mục phù hợp.</p>
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
           <AdminInput
             label="Thêm danh mục mới"
+            placeholder="Tạo Danh mục..."
             value={newCategory}
             onChange={(event) => setNewCategory(event.target.value)}
             onKeyDown={onCreateCategoryKey}
@@ -97,16 +99,17 @@ export default function TaxonomyPanel({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--line)] bg-white p-3 shadow-[var(--shadow)]">
+      <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-[0_20px_50px_rgba(2,6,23,0.6)]">
         <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">Thẻ</p>
-          <span className="text-xs text-[var(--ink-muted)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-white/60">Thẻ</p>
+          <span className="text-xs text-white/60">
             {selectedTagIds.length} đã chọn
           </span>
         </div>
         <div className="mt-2">
           <AdminInput
             label="Tìm thẻ"
+            placeholder="Tìm kiếm thẻ..."
             value={tagQuery}
             onChange={(event) => setTagQuery(event.target.value)}
           />
@@ -122,8 +125,8 @@ export default function TaxonomyPanel({
                   onClick={() => onToggleTag(tag.id)}
                   className={`rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] ${
                     active
-                      ? "bg-[var(--accent-strong)] text-white"
-                      : "border border-[var(--line)] text-[var(--ink-muted)] hover:text-[var(--ink)]"
+                      ? "bg-[#ff8a4b] text-white"
+                      : "border border-white/10 text-white/60 hover:text-white"
                   }`}
                 >
                   {tag.name}
@@ -131,12 +134,13 @@ export default function TaxonomyPanel({
               );
             })
           ) : (
-            <p className="text-xs text-[var(--ink-muted)]">Không có thẻ phù hợp.</p>
+            <p className="text-xs text-white/50">Không có thẻ phù hợp.</p>
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
           <AdminInput
             label="Thêm thẻ mới"
+            placeholder="Tạo tags..."
             value={newTag}
             onChange={(event) => setNewTag(event.target.value)}
             onKeyDown={onCreateTagKey}

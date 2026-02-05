@@ -51,7 +51,7 @@ export const MediaToolbar = ({
   return (
     <div className="space-y-4 rounded-2xl border border-white/10 bg-[#101010] p-4 text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-[240px] flex-1 items-center gap-3 rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="flex min-w-[240px] flex-1 items-center gap-3 rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <span className="text-white/50">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
@@ -77,7 +77,7 @@ export const MediaToolbar = ({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_1fr]">
-        <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">Format</p>
           <AdminSelect
             className="mt-1 h-8 w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-3 text-xs text-white/80"
@@ -89,7 +89,7 @@ export const MediaToolbar = ({
             <option value="video">Video</option>
           </AdminSelect>
         </div>
-        <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">Sort</p>
           <AdminSelect
             className="mt-1 h-8 w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-3 text-xs text-white/80"
@@ -100,7 +100,7 @@ export const MediaToolbar = ({
             <option value="oldest">Oldest first</option>
           </AdminSelect>
         </div>
-        <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">Folder</p>
           <AdminSelect
             className="mt-1 h-8 w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-3 text-xs text-white/80"
@@ -117,7 +117,7 @@ export const MediaToolbar = ({
             ))}
           </AdminSelect>
         </div>
-        <div className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">Tag</p>
           <AdminSelect
             className="mt-1 h-8 w-full rounded-lg border border-white/10 bg-[#1a1a1a] px-3 text-xs text-white/80"
@@ -137,7 +137,7 @@ export const MediaToolbar = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <AdminInput
             placeholder="New folder name"
             value={newFolderName}
@@ -152,7 +152,7 @@ export const MediaToolbar = ({
             Add folder
           </AdminButton>
         </div>
-        <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-xl border border-white/10 bg-[#141414] px-3 py-2">
+        <div className="flex min-w-[200px] flex-1 items-center gap-2 rounded-xl border border-white/10 bg-[#262525] px-3 py-2">
           <AdminInput
             placeholder="New tag name"
             value={newTagName}

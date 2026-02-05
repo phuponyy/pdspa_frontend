@@ -37,6 +37,7 @@ export default function RichTextEditor({
   const insertCallbackRef = useRef<((url: string) => void) | null>(null);
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
   const [mediaQuery, setMediaQuery] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   const mediaQueryResult = useQuery({
     queryKey: ["cms-media-library"],
@@ -211,7 +212,12 @@ export default function RichTextEditor({
   );
 
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-white">
+    <div className="relative rounded-2xl border border-[var(--line)] bg-white">
+      {!isFocused && !value?.trim() ? (
+        <div className="pointer-events-none absolute left-4 top-3 z-10 text-sm text-white/60">
+          Nhập nội dung bài viết tại đây...
+        </div>
+      ) : null}
       <Editor
         apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY || "no-api-key"}
         init={init}
@@ -220,6 +226,8 @@ export default function RichTextEditor({
         onInit={(_, editor) => {
           editorRef.current = editor;
         }}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
       />
       <AdminDialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
         <AdminDialogContent className="max-w-3xl">

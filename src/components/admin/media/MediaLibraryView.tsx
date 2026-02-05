@@ -139,7 +139,7 @@ export default function MediaLibraryView({ onPick, pickLabel }: MediaLibraryView
                 className="fixed inset-0 z-30 bg-black/60"
                 onClick={() => media.setSelectedId(null)}
               />
-              <aside className="fixed right-0 top-0 z-40 h-full w-[360px] max-w-full border-l border-white/10 bg-[#0b0b0b] p-4 shadow-[0_0_40px_rgba(0,0,0,0.45)]">
+              <aside className="fixed right-0 top-0 z-40 h-full w-[360px] max-w-full overflow-y-auto border-l border-white/10 bg-[#0b0b0b] p-4 shadow-[0_0_40px_rgba(0,0,0,0.45)]">
                 <MediaDetails
                   item={media.selected}
                   editedFilename={media.editedFilename}

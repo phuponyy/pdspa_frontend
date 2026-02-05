@@ -1,4 +1,3 @@
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { uploadHeroImage, updateHomeHero } from "@/lib/api/admin";
 import { API_BASE_URL } from "@/lib/constants";
 import { storageKey } from "@/components/admin/page-editor/defaults";
@@ -32,27 +31,28 @@ export default function HeroSection({
   return (
     <section
       id="hero"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff8a4b]/15 text-[#ff8a4b]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6l8-4 8 4-8 4-8-4z" />
               <path d="M4 12l8 4 8-4" />
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Hero Section</p>
-            <p className="text-sm text-slate-500">Cập nhật thông điệp chính cho heros.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Hero Section</p>
+            <p className="text-sm text-white/60">Cập nhật thông điệp chính cho heros.</p>
           </div>
         </div>
       </div>
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-4">
-          <AdminInput
-            label="Heading"
-            value={currentHero.heading}
+        <AdminInput
+          label="Heading"
+          placeholder="Tiêu đề chính cho hero..."
+          value={currentHero.heading}
             onChange={(event) => {
               setIsDirty(true);
               setHeroByLang((prev) => ({
@@ -64,9 +64,10 @@ export default function HeroSection({
               }));
             }}
           />
-          <AdminTextarea
-            label="Subheading"
-            value={currentHero.subheading}
+        <AdminTextarea
+          label="Subheading"
+          placeholder="Mô tả ngắn cho hero..."
+          value={currentHero.subheading}
             onChange={(event) => {
               setIsDirty(true);
               setHeroByLang((prev) => ({
@@ -79,14 +80,14 @@ export default function HeroSection({
             }}
           />
         </div>
-        <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-xs text-slate-500">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
+        <div className="rounded-3xl border border-dashed border-white/15 bg-[#0f172a] p-4 text-center text-xs text-white/60">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-[#0b1220] text-white/40">
             <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="5" width="18" height="14" rx="2" />
               <path d="M7 15l3-3 3 3 4-4 3 3" />
             </svg>
           </div>
-          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
             Ảnh thumb
           </p>
           <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -143,19 +144,19 @@ export default function HeroSection({
                 }}
               />
             </label>
-            <span className="rounded-full border border-slate-200 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <span className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
               Library
             </span>
           </div>
-          <p className="mt-2 text-[11px] text-slate-400">Tối thiểu: 1920x1080px</p>
+          <p className="mt-2 text-[11px] text-white/50">Tối thiểu: 1920x1080px</p>
         </div>
       </div>
 
       <div className="mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-600">Hero slides (max 10)</p>
-            <p className="text-xs text-slate-400">Hãy giữ mọi thứ ở mức tối giản, mở rộng slide để chỉnh sửa chi tiết đầy đủ.</p>
+            <p className="text-sm font-semibold text-white">Hero slides (max 10)</p>
+            <p className="text-xs text-white/50">Hãy giữ mọi thứ ở mức tối giản, mở rộng slide để chỉnh sửa chi tiết đầy đủ.</p>
           </div>
           <AdminButton
             variant="outline"
@@ -192,19 +193,20 @@ export default function HeroSection({
           {currentHero.slides.map((slide, idx) => (
             <details
               key={`hero-slide-${idx}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+              className="rounded-2xl border border-white/10 bg-[#0f172a] px-4 py-3"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-slate-600">
+              <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-white/80">
                 <span>
                   Slide {idx + 1} · {slide.heading?.trim() || "Untitled"}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-white/50">
                   {slide.imageUrl ? "Image set" : "No image"}
                 </span>
               </summary>
               <div className="mt-4 grid gap-3">
                 <AdminInput
                   label="Image URL"
+                  placeholder="/uploads/media/hero.jpg"
                   value={slide.imageUrl}
                   onChange={(event) => {
                     setIsDirty(true);
@@ -220,6 +222,7 @@ export default function HeroSection({
                 />
                 <AdminInput
                   label="Heading"
+                  placeholder="Tiêu đề slide..."
                   value={slide.heading || ""}
                   onChange={(event) => {
                     setIsDirty(true);
@@ -235,6 +238,7 @@ export default function HeroSection({
                 />
                 <AdminTextarea
                   label="Subheading"
+                  placeholder="Mô tả slide..."
                   value={slide.subheading || ""}
                   onChange={(event) => {
                     setIsDirty(true);
@@ -251,6 +255,7 @@ export default function HeroSection({
                 <div className="grid gap-3 md:grid-cols-2">
                   <AdminInput
                     label="Primary button"
+                    placeholder="Ví dụ: Đặt lịch ngay"
                     value={slide.primaryCta || ""}
                     onChange={(event) => {
                       setIsDirty(true);
@@ -269,6 +274,7 @@ export default function HeroSection({
                   />
                   <AdminInput
                     label="Primary link"
+                    placeholder="https://..."
                     value={slide.primaryLink || ""}
                     onChange={(event) => {
                       setIsDirty(true);
@@ -287,6 +293,7 @@ export default function HeroSection({
                   />
                   <AdminInput
                     label="Secondary button"
+                    placeholder="Ví dụ: Xem thêm"
                     value={slide.secondaryCta || ""}
                     onChange={(event) => {
                       setIsDirty(true);
@@ -305,6 +312,7 @@ export default function HeroSection({
                   />
                   <AdminInput
                     label="Secondary link"
+                    placeholder="https://..."
                     value={slide.secondaryLink || ""}
                     onChange={(event) => {
                       setIsDirty(true);
@@ -342,7 +350,7 @@ export default function HeroSection({
             </details>
           ))}
           {!currentHero.slides.length ? (
-            <p className="text-xs text-slate-400">No slides yet. Add up to 10 slides.</p>
+            <p className="text-xs text-white/50">No slides yet. Add up to 10 slides.</p>
           ) : null}
         </div>
       </div>

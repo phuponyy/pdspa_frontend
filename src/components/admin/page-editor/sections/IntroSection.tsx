@@ -1,4 +1,3 @@
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeIntro, updateHomeIntro } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { IntroState } from "@/components/admin/page-editor/types";
@@ -27,11 +26,11 @@ export default function IntroSection({
   return (
     <section
       id="intro"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff8a4b]/15 text-[#ff8a4b]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 12h16" />
               <path d="M4 6h10" />
@@ -39,14 +38,15 @@ export default function IntroSection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Intro Section</p>
-            <p className="text-sm text-slate-500">Điểm nổi bật trên trang chủ nằm bên dưới phần hero.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Intro Section</p>
+            <p className="text-sm text-white/60">Điểm nổi bật trên trang chủ nằm bên dưới phần hero.</p>
           </div>
         </div>
       </div>
       <div className="mt-5 grid gap-4">
         <AdminInput
           label="Heading"
+          placeholder="Tiêu đề phần giới thiệu..."
           value={currentIntro.heading}
           onChange={(event) => {
             setIsDirty(true);
@@ -58,8 +58,9 @@ export default function IntroSection({
         />
         <AdminTextarea
           label="Description"
+          placeholder="Mô tả ngắn giới thiệu..."
           value={currentIntro.description}
-          onChange={(event) => {
+          onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
             setIsDirty(true);
             setIntroByLang((prev) => ({
               ...prev,
@@ -70,6 +71,7 @@ export default function IntroSection({
         <div className="grid gap-4 md:grid-cols-2">
           <AdminInput
             label="Image URL"
+            placeholder="/uploads/media/intro.jpg"
             value={currentIntro.imageUrl}
             onChange={(event) => {
               setIsDirty(true);
@@ -81,6 +83,7 @@ export default function IntroSection({
           />
           <AdminInput
             label="Video URL"
+            placeholder="https://youtube.com/..."
             value={currentIntro.videoUrl}
             onChange={(event) => {
               setIsDirty(true);
@@ -94,6 +97,7 @@ export default function IntroSection({
         <div className="grid gap-4 md:grid-cols-2">
           <AdminInput
             label="Provider name"
+            placeholder="Tripadvisor"
             value={currentIntro.providerName}
             onChange={(event) => {
               setIsDirty(true);
@@ -105,6 +109,7 @@ export default function IntroSection({
           />
           <AdminInput
             label="Listing name"
+            placeholder="Panda Spa"
             value={currentIntro.listingName}
             onChange={(event) => {
               setIsDirty(true);
@@ -118,6 +123,7 @@ export default function IntroSection({
         <div className="grid gap-4 md:grid-cols-3">
           <AdminInput
             label="Rating"
+            placeholder="5"
             value={currentIntro.rating}
             onChange={(event) => {
               setIsDirty(true);
@@ -129,6 +135,7 @@ export default function IntroSection({
           />
           <AdminInput
             label="Reviews"
+            placeholder="1234"
             value={currentIntro.reviews}
             onChange={(event) => {
               setIsDirty(true);
@@ -140,6 +147,7 @@ export default function IntroSection({
           />
           <AdminInput
             label="Rank text"
+            placeholder="#1 Massage Đà Nẵng"
             value={currentIntro.rankText}
             onChange={(event) => {
               setIsDirty(true);
@@ -153,6 +161,7 @@ export default function IntroSection({
         <div className="grid gap-4 md:grid-cols-2">
           <AdminInput
             label="Button label"
+            placeholder="SPA ĐÀ NẴNG"
             value={currentIntro.buttonLabel}
             onChange={(event) => {
               setIsDirty(true);
@@ -164,6 +173,7 @@ export default function IntroSection({
           />
           <AdminInput
             label="Button link"
+            placeholder="https://..."
             value={currentIntro.buttonLink}
             onChange={(event) => {
               setIsDirty(true);

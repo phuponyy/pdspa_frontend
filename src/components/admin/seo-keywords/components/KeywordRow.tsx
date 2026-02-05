@@ -1,23 +1,25 @@
 import { useMemo, useState } from "react";
 import LineChart from "@/components/admin/charts/LineChart";
-import {
-  AdminAlertDialog,
-  AdminAlertDialogAction,
-  AdminAlertDialogCancel,
-  AdminAlertDialogContent,
-  AdminAlertDialogDescription,
-  AdminAlertDialogTitle,
-  AdminAlertDialogTrigger,
-import {
-  addSeoKeywordRank,
-  deleteSeoKeyword,
-  getSeoKeywordHistory,
-  getSeoKeywordSerpPreview,
-} from "@/lib/api/admin";
+import { addSeoKeywordRank, deleteSeoKeyword, getSeoKeywordHistory, getSeoKeywordSerpPreview } from "@/lib/api/admin";
 import type { SeoKeyword, SeoKeywordRank, SeoKeywordSerpPreviewItem } from "@/types/api.types";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import {
+  AdminDialog,
+  AdminDialogTrigger,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogDescription,
+  AdminDialogFooter,
+  AdminAlertDialog,
+  AdminAlertDialogTrigger,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogTitle,
+  AdminAlertDialogDescription,
+} from "@/components/admin/ui/AdminDialog";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export type KeywordRowProps = {

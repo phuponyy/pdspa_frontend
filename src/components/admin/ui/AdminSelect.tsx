@@ -8,7 +8,7 @@ export type AdminSelectProps = React.SelectHTMLAttributes<HTMLSelectElement>;
 const AdminSelectComponent = ({ className, ...props }: AdminSelectProps) => (
   <select
     className={cn(
-      "h-10 w-full rounded-xl border border-white/10 bg-[#141414] px-3 text-sm text-white/80 focus:outline-none focus:ring-2 focus:ring-[var(--accent-strong)]",
+      "h-10 w-full rounded-xl border border-white/10 bg-[#0b1220] px-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#ff8a4b]",
       className
     )}
     {...props}

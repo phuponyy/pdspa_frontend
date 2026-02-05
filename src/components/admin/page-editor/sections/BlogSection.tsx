@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getCmsPosts, getHomeBlog, updateHomeBlog } from "@/lib/api/admin";
 import { useAdminQuery } from "@/lib/api/adminHooks";
 import { storageKey } from "@/components/admin/page-editor/defaults";
@@ -73,9 +72,9 @@ export default function BlogSection({
   return (
     <section
       id="blog"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
             <svg
@@ -91,10 +90,10 @@ export default function BlogSection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
               Blog Section
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-white/60">
               Hiển thị 5 bài viết, bài đầu tiên có thể ưu tiên theo ngôn ngữ.
             </p>
           </div>
@@ -104,6 +103,7 @@ export default function BlogSection({
       <div className="mt-5 grid gap-4">
         <AdminInput
           label="Heading"
+          placeholder="Tiêu đề blog..."
           value={currentBlog.heading}
           onChange={(event) => {
             setIsDirty(true);
@@ -115,6 +115,7 @@ export default function BlogSection({
         />
         <AdminTextarea
           label="Description"
+          placeholder="Mô tả ngắn cho blog section..."
           value={currentBlog.description}
           onChange={(event) => {
             setIsDirty(true);
@@ -125,13 +126,13 @@ export default function BlogSection({
           }}
         />
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-2xl border border-white/10 bg-[#0f172a] p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
                 Featured post
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-white/60">
                 Chọn bài viết ưu tiên hiển thị đầu tiên (theo ngôn ngữ).
               </p>
             </div>
@@ -155,7 +156,7 @@ export default function BlogSection({
                   },
                 }));
               }}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700"
+              className="h-11 w-full rounded-xl border border-white/10 bg-[#0b1220] px-4 text-sm text-white/80"
             >
               <option value="">Tự động (mới nhất)</option>
               {options.map((item) => (
@@ -165,7 +166,7 @@ export default function BlogSection({
               ))}
             </select>
             {selected ? (
-              <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
+              <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0b1220] px-3 py-2 text-sm text-white/70">
                 {selected.thumbnailUrl ? (
                   <img
                     src={selected.thumbnailUrl}
@@ -174,7 +175,7 @@ export default function BlogSection({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-10 w-14 rounded-lg bg-slate-100" />
+                  <div className="h-10 w-14 rounded-lg bg-white/5" />
                 )}
                 <span className="line-clamp-2">{selected.title}</span>
               </div>

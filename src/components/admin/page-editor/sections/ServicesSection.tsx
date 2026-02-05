@@ -7,7 +7,6 @@ import type { AdminService } from "@/types/api.types";
 import type { Dispatch, SetStateAction } from "react";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type ServicesSectionProps = {
   activeLang: "vi" | "en";
@@ -37,9 +36,9 @@ export default function ServicesSection({
   return (
     <section
       id="services"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -49,14 +48,15 @@ export default function ServicesSection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Services Section</p>
-            <p className="text-sm text-slate-500">Chọn dịch vụ hiển thị trên trang chủ.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Services Section</p>
+            <p className="text-sm text-white/60">Chọn dịch vụ hiển thị trên trang chủ.</p>
           </div>
         </div>
       </div>
       <div className="mt-5 grid gap-4">
         <AdminInput
           label="Heading"
+          placeholder="Tiêu đề dịch vụ..."
           value={currentServices.heading}
           onChange={(event) => {
             setIsDirty(true);
@@ -68,6 +68,7 @@ export default function ServicesSection({
         />
         <AdminTextarea
           label="Description"
+          placeholder="Mô tả ngắn về dịch vụ..."
           value={currentServices.description}
           onChange={(event) => {
             setIsDirty(true);
@@ -77,8 +78,8 @@ export default function ServicesSection({
             }));
           }}
         />
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chọn dịch vụ</p>
+        <div className="rounded-2xl border border-white/10 bg-[#0f172a] p-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">Chọn dịch vụ</p>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {adminServices.map((service) => {
               const checked = currentServices.items.some(
@@ -87,7 +88,7 @@ export default function ServicesSection({
               return (
                 <label
                   key={`svc-${service.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#0b1220] px-3 py-2 text-sm text-white/80"
                 >
                   <input
                     type="checkbox"
@@ -126,7 +127,7 @@ export default function ServicesSection({
           {currentServices.items.map((item, index) => (
             <div
               key={`service-item-${item.serviceId}-${index}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              className="rounded-2xl border border-white/10 bg-[#0f172a] p-4"
             >
               {(() => {
                 const service = adminServices.find(
@@ -140,11 +141,9 @@ export default function ServicesSection({
                   item.priceNote?.trim() ||
                   (minPrice !== null ? `From ${formatVnd(minPrice)} VND` : "Liên hệ");
                 return (
-                  <div className="mb-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
-                    <div className="font-semibold text-slate-700">
-                      Preview: {previewTitle}
-                    </div>
-                    <div className="text-slate-500">{previewPrice}</div>
+                  <div className="mb-3 rounded-xl border border-white/10 bg-[#0b1220] px-3 py-2 text-xs text-white/70">
+                    <div className="font-semibold text-white">Preview: {previewTitle}</div>
+                    <div className="text-white/60">{previewPrice}</div>
                   </div>
                 );
               })()}
@@ -171,6 +170,7 @@ export default function ServicesSection({
               />
               <AdminInput
                 label="Price note"
+                placeholder="Ví dụ: From 500.000 VND"
                 value={item.priceNote || ""}
                 onChange={(event) => {
                   setIsDirty(true);
@@ -186,6 +186,7 @@ export default function ServicesSection({
               />
               <AdminInput
                 label="Image URL"
+                placeholder="/uploads/media/service.jpg"
                 value={item.imageUrl || ""}
                 onChange={(event) => {
                   setIsDirty(true);

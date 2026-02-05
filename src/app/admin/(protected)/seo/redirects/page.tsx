@@ -9,13 +9,8 @@ import {
   updateRedirect,
 } from "@/lib/api/admin";
 import { useToast } from "@/components/common/ToastProvider";
-import {
-  AdminDialog,
-  AdminDialogContent,
-  AdminDialogDescription,
-  AdminDialogHeader,
-  AdminDialogTitle,
-  AdminDialogTrigger,
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 import {
   AdminAlertDialog,
   AdminAlertDialogAction,
@@ -24,10 +19,14 @@ import {
   AdminAlertDialogDescription,
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogDescription,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
 import type { RedirectItem } from "@/types/api.types";
-import AdminButton from "@/components/admin/ui/AdminButton";
-import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
 
 export default function RedirectsPage() {
   const toast = useToast();

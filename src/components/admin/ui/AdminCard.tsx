@@ -10,7 +10,7 @@ export function AdminCard({ className, ...props }: AdminCardProps) {
     <Card
       {...props}
       className={cn(
-        "border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]",
+        "border border-white/10 bg-[#0b1220] text-white shadow-[0_20px_60px_rgba(2,6,23,0.55)]",
         className
       )}
     />

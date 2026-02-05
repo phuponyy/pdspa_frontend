@@ -29,11 +29,11 @@ export default function SectionOrderSection({
   return (
     <section
       id="sections-order"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff8a4b]/15 text-[#ff8a4b]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6h16" />
               <path d="M4 12h16" />
@@ -41,10 +41,10 @@ export default function SectionOrderSection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
               Section Order
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-white/60">
               Kéo hoặc đổi vị trí để sắp xếp thứ tự hiển thị trên trang chủ.
             </p>
           </div>
@@ -72,12 +72,12 @@ export default function SectionOrderSection({
               });
               setDraggingSection(null);
             }}
-            className={`flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition ${
-              draggingSection === key ? "border-[#ff9f40] bg-[#fff6eb]" : ""
+            className={`flex items-center justify-between rounded-2xl border border-white/10 bg-[#0f172a] px-4 py-3 text-sm text-white/80 transition ${
+              draggingSection === key ? "border-[#ff8a4b] bg-[#111c2f]" : ""
             }`}
           >
             <div className="flex items-center gap-3">
-              <span className="rounded-full bg-[#0f1722] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+              <span className="rounded-full bg-black/40 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
                 {index + 1}
               </span>
               <span className="font-semibold capitalize">
@@ -85,7 +85,7 @@ export default function SectionOrderSection({
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="cursor-grab rounded-full border border-slate-200 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] text-slate-500">
+              <span className="cursor-grab rounded-full border border-white/10 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] text-white/50">
                 Drag
               </span>
               <AdminButton

@@ -7,6 +7,8 @@ import { updateSiteConfig, uploadMedia } from "@/lib/api/admin";
 import { getSiteConfig } from "@/lib/api/public";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "@/lib/constants";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 import {
   AdminAlertDialog,
   AdminAlertDialogAction,
@@ -15,13 +17,17 @@ import {
   AdminAlertDialogDescription,
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
-
-type NavItem = { label: string; href: string };
-import AdminButton from "@/components/admin/ui/AdminButton";
-import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogDescription,
+  AdminDialogFooter,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 import AdminSwitch from "@/components/admin/ui/AdminSwitch";
+type NavItem = { label: string; href: string };
 type TopBarFields = {
   address: string;
   hours: string;

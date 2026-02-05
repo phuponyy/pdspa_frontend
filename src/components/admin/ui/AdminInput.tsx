@@ -3,12 +3,15 @@
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils/cn";
 
-export type AdminInputProps = React.InputHTMLAttributes<HTMLInputElement>;
+export type AdminInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+};
 
-const AdminInputComponent = ({ className, ...props }: AdminInputProps) => (
+const AdminInputComponent = ({ className, label, ...props }: AdminInputProps) => (
   <Input
+    aria-label={props["aria-label"] ?? label}
     className={cn(
-      "h-10 border-white/10 bg-[#141414] text-white placeholder:text-white/40 focus-visible:ring-[var(--accent-strong)]",
+      "h-10 border border-white/10 bg-[#0b1220] text-white placeholder:text-white/60 focus-visible:ring-[#ff8a4b]",
       className
     )}
     {...props}

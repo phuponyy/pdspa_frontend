@@ -35,16 +35,19 @@ export default function PostContentSection({
       <div className="grid gap-4">
         <AdminInput
           label="Title"
+          placeholder="Nhập tiêu đề bài viết..."
           value={current.title}
           onChange={(event) => onTitleChange(event.target.value)}
         />
         <AdminInput
           label="Slug"
+          placeholder="tu-khoa-bai-viet"
           value={current.slug}
           onChange={(event) => onSlugChange(event.target.value)}
         />
         <AdminTextarea
           label="Excerpt"
+          placeholder="Mô tả ngắn hiển thị ở danh sách và SEO..."
           value={current.excerpt}
           onChange={(event) => onExcerptChange(event.target.value)}
         />

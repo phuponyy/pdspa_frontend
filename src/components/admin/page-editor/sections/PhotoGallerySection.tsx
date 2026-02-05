@@ -1,4 +1,3 @@
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeGallery, updateHomeGallery } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import { resolveMediaUrl } from "@/components/admin/page-editor/utils";
@@ -43,9 +42,9 @@ export default function PhotoGallerySection({
   return (
     <section
       id="gallery"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
             <svg
@@ -61,10 +60,10 @@ export default function PhotoGallerySection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
               Photo Gallery
             </p>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-white/60">
               Quản lý hình ảnh hiển thị dưới Recovery section.
             </p>
           </div>
@@ -90,6 +89,7 @@ export default function PhotoGallerySection({
       <div className="mt-5 grid gap-4">
         <AdminInput
           label="Heading"
+          placeholder="Tiêu đề bộ sưu tập ảnh..."
           value={currentGallery.heading}
           onChange={(event) => {
             setIsDirty(true);
@@ -101,8 +101,9 @@ export default function PhotoGallerySection({
         />
         <AdminTextarea
           label="Description"
+          placeholder="Mô tả ngắn cho gallery..."
           value={currentGallery.description}
-          onChange={(event) => {
+          onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
             setIsDirty(true);
             setGalleryByLang((prev) => ({
               ...prev,
@@ -117,10 +118,10 @@ export default function PhotoGallerySection({
             return (
               <div
                 key={`gallery-item-${index}`}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-white/10 bg-[#0f172a] p-4"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">
                     Image {index + 1}
                   </span>
                   <AdminButton
@@ -142,7 +143,7 @@ export default function PhotoGallerySection({
                   </AdminButton>
                 </div>
 
-                <div className="mb-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="mb-3 overflow-hidden rounded-xl border border-white/10 bg-[#0b1220]">
                   {previewUrl ? (
                     <img
                       src={previewUrl}
@@ -151,7 +152,7 @@ export default function PhotoGallerySection({
                       loading="lazy"
                     />
                   ) : (
-                    <div className="grid h-32 place-items-center text-xs text-slate-400">
+                    <div className="grid h-32 place-items-center text-xs text-white/60">
                       Chưa có ảnh
                     </div>
                   )}
@@ -159,6 +160,7 @@ export default function PhotoGallerySection({
 
                 <AdminInput
                   label="Image URL"
+                  placeholder="/uploads/media/gallery.jpg"
                   value={item.imageUrl || ""}
                   onChange={(event) => {
                     setIsDirty(true);
@@ -174,6 +176,7 @@ export default function PhotoGallerySection({
                 />
                 <AdminInput
                   label="Caption"
+                  placeholder="Chú thích ảnh..."
                   value={item.caption || ""}
                   onChange={(event) => {
                     setIsDirty(true);

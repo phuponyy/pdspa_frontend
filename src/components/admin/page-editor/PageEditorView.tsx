@@ -709,7 +709,7 @@ export default function PageEditor({ lang }: { lang: string }) {
         pickLabel="Chọn ảnh này"
       />
       <FloatingBar
-        showFloatingBar={showFloatingBar}
+        showFloatingBar={showFloatingBar && !mediaDialogOpen}
         activeLang={activeLang}
         status={status}
         isDirty={isDirty}

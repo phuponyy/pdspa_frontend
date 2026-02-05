@@ -10,7 +10,7 @@ export default function AdminSwitch({ className, ...props }: AdminSwitchProps) {
     <Switch
       {...props}
       className={cn(
-        "data-[state=checked]:bg-[var(--accent-strong)] data-[state=checked]:text-black",
+        "border border-white/10 bg-[#0b1220] data-[state=checked]:bg-[#ff8a4b] data-[state=checked]:text-white",
         className
       )}
     />

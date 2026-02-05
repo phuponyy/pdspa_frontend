@@ -50,15 +50,16 @@ export default function SeoSchemaPanel({
   onSchemaJsonChange,
 }: SeoSchemaPanelProps) {
   return (
-    <div className="rounded-2xl border border-[var(--line)] bg-white p-3 shadow-[var(--shadow)]">
+    <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-3 shadow-[0_20px_50px_rgba(2,6,23,0.6)]">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">SEO & Schema</p>
-        <span className="text-[10px] text-[var(--ink-muted)]">RankMath style</span>
+        <p className="text-xs uppercase tracking-[0.2em] text-white/60">SEO & Schema</p>
+        <span className="text-[10px] text-white/50">RankMath style</span>
       </div>
       <div className="mt-3 space-y-4">
         <div className="grid gap-3">
           <AdminInput
             label="Focus keyword"
+            placeholder="Ví dụ: massage Đà Nẵng"
             value={focusKeyword}
             onChange={(event) => onFocusKeywordChange(event.target.value)}
           />
@@ -80,24 +81,27 @@ export default function SeoSchemaPanel({
           </div>
           <AdminInput
             label="SEO Title"
+            placeholder="Tiêu đề tối ưu SEO..."
             value={current.seoTitle}
             onChange={(event) => onSeoFieldChange({ seoTitle: event.target.value })}
           />
           <AdminTextarea
             label="SEO Description"
+            placeholder="Mô tả ngắn (150-160 ký tự) hiển thị trên Google."
             value={current.seoDescription}
             onChange={(event) => onSeoFieldChange({ seoDescription: event.target.value })}
             className="min-h-[90px]"
           />
           <AdminInput
             label="Canonical URL"
+            placeholder="https://example.com/bai-viet"
             value={current.canonical}
             onChange={(event) => onSeoFieldChange({ canonical: event.target.value })}
           />
-          <label className="flex w-full flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+          <label className="flex w-full flex-col gap-2 text-sm font-medium text-white/60">
             Robots
             <select
-              className="h-12 rounded-2xl border border-[var(--line)] bg-white px-4 text-[15px] text-[var(--ink)]"
+              className="h-12 rounded-2xl border border-white/10 bg-[#0b1220] px-4 text-[15px] text-white"
               value={current.robots || "index,follow"}
               onChange={(event) => onSeoFieldChange({ robots: event.target.value })}
             >
@@ -108,11 +112,13 @@ export default function SeoSchemaPanel({
           </label>
           <AdminInput
             label="OG Title"
+            placeholder="Tiêu đề hiển thị khi chia sẻ..."
             value={current.ogTitle}
             onChange={(event) => onSeoFieldChange({ ogTitle: event.target.value })}
           />
           <AdminTextarea
             label="OG Description"
+            placeholder="Mô tả hiển thị khi chia sẻ..."
             value={current.ogDescription}
             onChange={(event) => onSeoFieldChange({ ogDescription: event.target.value })}
             className="min-h-[90px]"
@@ -120,6 +126,7 @@ export default function SeoSchemaPanel({
           <div className="space-y-2">
             <AdminInput
               label="OG Image"
+              placeholder="/uploads/media/og-image.jpg"
               value={current.ogImage}
               onChange={(event) => onSeoFieldChange({ ogImage: event.target.value })}
             />
@@ -136,7 +143,7 @@ export default function SeoSchemaPanel({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#0f1722] p-4 text-white seo-panel">
+        <div className="rounded-2xl border border-white/10 bg-[#0f172a] p-4 text-white seo-panel">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-white/50">SEO Score</p>
@@ -190,26 +197,26 @@ export default function SeoSchemaPanel({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)]">SERP Preview</p>
+        <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">SERP Preview</p>
           <div className="mt-3 space-y-1">
-            <p className="text-sm font-semibold text-[#1a73e8]">
+            <p className="text-sm font-semibold text-[#7ab7ff]">
               {current.seoTitle || current.title || "SEO title"}
             </p>
-            <p className="text-xs text-emerald-700">{serpUrl}</p>
-            <p className="text-xs text-[var(--ink-muted)]">
+            <p className="text-xs text-emerald-300/80">{serpUrl}</p>
+            <p className="text-xs text-white/60">
               {current.seoDescription || "Meta description sẽ hiển thị ở đây."}
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-4 seo-panel">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)]">Schema Builder</p>
+        <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4 seo-panel">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">Schema Builder</p>
           <div className="mt-3 grid gap-3">
-            <label className="flex w-full flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-white/60">
               Template
               <select
-                className="h-12 rounded-2xl border border-[var(--line)] bg-white px-4 text-[15px] text-[var(--ink)]"
+                className="h-12 rounded-2xl border border-white/10 bg-[#0b1220] px-4 text-[15px] text-white"
                 value={schemaTemplate}
                 onChange={(event) => onSchemaTemplateChange(event.target.value as SchemaTemplateType)}
               >
@@ -222,15 +229,17 @@ export default function SeoSchemaPanel({
             </label>
             <AdminInput
               label="Organization"
+              placeholder="Panda Spa"
               value={schemaOrg}
               onChange={(event) => onSchemaOrgChange(event.target.value)}
             />
             {schemaTemplate === "FAQPage" ? (
               <div className="space-y-2">
                 {schemaFaqItems.map((item, index) => (
-                  <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-[var(--line)] p-2">
+                  <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-white/10 p-2">
                     <AdminInput
                       label={`Question ${index + 1}`}
+                      placeholder="Nhập câu hỏi..."
                       value={item.question}
                       onChange={(event) => {
                         const next = [...schemaFaqItems];
@@ -240,6 +249,7 @@ export default function SeoSchemaPanel({
                     />
                     <AdminTextarea
                       label="Answer"
+                      placeholder="Nhập câu trả lời..."
                       value={item.answer}
                       onChange={(event) => {
                         const next = [...schemaFaqItems];
@@ -263,6 +273,7 @@ export default function SeoSchemaPanel({
             </AdminButton>
             <AdminTextarea
               label="Schema JSON (có thể chỉnh sửa)"
+              placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "Article",\n  "headline": "..."\n}`}
               value={current.schemaJson || ""}
               onChange={(event) => onSchemaJsonChange(event.target.value)}
               className="min-h-[160px]"

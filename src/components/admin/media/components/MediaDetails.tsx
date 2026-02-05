@@ -90,7 +90,7 @@ export const MediaDetails = ({
         <AdminInput
           value={editedFilename}
           onChange={(event) => setEditedFilename(event.target.value)}
-          className="bg-[#141414] text-white"
+          className="bg-[#262525] text-white"
         />
       </div>
       <div className="grid gap-2">

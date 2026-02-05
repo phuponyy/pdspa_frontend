@@ -18,12 +18,12 @@ import {
   AdminDropdownMenuContent,
   AdminDropdownMenuItem,
   AdminDropdownMenuTrigger,
+} from "@/components/admin/ui/AdminDropdown";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 
 export type DataTableProps<TData> = {
   columns: ColumnDef<TData, any>[];
-import AdminButton from "@/components/admin/ui/AdminButton";
-import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDropdownMenu, AdminDropdownMenuTrigger, AdminDropdownMenuContent, AdminDropdownMenuItem } from "@/components/admin/ui/AdminDropdown";
   data: TData[];
   searchColumn?: string;
   emptyLabel?: string;

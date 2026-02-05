@@ -387,7 +387,7 @@ export default function CmsPostForm({
       }}
       media={media}
       floatingBar={{
-        show: showFloatingBar,
+        show: showFloatingBar && !media.mediaDialogOpen,
         activeLang,
         status,
         isDirty,

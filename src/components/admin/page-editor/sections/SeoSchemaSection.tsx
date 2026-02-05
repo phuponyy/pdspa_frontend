@@ -7,7 +7,6 @@ import { parseSchemaJson } from "@/components/admin/page-editor/utils";
 import type { Dispatch, SetStateAction } from "react";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type SeoSchemaSectionProps = {
   activeLang: "vi" | "en";
@@ -69,28 +68,28 @@ export default function SeoSchemaSection({
   return (
     <section
       id="seo"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff8a4b]/15 text-[#ff8a4b]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6h16M4 12h10M4 18h7" />
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">SEO Metadata</p>
-            <p className="text-sm text-slate-500">Tối ưu hóa khả năng hiển thị tìm kiếm.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">SEO Metadata</p>
+            <p className="text-sm text-white/60">Tối ưu hóa khả năng hiển thị tìm kiếm.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-slate-400">
-          <button type="button" className="rounded-full p-2 hover:bg-slate-100">
+        <div className="flex items-center gap-2 text-white/50">
+          <button type="button" className="rounded-full p-2 hover:bg-white/5">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5c4.5 0 8.3 2.9 9.5 7-1.2 4.1-5 7-9.5 7S3.7 16.1 2.5 12C3.7 7.9 7.5 5 12 5z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
-          <button type="button" className="rounded-full p-2 text-rose-500 hover:bg-rose-50">
+          <button type="button" className="rounded-full p-2 text-rose-400 hover:bg-white/5">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18" />
               <path d="M8 6V4h8v2" />
@@ -102,6 +101,7 @@ export default function SeoSchemaSection({
       <div className="mt-5 space-y-4">
         <AdminInput
           label="Focus keyword"
+          placeholder="Ví dụ: massage Đà Nẵng"
           value={focusKeyword}
           onChange={(event) =>
             setFocusKeywordByLang((prev) => ({
@@ -133,12 +133,13 @@ export default function SeoSchemaSection({
           >
             Auto generate SEO
           </AdminButton>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-white/50">
             Tự động lấy từ nội dung trang
           </span>
         </div>
         <AdminInput
           label="Meta title"
+          placeholder="Tiêu đề tối ưu SEO..."
           value={currentMeta.metaTitle}
           onChange={(event) => {
             setIsDirty(true);
@@ -153,6 +154,7 @@ export default function SeoSchemaSection({
         />
         <AdminTextarea
           label="Meta description"
+          placeholder="Mô tả ngắn (150-160 ký tự) hiển thị trên Google."
           value={currentMeta.metaDescription}
           onChange={(event) => {
             setIsDirty(true);
@@ -167,6 +169,7 @@ export default function SeoSchemaSection({
         />
         <AdminInput
           label="Canonical URL"
+          placeholder="https://example.com"
           value={currentMeta.canonical}
           onChange={(event) => {
             setIsDirty(true);
@@ -179,10 +182,10 @@ export default function SeoSchemaSection({
             }));
           }}
         />
-        <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+        <label className="flex w-full flex-col gap-2 text-sm font-medium text-white/60">
           Robots
           <select
-            className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+            className="h-12 rounded-2xl border border-white/10 bg-[#0b1220] px-4 text-sm text-white"
             value={currentMeta.robots || "index,follow"}
             onChange={(event) => {
               setIsDirty(true);
@@ -202,6 +205,7 @@ export default function SeoSchemaSection({
         </label>
         <AdminInput
           label="OG Title"
+          placeholder="Tiêu đề hiển thị khi chia sẻ..."
           value={currentMeta.ogTitle}
           onChange={(event) => {
             setIsDirty(true);
@@ -216,6 +220,7 @@ export default function SeoSchemaSection({
         />
         <AdminTextarea
           label="OG Description"
+          placeholder="Mô tả hiển thị khi chia sẻ..."
           value={currentMeta.ogDescription}
           onChange={(event) => {
             setIsDirty(true);
@@ -230,6 +235,7 @@ export default function SeoSchemaSection({
         />
         <AdminInput
           label="OG Image"
+          placeholder="/uploads/media/og-image.jpg"
           value={currentMeta.ogImage}
           onChange={(event) => {
             setIsDirty(true);
@@ -243,7 +249,7 @@ export default function SeoSchemaSection({
           }}
         />
 
-        <div className="rounded-2xl border border-slate-200 bg-[#0f1722] p-4 text-white seo-panel">
+        <div className="rounded-2xl border border-white/10 bg-[#0f172a] p-4 text-white seo-panel">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-white/50">
@@ -301,30 +307,30 @@ export default function SeoSchemaSection({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+        <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">
             SERP Preview
           </p>
           <div className="mt-3 space-y-1">
-            <p className="text-sm font-semibold text-[#1a73e8]">
+            <p className="text-sm font-semibold text-[#7ab7ff]">
               {currentMeta.metaTitle || "SEO title"}
             </p>
-            <p className="text-xs text-emerald-700">{serpUrl}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-emerald-300/80">{serpUrl}</p>
+            <p className="text-xs text-white/60">
               {currentMeta.metaDescription || "Meta description sẽ hiển thị ở đây."}
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 seo-panel">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+        <div className="rounded-2xl border border-white/10 bg-[#0b1220] p-4 seo-panel">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/60">
             Schema Builder
           </p>
           <div className="mt-3 grid gap-3">
-            <label className="flex w-full flex-col gap-2 text-sm font-medium text-slate-500">
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-white/60">
               Template
               <select
-                className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm"
+                className="h-12 rounded-2xl border border-white/10 bg-[#0b1220] px-4 text-sm text-white"
                 value={schemaTemplate}
                 onChange={(event) =>
                   setSchemaTemplateByLang((prev) => ({
@@ -342,6 +348,7 @@ export default function SeoSchemaSection({
             </label>
             <AdminInput
               label="Organization"
+              placeholder="Panda Spa"
               value={schemaOrg}
               onChange={(event) =>
                 setSchemaOrgByLang((prev) => ({
@@ -353,9 +360,10 @@ export default function SeoSchemaSection({
             {schemaTemplate === "FAQPage" ? (
               <div className="space-y-2">
                 {schemaFaqItems.map((item, index) => (
-                  <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-slate-200 p-2">
+                  <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-white/10 p-2">
                     <AdminInput
                       label={`Question ${index + 1}`}
+                      placeholder="Nhập câu hỏi..."
                       value={item.question}
                       onChange={(event) => {
                         const next = [...schemaFaqItems];
@@ -368,6 +376,7 @@ export default function SeoSchemaSection({
                     />
                     <AdminTextarea
                       label="Answer"
+                      placeholder="Nhập câu trả lời..."
                       value={item.answer}
                       onChange={(event) => {
                         const next = [...schemaFaqItems];
@@ -393,7 +402,7 @@ export default function SeoSchemaSection({
                 </AdminButton>
               </div>
             ) : null}
-            <div className="rounded-xl border border-slate-200 bg-[#0f1722] p-3 text-xs text-white/80">
+            <div className="rounded-xl border border-white/10 bg-[#0f172a] p-3 text-xs text-white/80">
               <pre className="whitespace-pre-wrap">
                 {JSON.stringify(
                   buildSchemaTemplate({
@@ -435,6 +444,7 @@ export default function SeoSchemaSection({
             </AdminButton>
             <AdminTextarea
               label="Schema JSON (có thể chỉnh sửa)"
+              placeholder={`{\n  "@context": "https://schema.org",\n  "@type": "WebPage",\n  "headline": "..."\n}`}
               value={currentMeta.schemaJson || ""}
               onChange={(event) => {
                 setIsDirty(true);

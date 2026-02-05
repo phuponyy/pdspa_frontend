@@ -18,7 +18,7 @@ export function AdminDropdownMenuContent(
     <DropdownMenuContent
       {...props}
       className={cn(
-        "border-white/10 bg-[#101826] text-white shadow-[0_16px_40px_rgba(0,0,0,0.4)]",
+        "border border-white/10 bg-[#0b1220] text-white shadow-[0_16px_40px_rgba(2,6,23,0.55)]",
         props.className
       )}
     />
@@ -31,7 +31,7 @@ export function AdminDropdownMenuItem(
   return (
     <DropdownMenuItem
       {...props}
-      className={cn("focus:bg-white/10", props.className)}
+      className={cn("focus:bg-white/5", props.className)}
     />
   );
 }

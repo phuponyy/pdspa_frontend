@@ -1,4 +1,3 @@
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import {
   analyzeSeo,
   buildSchemaTemplate,

@@ -82,7 +82,7 @@ export const BulkActionBar = ({
       {mode === "move" ? (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
           <AdminSelect
-            className="h-9 rounded-lg border-white/10 bg-[#141414] px-3 text-white/80"
+            className="h-9 rounded-lg border-white/10 bg-[#262525] px-3 text-white/80"
             value={folderId ?? ""}
             onChange={(event) =>
               setFolderId(event.target.value ? Number(event.target.value) : null)

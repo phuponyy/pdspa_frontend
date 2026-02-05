@@ -12,18 +12,18 @@ import {
 } from "@/lib/api/admin";
 import { getServices } from "@/lib/api/public";
 import DataTable from "@/components/admin/DataTable";
-import {
-  AdminDialog,
-  AdminDialogContent,
-  AdminDialogHeader,
-  AdminDialogTitle,
 import type { Booking } from "@/types/admin-dashboard.types";
 import type { PublicService } from "@/types/api.types";
 import { DEFAULT_LANG } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 import { useAdminQuery } from "@/lib/api/adminHooks";
 import AdminButton from "@/components/admin/ui/AdminButton";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import {
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+} from "@/components/admin/ui/AdminDialog";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const statusColor: Record<Booking["status"], string> = {

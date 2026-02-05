@@ -71,7 +71,7 @@ export default function PageEditorSidebar({
                   className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] ${
                     activeLang === code
                       ? "bg-[#ff9f40] text-[#1a1410]"
-                      : "text-slate-400 hover:text-white"
+                      : "text-white/60 hover:text-white"
                   }`}
                 >
                   {code.toUpperCase()}

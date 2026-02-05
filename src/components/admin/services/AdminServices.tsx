@@ -9,12 +9,13 @@ import {
   updateAdminService,
 } from "@/lib/api/admin";
 import { useAdminQuery } from "@/lib/api/adminHooks";
-import {
-  AdminDialog,
-  AdminDialogContent,
-  AdminDialogHeader,
-  AdminDialogTitle,
-  AdminDialogTrigger,
+import { ApiError } from "@/lib/api/client";
+import { useToast } from "@/components/common/ToastProvider";
+import type { AdminService } from "@/types/api.types";
+import { DEFAULT_LANG } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 import {
   AdminAlertDialog,
   AdminAlertDialogAction,
@@ -23,14 +24,14 @@ import {
   AdminAlertDialogDescription,
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
-import { ApiError } from "@/lib/api/client";
-import { useToast } from "@/components/common/ToastProvider";
-import type { AdminService } from "@/types/api.types";
-import { DEFAULT_LANG } from "@/lib/constants";
-import { useTranslation } from "react-i18next";
-import AdminButton from "@/components/admin/ui/AdminButton";
-import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogDescription,
+  AdminDialogFooter,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 type ServicePriceOptionForm = {

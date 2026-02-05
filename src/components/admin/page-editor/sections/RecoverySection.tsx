@@ -10,7 +10,6 @@ import type { Dispatch, SetStateAction } from "react";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
-import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type RecoverySectionProps = {
   activeLang: "vi" | "en";
@@ -38,9 +37,9 @@ export default function RecoverySection({
   return (
     <section
       id="recovery"
-      className="rounded-[28px] bg-white p-6 text-[#0f1722] shadow-[0_30px_80px_rgba(5,10,18,0.35)]"
+      className="rounded-[28px] border border-white/10 bg-[#0b1220] p-6 text-white shadow-[0_30px_80px_rgba(2,6,23,0.6)]"
     >
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#ff9f40]/15 text-[#ff6a3d]">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -50,14 +49,15 @@ export default function RecoverySection({
             </svg>
           </span>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Recovery Section</p>
-            <p className="text-sm text-slate-500">Hãy nêu bật ba dịch vụ chính.</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/60">Recovery Section</p>
+            <p className="text-sm text-white/60">Hãy nêu bật ba dịch vụ chính.</p>
           </div>
         </div>
       </div>
       <div className="mt-5 grid gap-4">
         <AdminInput
           label="Heading"
+          placeholder="Tiêu đề phần Recovery..."
           value={currentRecovery.heading}
           onChange={(event) => {
             setIsDirty(true);
@@ -69,6 +69,7 @@ export default function RecoverySection({
         />
         <AdminTextarea
           label="Description"
+          placeholder="Mô tả ngắn cho phần Recovery..."
           value={currentRecovery.description}
           onChange={(event) => {
             setIsDirty(true);
@@ -82,10 +83,11 @@ export default function RecoverySection({
           {ensureRecoveryItems(currentRecovery.items).map((item, index) => (
             <div
               key={`recovery-item-${index}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              className="rounded-2xl border border-white/10 bg-[#0f172a] p-4"
             >
               <AdminInput
                 label={`AdminCard ${index + 1} title`}
+                placeholder="Tiêu đề thẻ..."
                 value={item.title || ""}
                 onChange={(event) => {
                   setIsDirty(true);
@@ -101,6 +103,7 @@ export default function RecoverySection({
               />
               <AdminTextarea
                 label="Description"
+                placeholder="Nội dung mô tả..."
                 value={item.description || ""}
                 onChange={(event) => {
                   setIsDirty(true);
@@ -116,6 +119,7 @@ export default function RecoverySection({
               />
               <AdminInput
                 label="Image URL"
+                placeholder="/uploads/media/recovery.jpg"
                 value={item.imageUrl || ""}
                 onChange={(event) => {
                   setIsDirty(true);
