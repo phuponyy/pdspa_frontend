@@ -2,8 +2,8 @@ import Link from "next/link";
 import StatusPill from "./StatusPill";
 import type { Lead } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
-import { Card, CardContent } from "@/components/ui/card";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export default function LeadTable({
   leads,
@@ -14,8 +14,8 @@ export default function LeadTable({
     <div className="space-y-4">
       {leads.length ? (
         leads.map((lead) => (
-          <Card key={lead.id}>
-            <CardContent className="flex items-center justify-between gap-4 py-5">
+          <AdminCard key={lead.id}>
+            <AdminCardContent className="flex items-center justify-between gap-4 py-5">
               <div className="space-y-2">
                 <h3 className="text-base font-semibold text-white">
                   {lead.fullName}
@@ -34,8 +34,8 @@ export default function LeadTable({
                   <path d="M9 6l6 6-6 6" />
                 </svg>
               </Link>
-            </CardContent>
-          </Card>
+            </AdminCardContent>
+          </AdminCard>
         ))
       ) : (
         <p className="text-sm text-slate-400">Chưa có leads.</p>

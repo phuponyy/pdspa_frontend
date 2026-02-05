@@ -14,20 +14,27 @@ import Loading from "@/components/common/Loading";
 import { useToast } from "@/components/common/ToastProvider";
 import { ApiError } from "@/lib/api/client";
 import type { AdminRole, AdminUser } from "@/types/api.types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
+  AdminDialog,
+  AdminDialogTrigger,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogDescription,
+  AdminDialogFooter,
+} from "@/components/admin/ui/AdminDialog";
 import { useTranslation } from "react-i18next";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import AdminSwitch from "@/components/admin/ui/AdminSwitch";
 
 const DEFAULT_ROLE_KEY = "EDITOR";
 
@@ -99,17 +106,17 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader className="py-2">
-          <CardTitle>{labels.createTitle}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <AdminCard className="border-white/5 bg-[#0f1722]">
+        <AdminCardHeader className="py-2">
+          <AdminCardTitle>{labels.createTitle}</AdminCardTitle>
+        </AdminCardHeader>
+        <AdminCardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <label className="space-y-2 text-sm text-slate-300">
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                 Email
               </span>
-              <Input
+              <AdminInput
                 value={form.email}
                 onChange={(event) =>
                   setForm({ ...form, email: event.target.value })
@@ -120,7 +127,7 @@ export default function UsersPage() {
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                 Tên
               </span>
-              <Input
+              <AdminInput
                 value={form.name}
                 onChange={(event) =>
                   setForm({ ...form, name: event.target.value })
@@ -131,7 +138,7 @@ export default function UsersPage() {
               <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                 Ảnh đại diện (URL)
               </span>
-              <Input
+              <AdminInput
                 value={form.avatarUrl}
                 placeholder="Nhập url ảnh"
                 onChange={(event) =>
@@ -144,7 +151,7 @@ export default function UsersPage() {
                 Mật khẩu
               </span>
               <div className="relative">
-                <Input
+                <AdminInput
                   type={showCreatePassword ? "text" : "password"}
                   className="pr-12"
                   value={form.password}
@@ -203,7 +210,7 @@ export default function UsersPage() {
               </span>
             ))}
           </div>
-          <Button
+          <AdminButton
             onClick={async () => {
               try {
                 await createAdminUser(undefined, form);
@@ -223,15 +230,15 @@ export default function UsersPage() {
             }}
           >
             {labels.create}
-          </Button>
-        </CardContent>
-      </Card>
+          </AdminButton>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader>
-          <CardTitle>{labels.usersTitle}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <AdminCard className="border-white/5 bg-[#0f1722]">
+        <AdminCardHeader>
+          <AdminCardTitle>{labels.usersTitle}</AdminCardTitle>
+        </AdminCardHeader>
+        <AdminCardContent>
           {isLoading ? (
             <Loading label="Loading users" />
           ) : (
@@ -253,8 +260,8 @@ export default function UsersPage() {
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }
@@ -322,7 +329,7 @@ function UserRow({
       </div>
       {securityRole ? (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/60">
-          <Button
+          <AdminButton
             size="sm"
             variant="secondary"
             disabled={roleKey === "SECURITY_ADMIN"}
@@ -340,18 +347,18 @@ function UserRow({
             }}
           >
             Gán Security
-          </Button>
+          </AdminButton>
         </div>
       ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
         <div className="space-y-3">
-          <Input
+          <AdminInput
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Display name"
           />
-          <Input
+          <AdminInput
             value={avatarUrl}
             onChange={(event) => setAvatarUrl(event.target.value)}
             placeholder="Avatar URL"
@@ -371,12 +378,12 @@ function UserRow({
           </select>
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#111a25] px-4 py-3 text-xs text-white/70">
             <span className="uppercase tracking-[0.2em]">Trạng thái</span>
-            <Switch checked={isActive} onCheckedChange={setIsActive} />
+            <AdminSwitch checked={isActive} onCheckedChange={setIsActive} />
           </div>
         </div>
         <div className="space-y-3">
           <div className="relative">
-            <Input
+            <AdminInput
               type={showResetPassword ? "text" : "password"}
               className="pr-12"
               value={password}
@@ -405,7 +412,7 @@ function UserRow({
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button
+            <AdminButton
               variant="secondary"
               onClick={async () => {
                 try {
@@ -423,8 +430,8 @@ function UserRow({
               }}
             >
               {labels.save}
-            </Button>
-            <Button
+            </AdminButton>
+            <AdminButton
               variant="secondary"
               onClick={async () => {
                 if (!password) return;
@@ -438,19 +445,19 @@ function UserRow({
               }}
             >
               {labels.resetPassword}
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">{labels.delete}</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogTitle>Chắc chắn xoá thành viên này?</AlertDialogTitle>
-                <AlertDialogDescription>
+            </AdminButton>
+            <AdminAlertDialog>
+              <AdminAlertDialogTrigger asChild>
+                <AdminButton variant="outline">{labels.delete}</AdminButton>
+              </AdminAlertDialogTrigger>
+              <AdminAlertDialogContent>
+                <AdminAlertDialogTitle>Chắc chắn xoá thành viên này?</AdminAlertDialogTitle>
+                <AdminAlertDialogDescription>
                   Thao tác này không thể hoàn tác. Người dùng sẽ mất quyền truy cập ngay lập tức.
-                </AlertDialogDescription>
+                </AdminAlertDialogDescription>
                 <div className="mt-5 flex items-center justify-end gap-3">
-                  <AlertDialogCancel className="cursor-pointer">{labels.cancel}</AlertDialogCancel>
-                  <AlertDialogAction
+                  <AdminAlertDialogCancel className="cursor-pointer">{labels.cancel}</AdminAlertDialogCancel>
+                  <AdminAlertDialogAction
                     className="cursor-pointer"
                     onClick={async () => {
                       try {
@@ -463,10 +470,10 @@ function UserRow({
                     }}
                   >
                     {labels.delete}
-                  </AlertDialogAction>
+                  </AdminAlertDialogAction>
                 </div>
-              </AlertDialogContent>
-            </AlertDialog>
+              </AdminAlertDialogContent>
+            </AdminAlertDialog>
           </div>
         </div>
       </div>

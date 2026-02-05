@@ -1,6 +1,4 @@
-import Input from "@/components/common/Input";
-import Button from "@/components/common/Button";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeMentions, updateHomeMentions } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import { resolveMediaUrl } from "@/components/admin/page-editor/utils";
@@ -10,6 +8,9 @@ import type {
   PageEditorMediaTarget,
 } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type MentionsSectionProps = {
   activeLang: "vi" | "en";
@@ -69,7 +70,7 @@ export default function MentionsSection({
             </p>
           </div>
         </div>
-        <Button
+        <AdminButton
           type="button"
           className="px-4 py-2 text-xs"
           onClick={() => {
@@ -84,11 +85,11 @@ export default function MentionsSection({
           }}
         >
           Thêm logo
-        </Button>
+        </AdminButton>
       </div>
 
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentMentions.heading}
           onChange={(event) => {
@@ -99,7 +100,7 @@ export default function MentionsSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentMentions.description}
           onChange={(event) => {
@@ -126,7 +127,7 @@ export default function MentionsSection({
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Logo {index + 1}
                   </span>
-                  <Button
+                  <AdminButton
                     type="button"
                     className="px-2 py-1 text-[10px]"
                     onClick={() => {
@@ -142,7 +143,7 @@ export default function MentionsSection({
                     }}
                   >
                     Xóa
-                  </Button>
+                  </AdminButton>
                 </div>
 
                 <div className="mb-3 grid h-28 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -158,7 +159,7 @@ export default function MentionsSection({
                   )}
                 </div>
 
-                <Input
+                <AdminInput
                   label="Name"
                   value={item.name || ""}
                   onChange={(event) => {
@@ -173,7 +174,7 @@ export default function MentionsSection({
                     });
                   }}
                 />
-                <Input
+                <AdminInput
                   label="Image URL"
                   value={item.imageUrl || ""}
                   onChange={(event) => {
@@ -188,7 +189,7 @@ export default function MentionsSection({
                     });
                   }}
                 />
-                <Input
+                <AdminInput
                   label="Link (optional)"
                   value={item.link || ""}
                   onChange={(event) => {
@@ -204,7 +205,7 @@ export default function MentionsSection({
                   }}
                 />
                 <div className="mt-2 flex justify-end">
-                  <Button
+                  <AdminButton
                     type="button"
                     className="px-4 py-2 text-xs"
                     onClick={() => {
@@ -213,14 +214,14 @@ export default function MentionsSection({
                     }}
                   >
                     Chọn từ Media
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
             );
           })}
         </div>
 
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalizedItems = (currentMentions.items || [])
@@ -263,7 +264,7 @@ export default function MentionsSection({
           }}
         >
           Save mentions
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

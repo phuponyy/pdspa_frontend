@@ -9,30 +9,29 @@ import {
   updateAdminService,
 } from "@/lib/api/admin";
 import { useAdminQuery } from "@/lib/api/adminHooks";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogTrigger,
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
 import { ApiError } from "@/lib/api/client";
 import { useToast } from "@/components/common/ToastProvider";
 import type { AdminService } from "@/types/api.types";
 import { DEFAULT_LANG } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 type ServicePriceOptionForm = {
   id?: number;
@@ -275,20 +274,20 @@ export default function AdminServices() {
 
   return (
     <div className="space-y-8">
-      <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <AdminCard className="border-white/5 bg-[#0f1722]">
+        <AdminCardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="py-2">
-            <CardTitle>Dịch vụ</CardTitle>
+            <AdminCardTitle>Dịch vụ</AdminCardTitle>
             <p className="text-sm text-white/60">Quản lý dịch vụ và thời lượng.</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={openCreate}>Thêm dịch vụ</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl border-white/10 bg-[#0f1722] text-white">
-              <DialogHeader>
-                <DialogTitle>{editing ? "Cập nhật dịch vụ" : "Tạo dịch vụ mới"}</DialogTitle>
-              </DialogHeader>
+          <AdminDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <AdminDialogTrigger asChild>
+              <AdminButton onClick={openCreate}>Thêm dịch vụ</AdminButton>
+            </AdminDialogTrigger>
+            <AdminDialogContent className="max-w-4xl border-white/10 bg-[#0f1722] text-white">
+              <AdminDialogHeader>
+                <AdminDialogTitle>{editing ? "Cập nhật dịch vụ" : "Tạo dịch vụ mới"}</AdminDialogTitle>
+              </AdminDialogHeader>
               <div className="space-y-6">
                 <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111a25] p-1 text-xs uppercase tracking-[0.2em]">
                   {(["vi", "en"] as const).map((code) => (
@@ -311,7 +310,7 @@ export default function AdminServices() {
                     <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                       Service key
                     </span>
-                    <Input
+                    <AdminInput
                       value={form.key}
                       onChange={(event) =>
                         setForm((prev) => ({ ...prev, key: event.target.value }))
@@ -323,7 +322,7 @@ export default function AdminServices() {
                     <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                       Service name ({activeLang})
                     </span>
-                    <Input
+                    <AdminInput
                       value={currentTranslation.name}
                       onChange={(event) =>
                         setTranslations((prev) => ({
@@ -372,12 +371,12 @@ export default function AdminServices() {
                         key={`${option.code}-${index}`}
                         className="grid gap-3 rounded-xl border border-white/10 bg-[#0f1722] p-4 md:grid-cols-[1.4fr_1fr_1fr_auto]"
                       >
-                        <Input
+                        <AdminInput
                           value={option.code}
                           onChange={(event) => updateOption(index, { code: event.target.value })}
                           placeholder="60min"
                         />
-                        <Input
+                        <AdminInput
                           type="number"
                           min={0}
                           value={option.price}
@@ -386,7 +385,7 @@ export default function AdminServices() {
                           }
                           placeholder="Giá (đ)"
                         />
-                        <Input
+                        <AdminInput
                           type="number"
                           min={0}
                           value={option.durationMinutes ?? 0}
@@ -409,7 +408,7 @@ export default function AdminServices() {
                   </div>
                 </div>
                 <div className="flex items-center justify-end gap-3">
-                    <Button
+                    <AdminButton
                       variant="outline"
                       onClick={() => {
                         setDialogOpen(false);
@@ -419,8 +418,8 @@ export default function AdminServices() {
                       }}
                     >
                       Huỷ
-                    </Button>
-                  <Button
+                    </AdminButton>
+                  <AdminButton
                     onClick={() => {
                       if (!canSubmit) {
                         notify("Vui lòng nhập đầy đủ thông tin.", "error");
@@ -435,13 +434,13 @@ export default function AdminServices() {
                 disabled={createMutation.isPending || updateMutation.isPending}
                   >
                     {editing ? "Lưu cập nhật" : "Tạo dịch vụ"}
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent className="space-y-4">
+            </AdminDialogContent>
+          </AdminDialog>
+        </AdminCardHeader>
+        <AdminCardContent className="space-y-4">
           {servicesQuery.isError ? (
             <div className="rounded-2xl border border-white/10 bg-[#111a25] p-4 text-sm text-white/70">
               Không thể tải dịch vụ. 
@@ -485,30 +484,30 @@ export default function AdminServices() {
                           Hidden
                         </span>
                       )}
-                      <Button variant="secondary" size="sm" onClick={() => openEdit(service)}>
+                      <AdminButton variant="secondary" size="sm" onClick={() => openEdit(service)}>
                         Sửa
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                      </AdminButton>
+                      <AdminAlertDialog>
+                        <AdminAlertDialogTrigger asChild>
+                          <AdminButton variant="outline" size="sm">
                             Xoá
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogTitle>Delete service?</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          </AdminButton>
+                        </AdminAlertDialogTrigger>
+                        <AdminAlertDialogContent>
+                          <AdminAlertDialogTitle>Delete service?</AdminAlertDialogTitle>
+                          <AdminAlertDialogDescription>
                             Dữ liệu sẽ bị xoá khỏi hệ thống. Hãy chắc chắn trước khi tiếp tục.
-                          </AlertDialogDescription>
+                          </AdminAlertDialogDescription>
                           <div className="mt-5 flex items-center justify-end gap-3">
-                            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                            <AlertDialogAction
+                            <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+                            <AdminAlertDialogAction
                               onClick={() => deleteMutation.mutate(service.id)}
                             >
                               Xoá
-                            </AlertDialogAction>
+                            </AdminAlertDialogAction>
                           </div>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        </AdminAlertDialogContent>
+                      </AdminAlertDialog>
                     </div>
                   </div>
                   {translation?.description ? (
@@ -540,8 +539,8 @@ export default function AdminServices() {
           ) : (
             <p className="text-sm text-white/60">Chưa có dịch vụ nào.</p>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }

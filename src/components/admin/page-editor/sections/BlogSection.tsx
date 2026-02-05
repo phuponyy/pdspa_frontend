@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getCmsPosts, getHomeBlog, updateHomeBlog } from "@/lib/api/admin";
 import { useAdminQuery } from "@/lib/api/adminHooks";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { BlogState } from "@/components/admin/page-editor/types";
 import type { CmsPost } from "@/types/api.types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 type BlogSectionProps = {
   activeLang: "vi" | "en";
@@ -101,7 +102,7 @@ export default function BlogSection({
       </div>
 
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentBlog.heading}
           onChange={(event) => {
@@ -112,7 +113,7 @@ export default function BlogSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentBlog.description}
           onChange={(event) => {
@@ -134,7 +135,7 @@ export default function BlogSection({
                 Chọn bài viết ưu tiên hiển thị đầu tiên (theo ngôn ngữ).
               </p>
             </div>
-            <Input
+            <AdminInput
               value={search}
               placeholder="Tìm kiếm bài viết..."
               onChange={(event) => setSearch(event.target.value)}
@@ -181,7 +182,7 @@ export default function BlogSection({
           </div>
         </div>
 
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               await updateHomeBlog(undefined, activeLang, {
@@ -211,7 +212,7 @@ export default function BlogSection({
           }}
         >
           Save blog
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

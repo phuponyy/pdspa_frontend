@@ -1,6 +1,6 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
 import type { CmsCategory, CmsTag } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 
 export type TaxonomyPanelProps = {
   categories: CmsCategory[];
@@ -55,7 +55,7 @@ export default function TaxonomyPanel({
           </span>
         </div>
         <div className="mt-2">
-          <Input
+          <AdminInput
             label="Tìm danh mục"
             value={categoryQuery}
             onChange={(event) => setCategoryQuery(event.target.value)}
@@ -85,15 +85,15 @@ export default function TaxonomyPanel({
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <Input
+          <AdminInput
             label="Thêm danh mục mới"
             value={newCategory}
             onChange={(event) => setNewCategory(event.target.value)}
             onKeyDown={onCreateCategoryKey}
           />
-          <Button variant="outline" size="sm" onClick={onCreateCategory}>
+          <AdminButton variant="outline" size="sm" onClick={onCreateCategory}>
             Thêm
-          </Button>
+          </AdminButton>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ export default function TaxonomyPanel({
           </span>
         </div>
         <div className="mt-2">
-          <Input
+          <AdminInput
             label="Tìm thẻ"
             value={tagQuery}
             onChange={(event) => setTagQuery(event.target.value)}
@@ -135,15 +135,15 @@ export default function TaxonomyPanel({
           )}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <Input
+          <AdminInput
             label="Thêm thẻ mới"
             value={newTag}
             onChange={(event) => setNewTag(event.target.value)}
             onKeyDown={onCreateTagKey}
           />
-          <Button variant="outline" size="sm" onClick={onCreateTag}>
+          <AdminButton variant="outline" size="sm" onClick={onCreateTag}>
             Thêm
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </>

@@ -1,13 +1,13 @@
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type DeleteDialogProps = {
   onConfirm: () => void;
@@ -16,22 +16,22 @@ export type DeleteDialogProps = {
 
 export const DeleteDialog = ({ onConfirm, children }: DeleteDialogProps) => {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogTitle>Confirm delete</AlertDialogTitle>
-        <AlertDialogDescription>
+    <AdminAlertDialog>
+      <AdminAlertDialogTrigger asChild>{children}</AdminAlertDialogTrigger>
+      <AdminAlertDialogContent>
+        <AdminAlertDialogTitle>Confirm delete</AdminAlertDialogTitle>
+        <AdminAlertDialogDescription>
           Bạn chắc chắn muốn xoá? Thao tác này không thể hoàn tác.
-        </AlertDialogDescription>
+        </AdminAlertDialogDescription>
         <div className="mt-4 flex justify-end gap-3">
-          <AlertDialogCancel asChild>
-            <Button variant="outline">Cancel</Button>
-          </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button onClick={onConfirm}>Delete</Button>
-          </AlertDialogAction>
+          <AdminAlertDialogCancel asChild>
+            <AdminButton variant="outline">Cancel</AdminButton>
+          </AdminAlertDialogCancel>
+          <AdminAlertDialogAction asChild>
+            <AdminButton onClick={onConfirm}>Delete</AdminButton>
+          </AdminAlertDialogAction>
         </div>
-      </AlertDialogContent>
-    </AlertDialog>
+      </AdminAlertDialogContent>
+    </AdminAlertDialog>
   );
 };

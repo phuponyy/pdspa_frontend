@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
-import Input from "@/components/common/Input";
 import { slugify } from "../slugify";
 import type { CmsPageTranslation } from "../types";
+import AdminInput from "@/components/admin/ui/AdminInput";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/RichTextEditor"), {
   ssr: false,
@@ -31,7 +31,7 @@ export const ContentSection = ({
 }: ContentSectionProps) => {
   return (
     <div className="grid gap-4">
-      <Input
+      <AdminInput
         label="Title"
         value={current.title}
         onChange={(event) => {
@@ -43,7 +43,7 @@ export const ContentSection = ({
           });
         }}
       />
-      <Input
+      <AdminInput
         label="Slug"
         value={current.slug}
         onChange={(event) => {

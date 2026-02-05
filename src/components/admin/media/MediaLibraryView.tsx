@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import Loading from "@/components/common/Loading";
 import { MediaToolbar } from "./components/MediaToolbar";
 import { MediaGrid } from "./components/MediaGrid";
@@ -8,6 +7,7 @@ import { MediaDetails } from "./components/MediaDetails";
 import { BulkActionBar } from "./components/BulkActionBar";
 import { useMediaLibrary } from "./hooks/useMediaLibrary";
 import type { MediaItem } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type MediaLibraryViewProps = {
   onPick?: (item: MediaItem) => void;
@@ -102,22 +102,22 @@ export default function MediaLibraryView({ onPick, pickLabel }: MediaLibraryView
                 {media.totalItems} items · page {media.page}/{media.totalPages}
               </span>
               <div className="flex items-center gap-2">
-                <Button
+                <AdminButton
                   variant="outline"
                   className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                   onClick={() => media.setPage(Math.max(1, media.page - 1))}
                   disabled={media.page <= 1}
                 >
                   Prev
-                </Button>
-                <Button
+                </AdminButton>
+                <AdminButton
                   variant="outline"
                   className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                   onClick={() => media.setPage(Math.min(media.totalPages, media.page + 1))}
                   disabled={media.page >= media.totalPages}
                 >
                   Next
-                </Button>
+                </AdminButton>
               </div>
             </div>
 

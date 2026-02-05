@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getAdminIpConfig, updateAdminIpConfig } from "@/lib/api/admin";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Loading from "@/components/common/Loading";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/common/ToastProvider";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export default function AdminBlacklistPage() {
   const toast = useToast();
@@ -37,8 +37,8 @@ export default function AdminBlacklistPage() {
         </p>
       </div>
 
-      <Card>
-        <CardContent className="space-y-3 py-5">
+      <AdminCard>
+        <AdminCardContent className="space-y-3 py-5">
           {isLoading ? (
             <Loading label="Loading blacklist" />
           ) : (
@@ -46,9 +46,9 @@ export default function AdminBlacklistPage() {
               {blacklist.length ? (
                 <div className="flex flex-wrap gap-2">
                   {blacklist.map((ip: string) => (
-                    <Badge key={ip} variant="destructive">
+                    <AdminBadge key={ip} variant="destructive">
                       {ip}
-                    </Badge>
+                    </AdminBadge>
                   ))}
                 </div>
               ) : (
@@ -56,13 +56,13 @@ export default function AdminBlacklistPage() {
               )}
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-[0.2em] text-white/40">Cập nhật blacklist</p>
-                <Textarea
+                <AdminTextarea
                   value={value}
                   onChange={(event) => setValue(event.target.value)}
                   placeholder="Mỗi dòng là một IP"
                   rows={6}
                 />
-                <Button
+                <AdminButton
                   onClick={async () => {
                     const nextBlacklist = value
                       .split("\n")
@@ -81,12 +81,12 @@ export default function AdminBlacklistPage() {
                   }}
                 >
                   Lưu blacklist
-                </Button>
+                </AdminButton>
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }

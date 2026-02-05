@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils/cn";
 import LineChart from "@/components/admin/charts/LineChart";
 import { useObservabilityQueries } from "@/components/admin/observability/hooks/useObservabilityQueries";
 import { formatDuration, formatPercent, getRumScore } from "@/components/admin/observability/utils";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export default function AdminObservability() {
   const [rumRange, setRumRange] = useState<"7d" | "14d" | "30d">("7d");
@@ -30,64 +30,64 @@ export default function AdminObservability() {
       </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Uptime</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Uptime</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">
               {summary ? formatDuration(summary.uptimeSec) : "--"}
             </p>
             <p className="mt-2 text-xs text-white/50">Realtime · auto refresh 15s</p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Total requests</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Total requests</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">
               {summary?.totalRequests?.toLocaleString() ?? 0}
             </p>
             <p className="mt-2 text-xs text-white/50">
               Total errors: {summary?.totalErrors?.toLocaleString() ?? 0}
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Error rate</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Error rate</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">
               {summary ? formatPercent(summary.errorRate) : "--"}
             </p>
             <p className="mt-2 text-xs text-white/50">
               {summary?.totalErrors ?? 0} / {summary?.totalRequests ?? 0}
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Database</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center gap-2">
-            <Badge variant={healthBadge}>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Database</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="flex items-center gap-2">
+            <AdminBadge variant={healthBadge}>
               {summary?.health?.database === "ok" ? "Healthy" : "Degraded"}
-            </Badge>
+            </AdminBadge>
             <span className="text-xs text-white/50">
               {summary?.health?.status ?? "unknown"}
             </span>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
 
-      <Card className="border-white/5">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Top slow endpoints</CardTitle>
-          <Badge variant="default">p95 latency</Badge>
-        </CardHeader>
-        <CardContent>
+      <AdminCard className="border-white/5">
+        <AdminCardHeader className="flex flex-row items-center justify-between">
+          <AdminCardTitle>Top slow endpoints</AdminCardTitle>
+          <AdminBadge variant="default">p95 latency</AdminBadge>
+        </AdminCardHeader>
+        <AdminCardContent>
           {isLoading ? (
             <p className="text-sm text-white/60">Loading...</p>
           ) : topSlow.length ? (
@@ -99,7 +99,7 @@ export default function AdminObservability() {
                 >
                   <div className="min-w-[240px]">
                     <div className="flex items-center gap-2">
-                      <Badge variant="default">{item.method}</Badge>
+                      <AdminBadge variant="default">{item.method}</AdminBadge>
                       <span className="text-sm text-white/80">{item.route}</span>
                     </div>
                     <p className="mt-1 text-xs text-white/50">
@@ -132,8 +132,8 @@ export default function AdminObservability() {
           ) : (
             <p className="text-sm text-white/60">Chưa có dữ liệu.</p>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
       <section className="admin-panel px-6 py-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -167,11 +167,11 @@ export default function AdminObservability() {
             const value = rum?.summary?.[metric]?.p75 ?? 0;
             const status = getRumScore(value, metric);
             return (
-              <Card key={metric} className="border-white/5">
-                <CardHeader>
-                  <CardTitle className="text-sm text-white/70">{metric} P75</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-between">
+              <AdminCard key={metric} className="border-white/5">
+                <AdminCardHeader>
+                  <AdminCardTitle className="text-sm text-white/70">{metric} P75</AdminCardTitle>
+                </AdminCardHeader>
+                <AdminCardContent className="flex items-center justify-between">
                   <p className="text-2xl font-semibold text-white">
                     {metric === "CLS" ? value.toFixed(2) : Math.round(value)}{" "}
                     {metric === "CLS" ? "" : "ms"}
@@ -187,48 +187,48 @@ export default function AdminObservability() {
                   >
                     {status === "needs" ? "Needs work" : status}
                   </span>
-                </CardContent>
-              </Card>
+                </AdminCardContent>
+              </AdminCard>
             );
           })}
         </div>
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-          <Card className="border-white/5">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Trend P75 (LCP/INP/CLS)</CardTitle>
-              <Badge variant="default">RUM</Badge>
-            </CardHeader>
-            <CardContent>
+          <AdminCard className="border-white/5">
+            <AdminCardHeader className="flex flex-row items-center justify-between">
+              <AdminCardTitle>Trend P75 (LCP/INP/CLS)</AdminCardTitle>
+              <AdminBadge variant="default">RUM</AdminBadge>
+            </AdminCardHeader>
+            <AdminCardContent>
               <LineChart
                 labels={rum?.timeseries?.labels || []}
                 data={rum?.timeseries?.series?.LCP || []}
                 label="LCP (ms)"
                 color="#38bdf8"
               />
-            </CardContent>
-            <CardContent>
+            </AdminCardContent>
+            <AdminCardContent>
               <LineChart
                 labels={rum?.timeseries?.labels || []}
                 data={rum?.timeseries?.series?.INP || []}
                 label="INP (ms)"
                 color="#f97316"
               />
-            </CardContent>
-            <CardContent>
+            </AdminCardContent>
+            <AdminCardContent>
               <LineChart
                 labels={rum?.timeseries?.labels || []}
                 data={rum?.timeseries?.series?.CLS || []}
                 label="CLS"
                 color="#22c55e"
               />
-            </CardContent>
-          </Card>
-          <Card className="border-white/5">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Top pages (samples)</CardTitle>
-              <Badge variant="default">RUM</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
+            </AdminCardContent>
+          </AdminCard>
+          <AdminCard className="border-white/5">
+            <AdminCardHeader className="flex flex-row items-center justify-between">
+              <AdminCardTitle>Top pages (samples)</AdminCardTitle>
+              <AdminBadge variant="default">RUM</AdminBadge>
+            </AdminCardHeader>
+            <AdminCardContent className="space-y-3">
               {rum?.topPages?.length ? (
                 rum.topPages.map((page) => (
                   <div key={page.page} className="rounded-2xl border border-white/10 px-4 py-3">
@@ -242,8 +242,8 @@ export default function AdminObservability() {
               ) : (
                 <p className="text-sm text-white/60">Chưa có dữ liệu.</p>
               )}
-            </CardContent>
-          </Card>
+            </AdminCardContent>
+          </AdminCard>
         </div>
       </section>
 
@@ -277,14 +277,14 @@ export default function AdminObservability() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {lighthouse.length ? (
             lighthouse.map((report) => (
-              <Card key={report.id} className="border-white/5">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-sm text-white/70">
+              <AdminCard key={report.id} className="border-white/5">
+                <AdminCardHeader className="flex flex-row items-center justify-between">
+                  <AdminCardTitle className="text-sm text-white/70">
                     {report.url}
-                  </CardTitle>
-                  <Badge variant="default">{report.device || "default"}</Badge>
-                </CardHeader>
-                <CardContent className="space-y-2 text-xs text-white/70">
+                  </AdminCardTitle>
+                  <AdminBadge variant="default">{report.device || "default"}</AdminBadge>
+                </AdminCardHeader>
+                <AdminCardContent className="space-y-2 text-xs text-white/70">
                   <div className="flex flex-wrap gap-3">
                     <span>Perf: {report.performance ?? "-"}</span>
                     <span>SEO: {report.seo ?? "-"}</span>
@@ -297,8 +297,8 @@ export default function AdminObservability() {
                     <span>FCP: {report.fcp ? Math.round(report.fcp) : "-"}</span>
                     <span>TBT: {report.tbt ? Math.round(report.tbt) : "-"}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </AdminCardContent>
+              </AdminCard>
             ))
           ) : (
             <p className="text-sm text-white/60">Chưa có kết quả Lighthouse.</p>

@@ -1,10 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
 import { resources } from "@/lib/i18n";
 import { updateSiteConfig, uploadMedia } from "@/lib/api/admin";
@@ -12,16 +8,20 @@ import { getSiteConfig } from "@/lib/api/public";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "@/lib/constants";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
 
 type NavItem = { label: string; href: string };
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import AdminSwitch from "@/components/admin/ui/AdminSwitch";
 type TopBarFields = {
   address: string;
   hours: string;
@@ -231,9 +231,9 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-white">{t("settings.title")}</h1>
-        <Button variant="ghost" className="text-[#8fb6ff]" onClick={handleSaveNav}>
+        <AdminButton variant="ghost" className="text-[#8fb6ff]" onClick={handleSaveNav}>
           {t("settings.save")}
-        </Button>
+        </AdminButton>
       </div>
 
       <Section title={t("settings.navbar")}>
@@ -253,13 +253,13 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
-        <CardContent className="space-y-4 px-6 pb-6">
+        <AdminCardContent className="space-y-4 px-6 pb-6">
           {currentNav.map((item, index) => (
             <div
               key={`${activeLang}-nav-${index}`}
               className="grid gap-3 md:grid-cols-[1.1fr_1.6fr_auto]"
             >
-              <Input
+              <AdminInput
                 placeholder={t("settings.menuLabel")}
                 value={item.label}
                 onChange={(event) => {
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 placeholder={t("settings.menuLink")}
                 value={item.href}
                 onChange={(event) => {
@@ -281,7 +281,7 @@ export default function SettingsPage() {
                   });
                 }}
               />
-              <Button
+              <AdminButton
                 variant="secondary"
                 onClick={() => {
                   setNavByLang((prev) => ({
@@ -291,10 +291,10 @@ export default function SettingsPage() {
                 }}
               >
                 {t("settings.delete")}
-              </Button>
+              </AdminButton>
             </div>
           ))}
-          <Button
+          <AdminButton
             variant="secondary"
             onClick={() =>
               setNavByLang((prev) => ({
@@ -307,13 +307,13 @@ export default function SettingsPage() {
             }
           >
             {t("settings.addMenu")}
-          </Button>
-        </CardContent>
+          </AdminButton>
+        </AdminCardContent>
       </Section>
 
       <Section title={t("settings.headerInfo")}>
-        <CardContent className="space-y-4 px-6 pb-6">
-          <Input
+        <AdminCardContent className="space-y-4 px-6 pb-6">
+          <AdminInput
             placeholder={t("settings.address")}
             value={topBarByLang[activeLang]?.address || ""}
             onChange={(event) =>
@@ -326,7 +326,7 @@ export default function SettingsPage() {
               }))
             }
           />
-          <Input
+          <AdminInput
             placeholder={t("settings.hours")}
             value={topBarByLang[activeLang]?.hours || ""}
             onChange={(event) =>
@@ -339,7 +339,7 @@ export default function SettingsPage() {
               }))
             }
           />
-          <Input
+          <AdminInput
             placeholder={t("settings.phonePrimary")}
             value={topBarByLang[activeLang]?.phonePrimary || ""}
             onChange={(event) =>
@@ -352,7 +352,7 @@ export default function SettingsPage() {
               }))
             }
           />
-          <Input
+          <AdminInput
             placeholder={t("settings.phoneSecondary")}
             value={topBarByLang[activeLang]?.phoneSecondary || ""}
             onChange={(event) =>
@@ -365,11 +365,11 @@ export default function SettingsPage() {
               }))
             }
           />
-        </CardContent>
+        </AdminCardContent>
       </Section>
 
       <Section title="Branding">
-        <CardContent className="space-y-6 px-6 pb-6">
+        <AdminCardContent className="space-y-6 px-6 pb-6">
           <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
@@ -396,36 +396,36 @@ export default function SettingsPage() {
                   event.target.value = "";
                 }}
               />
-              <Button
+              <AdminButton
                 variant="secondary"
                 disabled={isUploadingLogo}
                 onClick={() => logoInputRef.current?.click()}
               >
                 {isUploadingLogo ? "Đang tải..." : "Upload logo"}
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
+              </AdminButton>
+              <AdminAlertDialog>
+                <AdminAlertDialogTrigger asChild>
+                  <AdminButton
                     variant="outline"
                     className="!text-white !border-white/20 hover:!bg-white/10"
                     disabled={isRemovingLogo || !branding.logoUrl}
                   >
                     {isRemovingLogo ? "Đang xoá..." : "Xoá logo"}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogTitle>Xoá logo?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  </AdminButton>
+                </AdminAlertDialogTrigger>
+                <AdminAlertDialogContent>
+                  <AdminAlertDialogTitle>Xoá logo?</AdminAlertDialogTitle>
+                  <AdminAlertDialogDescription>
                     Logo hiện tại sẽ bị xoá khỏi cấu hình trang.
-                  </AlertDialogDescription>
+                  </AdminAlertDialogDescription>
                   <div className="mt-5 flex items-center justify-end gap-3">
-                    <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleRemove("logo")}>
+                    <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+                    <AdminAlertDialogAction onClick={() => handleRemove("logo")}>
                       Xoá
-                    </AlertDialogAction>
+                    </AdminAlertDialogAction>
                   </div>
-                </AlertDialogContent>
-              </AlertDialog>
+                </AdminAlertDialogContent>
+              </AdminAlertDialog>
             </div>
           </div>
 
@@ -455,39 +455,39 @@ export default function SettingsPage() {
                   event.target.value = "";
                 }}
               />
-              <Button
+              <AdminButton
                 variant="secondary"
                 disabled={isUploadingIcon}
                 onClick={() => iconInputRef.current?.click()}
               >
                 {isUploadingIcon ? "Đang tải..." : "Upload icon"}
-              </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
+              </AdminButton>
+              <AdminAlertDialog>
+                <AdminAlertDialogTrigger asChild>
+                  <AdminButton
                     variant="outline"
                     className="!text-white !border-white/20 hover:!bg-white/10"
                     disabled={isRemovingIcon || !branding.iconSvgUrl}
                   >
                     {isRemovingIcon ? "Đang xoá..." : "Xoá icon"}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogTitle>Xoá icon?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  </AdminButton>
+                </AdminAlertDialogTrigger>
+                <AdminAlertDialogContent>
+                  <AdminAlertDialogTitle>Xoá icon?</AdminAlertDialogTitle>
+                  <AdminAlertDialogDescription>
                     Icon SVG hiện tại sẽ bị xoá khỏi cấu hình trang.
-                  </AlertDialogDescription>
+                  </AdminAlertDialogDescription>
                   <div className="mt-5 flex items-center justify-end gap-3">
-                    <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleRemove("icon")}>
+                    <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+                    <AdminAlertDialogAction onClick={() => handleRemove("icon")}>
                       Xoá
-                    </AlertDialogAction>
+                    </AdminAlertDialogAction>
                   </div>
-                </AlertDialogContent>
-              </AlertDialog>
+                </AdminAlertDialogContent>
+              </AdminAlertDialog>
             </div>
           </div>
-        </CardContent>
+        </AdminCardContent>
       </Section>
 
       <Section title={t("settings.common")}>
@@ -507,7 +507,7 @@ export default function SettingsPage() {
           icon={<span className="text-xl">🔒</span>}
           label={t("settings.forceHttps")}
           trailing={
-            <Switch
+            <AdminSwitch
               checked={forceHttps}
               onClick={() => setForceHttps((prev) => !prev)}
             />
@@ -535,11 +535,11 @@ function Section({
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
         {title}
       </p>
-      <Card>
-        <CardContent className="divide-y divide-white/10 px-0 py-0">
+      <AdminCard>
+        <AdminCardContent className="divide-y divide-white/10 px-0 py-0">
           {children}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }

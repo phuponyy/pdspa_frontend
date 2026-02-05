@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { scanBrokenLinks } from "@/lib/api/admin";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
 import type { BrokenLinkItem, BrokenLinksScanResponse } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 type ScanResult = BrokenLinksScanResponse["data"] | null;
 
@@ -64,13 +64,13 @@ export default function BrokenLinksPage() {
             Broken Links Scanner
           </h1>
         </div>
-        <Button onClick={handleScan} disabled={isScanning}>
+        <AdminButton onClick={handleScan} disabled={isScanning}>
           {isScanning ? "Đang quét..." : "Quét ngay"}
-        </Button>
+        </AdminButton>
       </div>
 
-      <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-        <CardContent className="space-y-4 p-5">
+      <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+        <AdminCardContent className="space-y-4 p-5">
           <div className="grid gap-4 md:grid-cols-3">
             <label className="space-y-2 text-sm font-medium text-[var(--ink-muted)]">
               Ngôn ngữ
@@ -83,7 +83,7 @@ export default function BrokenLinksPage() {
                 <option value="en">EN</option>
               </select>
             </label>
-            <Input
+            <AdminInput
               label="Giới hạn link"
               type="number"
               min={50}
@@ -91,7 +91,7 @@ export default function BrokenLinksPage() {
               value={maxLinks}
               onChange={(event) => setMaxLinks(Number(event.target.value || 0))}
             />
-            <Input
+            <AdminInput
               label="Timeout (ms)"
               type="number"
               min={1000}
@@ -101,7 +101,7 @@ export default function BrokenLinksPage() {
             />
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            <Input
+            <AdminInput
               label="Concurrency"
               type="number"
               min={1}
@@ -126,8 +126,8 @@ export default function BrokenLinksPage() {
               Quét link ngoài domain
             </label>
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
       {error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
@@ -137,52 +137,52 @@ export default function BrokenLinksPage() {
 
       {result ? (
         <div className="grid gap-4 md:grid-cols-4">
-          <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-            <CardContent className="p-4">
+          <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+            <AdminCardContent className="p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
                 Tổng link
               </p>
               <p className="text-2xl font-semibold text-[var(--ink)]">
                 {result.totalFound}
               </p>
-            </CardContent>
-          </Card>
-          <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-            <CardContent className="p-4">
+            </AdminCardContent>
+          </AdminCard>
+          <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+            <AdminCardContent className="p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
                 Đã kiểm tra
               </p>
               <p className="text-2xl font-semibold text-[var(--ink)]">
                 {result.checked}
               </p>
-            </CardContent>
-          </Card>
-          <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-            <CardContent className="p-4">
+            </AdminCardContent>
+          </AdminCard>
+          <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+            <AdminCardContent className="p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
                 Broken links
               </p>
               <p className="text-2xl font-semibold text-rose-600">
                 {result.brokenCount}
               </p>
-            </CardContent>
-          </Card>
-          <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-            <CardContent className="p-4">
+            </AdminCardContent>
+          </AdminCard>
+          <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+            <AdminCardContent className="p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
                 Bỏ qua (ngoài)
               </p>
               <p className="text-2xl font-semibold text-[var(--ink)]">
                 {result.skipped.external}
               </p>
-            </CardContent>
-          </Card>
+            </AdminCardContent>
+          </AdminCard>
         </div>
       ) : null}
 
       {result ? (
-        <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-          <CardContent className="space-y-4 p-5">
+        <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+          <AdminCardContent className="space-y-4 p-5">
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
               <span>Broken links</span>
               <span className="rounded-full bg-rose-50 px-3 py-1 text-rose-600">
@@ -233,8 +233,8 @@ export default function BrokenLinksPage() {
                 Không phát hiện broken links.
               </p>
             )}
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       ) : null}
     </div>
   );

@@ -1,4 +1,4 @@
-import Button from "@/components/common/Button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type CmsPostHeaderProps = {
   languages: readonly string[];
@@ -34,9 +34,9 @@ export default function CmsPostHeader({
         ))}
       </div>
       {activeLang !== langCode ? (
-        <Button variant="outline" onClick={onCloneFromPrimary}>
+        <AdminButton variant="outline" onClick={onCloneFromPrimary}>
           Clone from {langCode.toUpperCase()}
-        </Button>
+        </AdminButton>
       ) : null}
     </div>
   );

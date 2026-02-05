@@ -1,4 +1,4 @@
-import { Button as UiButton } from "@/components/ui/button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type FloatingBarProps = {
   showFloatingBar: boolean;
@@ -92,22 +92,22 @@ export default function FloatingBar({
               Saved
             </span>
           )}
-          <UiButton
+          <AdminButton
             size="sm"
             variant="outline"
             onClick={() => persistStatus("DRAFT")}
             disabled={isSavingStatus}
           >
             Save draft
-          </UiButton>
-          <UiButton
+          </AdminButton>
+          <AdminButton
             size="sm"
             onClick={() => persistStatus("PUBLISHED")}
             disabled={isSavingStatus}
             className="bg-[#ff9f40] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.3)] hover:bg-[#ffb454]"
           >
             Publish
-          </UiButton>
+          </AdminButton>
         </div>
       </div>
     </div>

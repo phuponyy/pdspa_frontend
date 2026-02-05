@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "./DeleteDialog";
-import { Input } from "@/components/ui/input";
 import type { MediaFolder, MediaItem, MediaTag } from "@/types/api.types";
 import { formatBytes, resolveMediaUrl } from "../utils";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminSelect from "@/components/admin/ui/AdminSelect";
 
 export type MediaDetailsProps = {
   item: MediaItem | null;
@@ -86,7 +87,7 @@ export const MediaDetails = ({
       </div>
       <div className="grid gap-2">
         <label className="text-xs font-semibold text-white/70">Title</label>
-        <Input
+        <AdminInput
           value={editedFilename}
           onChange={(event) => setEditedFilename(event.target.value)}
           className="bg-[#141414] text-white"
@@ -94,8 +95,7 @@ export const MediaDetails = ({
       </div>
       <div className="grid gap-2">
         <label className="text-xs font-semibold text-white/70">Folder</label>
-        <select
-          className="h-10 rounded-xl border border-white/10 bg-[#141414] px-3 text-sm text-white/80"
+        <AdminSelect
           value={selectedFolderId ?? ""}
           onChange={(event) =>
             setSelectedFolderId(event.target.value ? Number(event.target.value) : null)
@@ -107,7 +107,7 @@ export const MediaDetails = ({
               {folder.name}
             </option>
           ))}
-        </select>
+        </AdminSelect>
       </div>
       <div className="grid gap-2">
         <label className="text-xs font-semibold text-white/70">Tags</label>
@@ -136,31 +136,31 @@ export const MediaDetails = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {onPick ? (
-          <Button className="w-full" onClick={() => onPick(item)}>
+          <AdminButton className="w-full" onClick={() => onPick(item)}>
             {pickLabel}
-          </Button>
+          </AdminButton>
         ) : null}
-        <Button className="w-full" onClick={onSaveMeta}>
+        <AdminButton className="w-full" onClick={onSaveMeta}>
           Save changes
-        </Button>
-        <Button variant="outline" className="w-full border-white/10 bg-white/5 text-white" onClick={onDownload}>
+        </AdminButton>
+        <AdminButton variant="outline" className="w-full border-white/10 bg-white/5 text-white" onClick={onDownload}>
           Download
-        </Button>
-        <Button variant="outline" className="w-full border-white/10 bg-white/5 text-white" onClick={onReplace}>
+        </AdminButton>
+        <AdminButton variant="outline" className="w-full border-white/10 bg-white/5 text-white" onClick={onReplace}>
           Replace
-        </Button>
-        <Button
+        </AdminButton>
+        <AdminButton
           variant="outline"
           className="w-full border-white/10 bg-white/5 text-white"
           onClick={onConvertWebp}
           disabled={item.mimeType === "image/webp" || item.mimeType === "image/svg+xml" || item.mimeType === "image/gif"}
         >
           Convert to WebP
-        </Button>
+        </AdminButton>
         <DeleteDialog onConfirm={onDelete}>
-          <Button variant="outline" className="w-full border-white/10 bg-white/5 text-white">
+          <AdminButton variant="outline" className="w-full border-white/10 bg-white/5 text-white">
             Delete
-          </Button>
+          </AdminButton>
         </DeleteDialog>
       </div>
     </div>

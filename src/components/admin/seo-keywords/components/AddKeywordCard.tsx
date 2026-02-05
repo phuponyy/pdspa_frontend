@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export type AddKeywordForm = {
   phrase: string;
@@ -19,15 +19,15 @@ export type AddKeywordCardProps = {
 
 export const AddKeywordCard = ({ form, setForm, onSubmit, canSubmit }: AddKeywordCardProps) => {
   return (
-    <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-      <CardHeader className="pb-0">
-        <CardTitle className="text-base !text-[var(--ink)]">Thêm keyword</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+      <AdminCardHeader className="pb-0">
+        <AdminCardTitle className="text-base !text-[var(--ink)]">Thêm keyword</AdminCardTitle>
+      </AdminCardHeader>
+      <AdminCardContent className="space-y-4">
         <div className="grid gap-3 lg:grid-cols-[2fr_2fr_1fr_1fr]">
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Keyword
-            <Input
+            <AdminInput
               placeholder="Spa da nang"
               value={form.phrase}
               onChange={(event) => setForm({ ...form, phrase: event.target.value })}
@@ -35,7 +35,7 @@ export const AddKeywordCard = ({ form, setForm, onSubmit, canSubmit }: AddKeywor
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Target URL
-            <Input
+            <AdminInput
               placeholder="https://..."
               value={form.targetUrl}
               onChange={(event) => setForm({ ...form, targetUrl: event.target.value })}
@@ -66,16 +66,16 @@ export const AddKeywordCard = ({ form, setForm, onSubmit, canSubmit }: AddKeywor
         </div>
         <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
           Notes
-          <Input
+          <AdminInput
             placeholder="Ghi chú mục tiêu..."
             value={form.notes}
             onChange={(event) => setForm({ ...form, notes: event.target.value })}
           />
         </label>
-        <Button disabled={!canSubmit} onClick={onSubmit}>
+        <AdminButton disabled={!canSubmit} onClick={onSubmit}>
           Add keyword
-        </Button>
-      </CardContent>
-    </Card>
+        </AdminButton>
+      </AdminCardContent>
+    </AdminCard>
   );
 };

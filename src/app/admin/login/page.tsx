@@ -5,11 +5,11 @@ import { useState } from "react";
 import { authSchema, type AuthFormValues } from "@/lib/schemas/authSchema";
 import { loginAdmin, verifyMfaLogin } from "@/lib/api/admin";
 import { useZodForm } from "@/lib/forms/useZodForm";
-import Input from "@/components/common/Input";
-import Button from "@/components/common/Button";
 import { ApiError } from "@/lib/api/client";
 import { useTranslation } from "react-i18next";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -74,7 +74,7 @@ export default function AdminLogin() {
         </p>
         {mfaToken ? (
           <div className="mt-6 space-y-4">
-            <Input
+            <AdminInput
               label={useRecovery ? "Recovery code" : "Authenticator code"}
               type="text"
               value={mfaCode}
@@ -91,19 +91,19 @@ export default function AdminLogin() {
               {useRecovery ? "Use authenticator code" : "Use recovery code"}
             </button>
             {error ? <p className="text-sm text-red-500">{error}</p> : null}
-            <Button type="button" onClick={onVerifyMfa} className="w-full">
+            <AdminButton type="button" onClick={onVerifyMfa} className="w-full">
               Verify
-            </Button>
+            </AdminButton>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-            <Input
+            <AdminInput
               label={t("admin.email")}
               type="email"
               error={errors.email?.message}
               {...register("email")}
             />
-            <Input
+            <AdminInput
               label={t("admin.password")}
               type={showPassword ? "text" : "password"}
               error={errors.password?.message}
@@ -132,9 +132,9 @@ export default function AdminLogin() {
               }
             />
             {error ? <p className="text-sm text-red-500">{error}</p> : null}
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+            <AdminButton type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting ? "Signing in..." : t("admin.signIn")}
-            </Button>
+            </AdminButton>
           </form>
         )}
       </div>

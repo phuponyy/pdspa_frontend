@@ -1,11 +1,12 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { uploadHeroImage, updateHomeHero } from "@/lib/api/admin";
 import { API_BASE_URL } from "@/lib/constants";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { HeroState } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type HeroSectionProps = {
   activeLang: "vi" | "en";
@@ -49,7 +50,7 @@ export default function HeroSection({
       </div>
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-4">
-          <Input
+          <AdminInput
             label="Heading"
             value={currentHero.heading}
             onChange={(event) => {
@@ -63,7 +64,7 @@ export default function HeroSection({
               }));
             }}
           />
-          <Textarea
+          <AdminTextarea
             label="Subheading"
             value={currentHero.subheading}
             onChange={(event) => {
@@ -156,7 +157,7 @@ export default function HeroSection({
             <p className="text-sm font-semibold text-slate-600">Hero slides (max 10)</p>
             <p className="text-xs text-slate-400">Hãy giữ mọi thứ ở mức tối giản, mở rộng slide để chỉnh sửa chi tiết đầy đủ.</p>
           </div>
-          <Button
+          <AdminButton
             variant="outline"
             onClick={() => {
               if (currentHero.slides.length >= 10) {
@@ -185,7 +186,7 @@ export default function HeroSection({
             }}
           >
             Add slide
-          </Button>
+          </AdminButton>
         </div>
         <div className="space-y-3">
           {currentHero.slides.map((slide, idx) => (
@@ -202,7 +203,7 @@ export default function HeroSection({
                 </span>
               </summary>
               <div className="mt-4 grid gap-3">
-                <Input
+                <AdminInput
                   label="Image URL"
                   value={slide.imageUrl}
                   onChange={(event) => {
@@ -217,7 +218,7 @@ export default function HeroSection({
                     });
                   }}
                 />
-                <Input
+                <AdminInput
                   label="Heading"
                   value={slide.heading || ""}
                   onChange={(event) => {
@@ -232,7 +233,7 @@ export default function HeroSection({
                     });
                   }}
                 />
-                <Textarea
+                <AdminTextarea
                   label="Subheading"
                   value={slide.subheading || ""}
                   onChange={(event) => {
@@ -248,7 +249,7 @@ export default function HeroSection({
                   }}
                 />
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Input
+                  <AdminInput
                     label="Primary button"
                     value={slide.primaryCta || ""}
                     onChange={(event) => {
@@ -266,7 +267,7 @@ export default function HeroSection({
                       });
                     }}
                   />
-                  <Input
+                  <AdminInput
                     label="Primary link"
                     value={slide.primaryLink || ""}
                     onChange={(event) => {
@@ -284,7 +285,7 @@ export default function HeroSection({
                       });
                     }}
                   />
-                  <Input
+                  <AdminInput
                     label="Secondary button"
                     value={slide.secondaryCta || ""}
                     onChange={(event) => {
@@ -302,7 +303,7 @@ export default function HeroSection({
                       });
                     }}
                   />
-                  <Input
+                  <AdminInput
                     label="Secondary link"
                     value={slide.secondaryLink || ""}
                     onChange={(event) => {
@@ -322,7 +323,7 @@ export default function HeroSection({
                   />
                 </div>
                 <div className="flex justify-end">
-                  <Button
+                  <AdminButton
                     variant="outline"
                     onClick={() =>
                       setHeroByLang((prev) => ({
@@ -335,7 +336,7 @@ export default function HeroSection({
                     }
                   >
                     Remove slide
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
             </details>
@@ -346,7 +347,7 @@ export default function HeroSection({
         </div>
       </div>
       <div className="mt-6">
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalizedSlides = currentHero.slides
@@ -386,7 +387,7 @@ export default function HeroSection({
           }}
         >
           Save hero
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

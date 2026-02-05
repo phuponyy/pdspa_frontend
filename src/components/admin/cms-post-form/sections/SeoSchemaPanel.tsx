@@ -1,8 +1,8 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
 import type { SchemaTemplateType } from "@/lib/seo/seoUtils";
 import type { CmsPostTranslationState, SeoAnalysis } from "@/components/admin/cms-post-form/types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type SeoSchemaPanelProps = {
   current: CmsPostTranslationState;
@@ -57,39 +57,39 @@ export default function SeoSchemaPanel({
       </div>
       <div className="mt-3 space-y-4">
         <div className="grid gap-3">
-          <Input
+          <AdminInput
             label="Focus keyword"
             value={focusKeyword}
             onChange={(event) => onFocusKeywordChange(event.target.value)}
           />
           <div className="flex flex-wrap items-center gap-2">
-            <Button
+            <AdminButton
               variant="outline"
               size="sm"
               onClick={() => onSeoFieldChange({ seoTitle: current.seoTitle || current.title })}
             >
               Dùng Title
-            </Button>
-            <Button
+            </AdminButton>
+            <AdminButton
               variant="outline"
               size="sm"
               onClick={() => onSeoFieldChange({ seoDescription: current.excerpt || "" })}
             >
               Dùng Excerpt
-            </Button>
+            </AdminButton>
           </div>
-          <Input
+          <AdminInput
             label="SEO Title"
             value={current.seoTitle}
             onChange={(event) => onSeoFieldChange({ seoTitle: event.target.value })}
           />
-          <Textarea
+          <AdminTextarea
             label="SEO Description"
             value={current.seoDescription}
             onChange={(event) => onSeoFieldChange({ seoDescription: event.target.value })}
             className="min-h-[90px]"
           />
-          <Input
+          <AdminInput
             label="Canonical URL"
             value={current.canonical}
             onChange={(event) => onSeoFieldChange({ canonical: event.target.value })}
@@ -106,31 +106,31 @@ export default function SeoSchemaPanel({
               <option value="noindex,nofollow">noindex,nofollow</option>
             </select>
           </label>
-          <Input
+          <AdminInput
             label="OG Title"
             value={current.ogTitle}
             onChange={(event) => onSeoFieldChange({ ogTitle: event.target.value })}
           />
-          <Textarea
+          <AdminTextarea
             label="OG Description"
             value={current.ogDescription}
             onChange={(event) => onSeoFieldChange({ ogDescription: event.target.value })}
             className="min-h-[90px]"
           />
           <div className="space-y-2">
-            <Input
+            <AdminInput
               label="OG Image"
               value={current.ogImage}
               onChange={(event) => onSeoFieldChange({ ogImage: event.target.value })}
             />
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" onClick={onOpenMediaPicker}>
+              <AdminButton variant="outline" size="sm" onClick={onOpenMediaPicker}>
                 Chọn từ Media
-              </Button>
+              </AdminButton>
               {current.ogImage ? (
-                <Button variant="outline" size="sm" onClick={onClearOgImage}>
+                <AdminButton variant="outline" size="sm" onClick={onClearOgImage}>
                   Xoá
-                </Button>
+                </AdminButton>
               ) : null}
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function SeoSchemaPanel({
                 <option value="WebPage">WebPage</option>
               </select>
             </label>
-            <Input
+            <AdminInput
               label="Organization"
               value={schemaOrg}
               onChange={(event) => onSchemaOrgChange(event.target.value)}
@@ -229,7 +229,7 @@ export default function SeoSchemaPanel({
               <div className="space-y-2">
                 {schemaFaqItems.map((item, index) => (
                   <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-[var(--line)] p-2">
-                    <Input
+                    <AdminInput
                       label={`Question ${index + 1}`}
                       value={item.question}
                       onChange={(event) => {
@@ -238,7 +238,7 @@ export default function SeoSchemaPanel({
                         onSchemaFaqItemsChange(next);
                       }}
                     />
-                    <Textarea
+                    <AdminTextarea
                       label="Answer"
                       value={item.answer}
                       onChange={(event) => {
@@ -249,19 +249,19 @@ export default function SeoSchemaPanel({
                     />
                   </div>
                 ))}
-                <Button
+                <AdminButton
                   variant="outline"
                   size="sm"
                   onClick={() => onSchemaFaqItemsChange([...schemaFaqItems, { question: "", answer: "" }])}
                 >
                   Thêm câu hỏi
-                </Button>
+                </AdminButton>
               </div>
             ) : null}
-            <Button size="sm" onClick={onApplySchema}>
+            <AdminButton size="sm" onClick={onApplySchema}>
               Áp dụng schema
-            </Button>
-            <Textarea
+            </AdminButton>
+            <AdminTextarea
               label="Schema JSON (có thể chỉnh sửa)"
               value={current.schemaJson || ""}
               onChange={(event) => onSchemaJsonChange(event.target.value)}

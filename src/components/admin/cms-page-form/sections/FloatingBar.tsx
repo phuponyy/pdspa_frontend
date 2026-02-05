@@ -1,5 +1,5 @@
-import Button from "@/components/common/Button";
 import type { CmsPageStatus } from "../types";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type FloatingBarProps = {
   show: boolean;
@@ -91,9 +91,9 @@ export const FloatingBar = ({
               Saved
             </span>
           )}
-          <Button onClick={onSave} disabled={isSaving}>
+          <AdminButton onClick={onSave} disabled={isSaving}>
             {isSaving ? "Saving..." : "Save"}
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </div>

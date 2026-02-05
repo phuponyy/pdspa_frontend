@@ -8,22 +8,22 @@ import {
   getAdminRoles,
   updateAdminRole,
 } from "@/lib/api/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
 import { useToast } from "@/components/common/ToastProvider";
 import { ApiError } from "@/lib/api/client";
 import type { AdminRole } from "@/types/api.types";
 import { useTranslation } from "react-i18next";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const PERMISSION_OPTIONS = [
   { key: "view_dashboard", label: "Overview & Analytics" },
@@ -83,11 +83,11 @@ export default function AdminRoles() {
 
   return (
     <div className="space-y-8">
-      <Card className="border-white/5 bg-[#0f1722]">
-        <CardHeader className="py-2">
-          <CardTitle>{t("admin.roles.title")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <AdminCard className="border-white/5 bg-[#0f1722]">
+        <AdminCardHeader className="py-2">
+          <AdminCardTitle>{t("admin.roles.title")}</AdminCardTitle>
+        </AdminCardHeader>
+        <AdminCardContent className="space-y-6">
           <div className="rounded-3xl border border-white/10 bg-[#111a25] p-5">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               {t("admin.roles.createTitle")}
@@ -97,7 +97,7 @@ export default function AdminRoles() {
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                   {t("admin.roles.key")}
                 </span>
-                <Input
+                <AdminInput
                   value={form.key}
                   onChange={(event) =>
                     setForm({ ...form, key: event.target.value.toUpperCase() })
@@ -109,7 +109,7 @@ export default function AdminRoles() {
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                   {t("admin.roles.name")}
                 </span>
-                <Input
+                <AdminInput
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
                 />
@@ -118,7 +118,7 @@ export default function AdminRoles() {
                 <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
                   {t("admin.roles.description")}
                 </span>
-                <Input
+                <AdminInput
                   value={form.description}
                   onChange={(event) => setForm({ ...form, description: event.target.value })}
                 />
@@ -144,7 +144,7 @@ export default function AdminRoles() {
               })}
             </div>
             <div className="mt-5">
-              <Button
+              <AdminButton
                 onClick={async () => {
                   try {
                     await createAdminRole(undefined, form);
@@ -157,7 +157,7 @@ export default function AdminRoles() {
                 }}
               >
                 {t("admin.roles.create")}
-              </Button>
+              </AdminButton>
             </div>
           </div>
 
@@ -182,8 +182,8 @@ export default function AdminRoles() {
               <p className="text-sm text-slate-400">{t("admin.roles.empty")}</p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }
@@ -235,13 +235,13 @@ function RoleRow({
           <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
             {labels.name}
           </span>
-          <Input value={name} onChange={(event) => setName(event.target.value)} />
+          <AdminInput value={name} onChange={(event) => setName(event.target.value)} />
         </label>
         <label className="space-y-2 text-sm text-slate-300">
           <span className="block text-xs uppercase tracking-[0.2em] text-slate-500">
             {labels.description}
           </span>
-          <Input
+          <AdminInput
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
@@ -269,7 +269,7 @@ function RoleRow({
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <Button
+        <AdminButton
           variant="secondary"
           onClick={async () => {
             try {
@@ -286,20 +286,20 @@ function RoleRow({
           }}
         >
           {labels.save}
-        </Button>
+        </AdminButton>
         {!role.isSystem ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline">Delete role</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Delete role?</AlertDialogTitle>
-              <AlertDialogDescription>
+          <AdminAlertDialog>
+            <AdminAlertDialogTrigger asChild>
+              <AdminButton variant="outline">Delete role</AdminButton>
+            </AdminAlertDialogTrigger>
+            <AdminAlertDialogContent>
+              <AdminAlertDialogTitle>Delete role?</AdminAlertDialogTitle>
+              <AdminAlertDialogDescription>
                 This action cannot be undone. Users must be reassigned first.
-              </AlertDialogDescription>
+              </AdminAlertDialogDescription>
               <div className="mt-5 flex items-center justify-end gap-3">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
+                <AdminAlertDialogCancel>Cancel</AdminAlertDialogCancel>
+                <AdminAlertDialogAction
                   onClick={async () => {
                     try {
                       await deleteAdminRole(undefined, role.id);
@@ -311,10 +311,10 @@ function RoleRow({
                   }}
                 >
                   Delete
-                </AlertDialogAction>
+                </AdminAlertDialogAction>
               </div>
-            </AlertDialogContent>
-          </AlertDialog>
+            </AdminAlertDialogContent>
+          </AdminAlertDialog>
         ) : null}
       </div>
     </div>

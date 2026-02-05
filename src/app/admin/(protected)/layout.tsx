@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import AdminShell from "@/components/admin/AdminShell";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
+import AdminShell from "@/components/admin/AdminShell";
 
 export default async function AdminLayout({
   children,

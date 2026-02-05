@@ -1,12 +1,13 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeMeta, updateHomeMeta } from "@/lib/api/admin";
 import { analyzeSeo, buildSchemaTemplate, generateSeoFromContent, type SchemaTemplateType } from "@/lib/seo/seoUtils";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { MetaState } from "@/components/admin/page-editor/types";
 import { parseSchemaJson } from "@/components/admin/page-editor/utils";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type SeoSchemaSectionProps = {
   activeLang: "vi" | "en";
@@ -99,7 +100,7 @@ export default function SeoSchemaSection({
         </div>
       </div>
       <div className="mt-5 space-y-4">
-        <Input
+        <AdminInput
           label="Focus keyword"
           value={focusKeyword}
           onChange={(event) =>
@@ -110,7 +111,7 @@ export default function SeoSchemaSection({
           }
         />
         <div className="flex flex-wrap items-center gap-2">
-          <Button
+          <AdminButton
             variant="outline"
             onClick={() => {
               const generated = generateSeoFromContent({
@@ -131,12 +132,12 @@ export default function SeoSchemaSection({
             }}
           >
             Auto generate SEO
-          </Button>
+          </AdminButton>
           <span className="text-xs text-slate-400">
             Tự động lấy từ nội dung trang
           </span>
         </div>
-        <Input
+        <AdminInput
           label="Meta title"
           value={currentMeta.metaTitle}
           onChange={(event) => {
@@ -150,7 +151,7 @@ export default function SeoSchemaSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Meta description"
           value={currentMeta.metaDescription}
           onChange={(event) => {
@@ -164,7 +165,7 @@ export default function SeoSchemaSection({
             }));
           }}
         />
-        <Input
+        <AdminInput
           label="Canonical URL"
           value={currentMeta.canonical}
           onChange={(event) => {
@@ -199,7 +200,7 @@ export default function SeoSchemaSection({
             <option value="noindex,nofollow">noindex,nofollow</option>
           </select>
         </label>
-        <Input
+        <AdminInput
           label="OG Title"
           value={currentMeta.ogTitle}
           onChange={(event) => {
@@ -213,7 +214,7 @@ export default function SeoSchemaSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="OG Description"
           value={currentMeta.ogDescription}
           onChange={(event) => {
@@ -227,7 +228,7 @@ export default function SeoSchemaSection({
             }));
           }}
         />
-        <Input
+        <AdminInput
           label="OG Image"
           value={currentMeta.ogImage}
           onChange={(event) => {
@@ -339,7 +340,7 @@ export default function SeoSchemaSection({
                 <option value="Service">Service</option>
               </select>
             </label>
-            <Input
+            <AdminInput
               label="Organization"
               value={schemaOrg}
               onChange={(event) =>
@@ -353,7 +354,7 @@ export default function SeoSchemaSection({
               <div className="space-y-2">
                 {schemaFaqItems.map((item, index) => (
                   <div key={`faq-${index}`} className="grid gap-2 rounded-xl border border-slate-200 p-2">
-                    <Input
+                    <AdminInput
                       label={`Question ${index + 1}`}
                       value={item.question}
                       onChange={(event) => {
@@ -365,7 +366,7 @@ export default function SeoSchemaSection({
                         }));
                       }}
                     />
-                    <Textarea
+                    <AdminTextarea
                       label="Answer"
                       value={item.answer}
                       onChange={(event) => {
@@ -379,7 +380,7 @@ export default function SeoSchemaSection({
                     />
                   </div>
                 ))}
-                <Button
+                <AdminButton
                   variant="outline"
                   onClick={() =>
                     setSchemaFaqByLang((prev) => ({
@@ -389,7 +390,7 @@ export default function SeoSchemaSection({
                   }
                 >
                   Thêm câu hỏi
-                </Button>
+                </AdminButton>
               </div>
             ) : null}
             <div className="rounded-xl border border-slate-200 bg-[#0f1722] p-3 text-xs text-white/80">
@@ -409,7 +410,7 @@ export default function SeoSchemaSection({
                 )}
               </pre>
             </div>
-            <Button
+            <AdminButton
               onClick={() => {
                 const schema = buildSchemaTemplate({
                   type: schemaTemplate,
@@ -431,8 +432,8 @@ export default function SeoSchemaSection({
               }}
             >
               Áp dụng schema
-            </Button>
-            <Textarea
+            </AdminButton>
+            <AdminTextarea
               label="Schema JSON (có thể chỉnh sửa)"
               value={currentMeta.schemaJson || ""}
               onChange={(event) => {
@@ -448,7 +449,7 @@ export default function SeoSchemaSection({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button
+          <AdminButton
             onClick={async () => {
               try {
                 const schemaJson = parseSchemaJson(
@@ -493,9 +494,9 @@ export default function SeoSchemaSection({
             }}
           >
             Save metadata
-          </Button>
+          </AdminButton>
           {activeLang !== lang ? (
-            <Button
+            <AdminButton
               variant="outline"
               onClick={() => {
                 if (onCloneFromLang) {
@@ -510,7 +511,7 @@ export default function SeoSchemaSection({
               }}
             >
               Clone from {lang.toUpperCase()}
-            </Button>
+            </AdminButton>
           ) : null}
         </div>
       </div>

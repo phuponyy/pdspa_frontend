@@ -1,12 +1,13 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeServices, updateHomeServices } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { PageEditorMediaTarget, ServicesState } from "@/components/admin/page-editor/types";
 import { formatVnd } from "@/components/admin/page-editor/utils";
 import type { AdminService } from "@/types/api.types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type ServicesSectionProps = {
   activeLang: "vi" | "en";
@@ -54,7 +55,7 @@ export default function ServicesSection({
         </div>
       </div>
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentServices.heading}
           onChange={(event) => {
@@ -65,7 +66,7 @@ export default function ServicesSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentServices.description}
           onChange={(event) => {
@@ -147,7 +148,7 @@ export default function ServicesSection({
                   </div>
                 );
               })()}
-              <Input
+              <AdminInput
                 label="Custom title"
                 value={item.label || ""}
                 placeholder={
@@ -168,7 +169,7 @@ export default function ServicesSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Price note"
                 value={item.priceNote || ""}
                 onChange={(event) => {
@@ -183,7 +184,7 @@ export default function ServicesSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Image URL"
                 value={item.imageUrl || ""}
                 onChange={(event) => {
@@ -199,7 +200,7 @@ export default function ServicesSection({
                 }}
               />
               <div className="mt-2 flex justify-end">
-                <Button
+                <AdminButton
                   type="button"
                   className="px-4 py-2 text-xs"
                   onClick={() => {
@@ -208,12 +209,12 @@ export default function ServicesSection({
                   }}
                 >
                   Chọn từ Media
-                </Button>
+                </AdminButton>
               </div>
             </div>
           ))}
         </div>
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalizedItems = (currentServices.items || []).map((item) => ({
@@ -256,7 +257,7 @@ export default function ServicesSection({
           }}
         >
           Save services
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

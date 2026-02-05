@@ -1,17 +1,13 @@
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import LineChart from "@/components/admin/charts/LineChart";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
 import {
   addSeoKeywordRank,
   deleteSeoKeyword,
@@ -19,6 +15,10 @@ import {
   getSeoKeywordSerpPreview,
 } from "@/lib/api/admin";
 import type { SeoKeyword, SeoKeywordRank, SeoKeywordSerpPreviewItem } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export type KeywordRowProps = {
   keyword: SeoKeyword;
@@ -113,8 +113,8 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
   };
 
   return (
-    <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-      <CardContent className="space-y-4 p-5">
+    <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+      <AdminCardContent className="space-y-4 p-5">
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-[220px] flex-1">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">Keyword</p>
@@ -131,41 +131,41 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
           </div>
           <div className="text-xs text-[var(--ink-muted)]">Latest: {latest?.position ?? "--"}</div>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={handleToggleHistory}>
+            <AdminButton variant="secondary" size="sm" onClick={handleToggleHistory}>
               {showHistory ? "Hide history" : "Show history"}
-            </Button>
-            <Button
+            </AdminButton>
+            <AdminButton
               variant="outline"
               size="sm"
               className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
               onClick={handleToggleSerp}
             >
               {showSerp ? "Hide SERP" : "SERP preview"}
-            </Button>
-            <Button
+            </AdminButton>
+            <AdminButton
               variant="outline"
               size="sm"
               className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
               onClick={() => onExport(keyword.id)}
             >
               Export CSV
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
+            </AdminButton>
+            <AdminAlertDialog>
+              <AdminAlertDialogTrigger asChild>
+                <AdminButton
                   variant="outline"
                   size="sm"
                   className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
                 >
                   Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogTitle>Delete keyword?</AlertDialogTitle>
-                <AlertDialogDescription>Lịch sử rank cũng sẽ bị xoá.</AlertDialogDescription>
+                </AdminButton>
+              </AdminAlertDialogTrigger>
+              <AdminAlertDialogContent>
+                <AdminAlertDialogTitle>Delete keyword?</AdminAlertDialogTitle>
+                <AdminAlertDialogDescription>Lịch sử rank cũng sẽ bị xoá.</AdminAlertDialogDescription>
                 <div className="mt-6 flex items-center justify-end gap-3">
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
+                  <AdminAlertDialogCancel>Cancel</AdminAlertDialogCancel>
+                  <AdminAlertDialogAction
                     onClick={async () => {
                       try {
                         await deleteSeoKeyword(undefined, keyword.id);
@@ -177,17 +177,17 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
                     }}
                   >
                     Delete
-                  </AlertDialogAction>
+                  </AdminAlertDialogAction>
                 </div>
-              </AlertDialogContent>
-            </AlertDialog>
+              </AdminAlertDialogContent>
+            </AdminAlertDialog>
           </div>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-[1fr_2fr_1fr_auto] lg:items-end">
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Position
-            <Input
+            <AdminInput
               type="number"
               min={1}
               value={rankForm.position}
@@ -196,20 +196,20 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Result URL
-            <Input
+            <AdminInput
               value={rankForm.resultUrl}
               onChange={(event) => setRankForm((prev) => ({ ...prev, resultUrl: event.target.value }))}
             />
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Checked at
-            <Input
+            <AdminInput
               type="datetime-local"
               value={rankForm.checkedAt}
               onChange={(event) => setRankForm((prev) => ({ ...prev, checkedAt: event.target.value }))}
             />
           </label>
-          <Button
+          <AdminButton
             onClick={async () => {
               try {
                 await addSeoKeywordRank(undefined, keyword.id, {
@@ -229,7 +229,7 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
             }}
           >
             Add rank
-          </Button>
+          </AdminButton>
         </div>
 
         {showHistory ? (
@@ -271,7 +271,7 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">SERP preview</p>
-                  <Button
+                  <AdminButton
                     variant="outline"
                     size="sm"
                     className="!text-[var(--ink)] !border-[var(--line)] hover:!bg-black/5"
@@ -279,7 +279,7 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
                     disabled={loadingSerp}
                   >
                     Refresh
-                  </Button>
+                  </AdminButton>
                 </div>
                 <div className="space-y-3">
                   {serpItems.map((item, index) => {
@@ -333,7 +333,7 @@ export const KeywordRow = ({ keyword, onUpdated, notify, onExport }: KeywordRowP
             )}
           </div>
         ) : null}
-      </CardContent>
-    </Card>
+      </AdminCardContent>
+    </AdminCard>
   );
 };

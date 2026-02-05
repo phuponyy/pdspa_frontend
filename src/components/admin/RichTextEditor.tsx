@@ -7,10 +7,10 @@ import { API_BASE_URL } from "@/lib/constants";
 import Cropper from "react-easy-crop";
 import { getMediaLibrary } from "@/lib/api/admin";
 import { adminFetch } from "@/lib/api/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import FocusTrap from "@/components/common/FocusTrap";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
 
 const Editor = dynamic(async () => {
   const mod = await import("@tinymce/tinymce-react");
@@ -221,13 +221,13 @@ export default function RichTextEditor({
           editorRef.current = editor;
         }}
       />
-      <Dialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Chọn ảnh từ Media</DialogTitle>
-          </DialogHeader>
+      <AdminDialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
+        <AdminDialogContent className="max-w-3xl">
+          <AdminDialogHeader>
+            <AdminDialogTitle>Chọn ảnh từ Media</AdminDialogTitle>
+          </AdminDialogHeader>
           <div className="space-y-4">
-            <Input
+            <AdminInput
               placeholder="Tìm ảnh..."
               value={mediaQuery}
               onChange={(event) => setMediaQuery(event.target.value)}
@@ -258,13 +258,13 @@ export default function RichTextEditor({
               )}
             </div>
             <div className="flex items-center justify-end">
-              <Button variant="secondary" onClick={() => setMediaDialogOpen(false)}>
+              <AdminButton variant="secondary" onClick={() => setMediaDialogOpen(false)}>
                 Đóng
-              </Button>
+              </AdminButton>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </AdminDialogContent>
+      </AdminDialog>
       {cropOpen && cropSrc ? (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-6">
           <FocusTrap active={cropOpen}>

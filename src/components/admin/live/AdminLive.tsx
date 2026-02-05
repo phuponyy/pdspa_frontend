@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useAdminLive } from "@/lib/realtime/useAdminLive";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import DoughnutChart from "@/components/admin/charts/DoughnutChart";
 import LineChart from "@/components/admin/charts/LineChart";
 import BarChart from "@/components/admin/charts/BarChart";
 import { useToast } from "@/components/common/ToastProvider";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const getSessionId = () => {
   if (typeof window === "undefined") return uuidv4();
@@ -139,37 +139,37 @@ export default function AdminLive() {
               Theo dõi người dùng đang online, hành vi truy cập và nguồn traffic trong 60s gần nhất.
             </p>
           </div>
-          <Badge variant="success">Trực tiếp</Badge>
+          <AdminBadge variant="success">Trực tiếp</AdminBadge>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Phiên hoạt động</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Phiên hoạt động</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-3xl font-semibold text-white">{snapshot?.onlineUsers ?? 0}</p>
             <p className="mt-2 text-xs text-white/50">Cập nhật mỗi 1-3s</p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Nguồn lưu lượng truy cập</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Nguồn lưu lượng truy cập</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <DoughnutChart
               labels={traffic.labels}
               data={traffic.data}
               colors={["#2f7bff", "#ff6a3d", "#22c55e", "#a855f7"]}
             />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle className="text-sm text-white/70">Các trang hàng đầu</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle className="text-sm text-white/70">Các trang hàng đầu</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-2">
             {(snapshot?.topPages || []).map((page) => (
               <div key={page.path} className="flex items-center justify-between text-xs text-white/70">
                 <button
@@ -191,62 +191,62 @@ export default function AdminLive() {
                   >
                     Copy
                   </button>
-                  <Badge variant="default">{page.count}</Badge>
+                  <AdminBadge variant="default">{page.count}</AdminBadge>
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Các trang (last 60s)</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Các trang (last 60s)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <BarChart labels={topPages.labels} data={topPages.data} label="Views" color="#22c55e" />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Các phiên hoạt động (last 12m)</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Các phiên hoạt động (last 12m)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <LineChart
               labels={timeline.labels}
               data={timeline.active}
               label="Active sessions"
               color="#2f7bff"
             />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Heartbeats mỗi phút</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Heartbeats mỗi phút</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <BarChart
               labels={timeline.labels}
               data={timeline.heartbeats}
               label="Heartbeats"
               color="#ff6a3d"
             />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Thiết bị</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Thiết bị</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <BarChart labels={deviceStats.labels} data={deviceStats.data} label="Device" color="#2f7bff" />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Spike alert</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-white/70">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Spike alert</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3 text-sm text-white/70">
             <div className="flex items-center justify-between">
               <span>Trạng thái</span>
               <span className={`text-xs font-semibold uppercase tracking-[0.2em] ${spikeColor}`}>
@@ -265,13 +265,13 @@ export default function AdminLive() {
               <span>Delta</span>
               <span>{spike?.delta ? `${Math.round(spike.delta * 100)}%` : "0%"}</span>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Error rate (60s)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-xs text-white/70">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Error rate (60s)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3 text-xs text-white/70">
             <div className="flex items-center justify-between">
               <span>Total requests</span>
               <span>{errorRate?.total ?? 0}</span>
@@ -296,13 +296,13 @@ export default function AdminLive() {
               <span>Payment fails</span>
               <span>{errorRate?.paymentFails ?? 0}</span>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Active now</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Active now</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3">
             {activeNow.length ? (
               activeNow.map((session) => (
                 <div key={session.sessionId} className="flex items-center justify-between gap-3 text-xs text-white/70">
@@ -321,21 +321,21 @@ export default function AdminLive() {
                       {session.utmSource ? <span>· {session.utmSource}</span> : null}
                     </div>
                   </div>
-                  <Badge variant="default">
+                  <AdminBadge variant="default">
                     {session.timeOnPageSec ? `${session.timeOnPageSec}s` : "Now"}
-                  </Badge>
+                  </AdminBadge>
                 </div>
               ))
             ) : (
               <p className="text-xs text-white/40">Chưa có phiên hoạt động.</p>
             )}
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Funnel (last 60s)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Funnel (last 60s)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3">
             {funnel.map((step) => (
               <div key={step.step} className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-white/70">
@@ -350,13 +350,13 @@ export default function AdminLive() {
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Endpoints (60s)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-xs text-white/70">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Endpoints (60s)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3 text-xs text-white/70">
             {endpoints.length ? (
               endpoints.map((endpoint) => (
                 <div key={endpoint.path} className="flex items-center justify-between gap-3">
@@ -387,26 +387,26 @@ export default function AdminLive() {
             ) : (
               <p className="text-xs text-white/40">Chưa có dữ liệu.</p>
             )}
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Location</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Location</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <BarChart
               labels={locationStats.labels}
               data={locationStats.data}
               label="Location"
               color="#a855f7"
             />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Heatmap (cities)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Heatmap (cities)</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3">
             {(snapshot?.locations || []).slice(0, 8).map((item) => {
               const percent = locationStats.data.length
                 ? Math.max(6, (item.count / Math.max(...locationStats.data)) * 100)
@@ -437,15 +437,15 @@ export default function AdminLive() {
                 />
               </svg>
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
       {selectedPage ? (
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Drill‑down</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm text-white/70">
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Drill‑down</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-4 text-sm text-white/70">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-white" title={selectedPage}>{selectedPage}</p>
@@ -480,8 +480,8 @@ export default function AdminLive() {
                 <p className="text-xs text-white/40">No active sessions.</p>
               ) : null}
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       ) : null}
     </div>
   );

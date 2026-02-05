@@ -1,6 +1,4 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeGallery, updateHomeGallery } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import { resolveMediaUrl } from "@/components/admin/page-editor/utils";
@@ -10,6 +8,9 @@ import type {
   PageEditorMediaTarget,
 } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type PhotoGallerySectionProps = {
   activeLang: "vi" | "en";
@@ -68,7 +69,7 @@ export default function PhotoGallerySection({
             </p>
           </div>
         </div>
-        <Button
+        <AdminButton
           type="button"
           className="px-4 py-2 text-xs"
           onClick={() => {
@@ -83,11 +84,11 @@ export default function PhotoGallerySection({
           }}
         >
           Thêm ảnh
-        </Button>
+        </AdminButton>
       </div>
 
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentGallery.heading}
           onChange={(event) => {
@@ -98,7 +99,7 @@ export default function PhotoGallerySection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentGallery.description}
           onChange={(event) => {
@@ -122,7 +123,7 @@ export default function PhotoGallerySection({
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Image {index + 1}
                   </span>
-                  <Button
+                  <AdminButton
                     type="button"
                     className="px-2 py-1 text-[10px]"
                     onClick={() => {
@@ -138,7 +139,7 @@ export default function PhotoGallerySection({
                     }}
                   >
                     Xóa
-                  </Button>
+                  </AdminButton>
                 </div>
 
                 <div className="mb-3 overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -156,7 +157,7 @@ export default function PhotoGallerySection({
                   )}
                 </div>
 
-                <Input
+                <AdminInput
                   label="Image URL"
                   value={item.imageUrl || ""}
                   onChange={(event) => {
@@ -171,7 +172,7 @@ export default function PhotoGallerySection({
                     });
                   }}
                 />
-                <Input
+                <AdminInput
                   label="Caption"
                   value={item.caption || ""}
                   onChange={(event) => {
@@ -187,7 +188,7 @@ export default function PhotoGallerySection({
                   }}
                 />
                 <div className="mt-2 flex justify-end">
-                  <Button
+                  <AdminButton
                     type="button"
                     className="px-4 py-2 text-xs"
                     onClick={() => {
@@ -196,14 +197,14 @@ export default function PhotoGallerySection({
                     }}
                   >
                     Chọn từ Media
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
             );
           })}
         </div>
 
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalizedItems = (currentGallery.items || [])
@@ -244,7 +245,7 @@ export default function PhotoGallerySection({
           }}
         >
           Save photo gallery
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

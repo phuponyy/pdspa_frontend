@@ -1,27 +1,38 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Input } from "@/components/ui/input";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Sidebar, { adminNavSections, filterAdminSections } from "./Sidebar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAdminQuery } from "@/lib/api/adminHooks";
 import { getAdminMe } from "@/lib/api/admin";
-import AdminRequestFeedback from "./AdminRequestFeedback";
 import { useTranslation } from "react-i18next";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { buildBreadcrumbTrail, getAdminPath } from "@/components/admin/shell/utils";
 import { isAdminPathAllowed } from "@/components/admin/shell/access";
 import { useAdminPrefetch } from "@/components/admin/shell/hooks/useAdminPrefetch";
 import { useBookingNotifications } from "@/components/admin/shell/hooks/useBookingNotifications";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import {
+  AdminDialog,
+  AdminDialogTrigger,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogDescription,
+  AdminDialogFooter,
+  AdminAlertDialog,
+  AdminAlertDialogTrigger,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogTitle,
+  AdminAlertDialogDescription,
+} from "@/components/admin/ui/AdminDialog";
+import AdminRequestFeedback from "@/components/admin/AdminRequestFeedback";
+
+type AdminNavSections = ReturnType<typeof adminNavSections>;
+type AdminNavSection = AdminNavSections[number];
+type AdminNavLink = AdminNavSection["links"][number] & { section?: string };
 
 export default function AdminShell({
   children,
@@ -42,11 +53,14 @@ export default function AdminShell({
     return <div className="min-h-screen bg-[var(--mist)]">{children}</div>;
   }
 
-  const displayTrail = useMemo(() => buildBreadcrumbTrail(pathname), [pathname]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [mounted, setMounted] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const displayTrail = useMemo<string[]>(
+    () => buildBreadcrumbTrail(pathname) as string[],
+    [pathname]
+  );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -59,7 +73,7 @@ export default function AdminShell({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
-  const navSections = useMemo(
+  const navSections = useMemo<AdminNavSections>(
     () =>
       adminNavSections((key: string) => {
         if (key === "admin.leads") return "Leads";
@@ -84,19 +98,19 @@ export default function AdminShell({
   }, [permissions]);
   const roleKey = data?.data?.roleKey;
   const canViewBookings = effectivePermissions.includes("view_bookings");
-  const filteredSections = useMemo(
-    () => filterAdminSections(navSections, effectivePermissions, roleKey),
+  const filteredSections = useMemo<AdminNavSections>(
+    () => filterAdminSections(navSections, effectivePermissions, roleKey) as AdminNavSections,
     [navSections, effectivePermissions, roleKey]
   );
-  const fullLinks = useMemo(
+  const fullLinks = useMemo<AdminNavLink[]>(
     () => navSections.flatMap((section) => section.links),
     [navSections]
   );
-  const allowedLinks = useMemo(
+  const allowedLinks = useMemo<Set<string>>(
     () => new Set(filteredSections.flatMap((section) => section.links.map((link) => link.href))),
     [filteredSections]
   );
-  const firstAllowedLink = useMemo(() => {
+  const firstAllowedLink = useMemo<string>(() => {
     const links = filteredSections.flatMap((section) => section.links);
     return links.length ? links[0].href : "";
   }, [filteredSections]);
@@ -154,7 +168,7 @@ export default function AdminShell({
       document.removeEventListener("mousedown", handleClick);
     };
   }, []);
-  const searchResults = useMemo(() => {
+  const searchResults = useMemo<AdminNavLink[]>(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return [];
     return filteredSections
@@ -166,7 +180,7 @@ export default function AdminShell({
       )
       .filter((link) => link.label.toLowerCase().includes(query));
   }, [filteredSections, searchQuery]);
-  const suggestedResults = useMemo(() => {
+  const suggestedResults = useMemo<AdminNavLink[]>(() => {
     return filteredSections.flatMap((section) =>
       section.links.slice(0, 2).map((link) => ({
         ...link,
@@ -217,7 +231,7 @@ export default function AdminShell({
         <main className="flex-1 space-y-8">
           <div className="admin-panel relative z-10 flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60">
-              {displayTrail.map((segment, index) => (
+              {displayTrail.map((segment: string, index: number) => (
                 <span key={`${segment}-${index}`} className={index === 0 ? "text-white/40" : ""}>
                   {index === 0 ? segment.toUpperCase() : `/ ${segment.toUpperCase()}`}
                 </span>
@@ -225,8 +239,8 @@ export default function AdminShell({
             </div>
             <div className="ml-auto flex items-center gap-2">
               {mounted ? (
-                <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
-                  <DialogTrigger asChild>
+                <AdminDialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+                  <AdminDialogTrigger asChild>
                     <button
                       type="button"
                       aria-label="Open search"
@@ -240,12 +254,12 @@ export default function AdminShell({
                         Ctrl+K
                       </span>
                     </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-xl">
-                    <DialogHeader>
-                      <DialogTitle>Tìm kiếm nhanh</DialogTitle>
-                      <DialogDescription>Tìm kiếm nhanh các mục, trang hoặc cài đặt.</DialogDescription>
-                    </DialogHeader>
+                  </AdminDialogTrigger>
+                  <AdminDialogContent className="max-w-xl">
+                    <AdminDialogHeader>
+                      <AdminDialogTitle>Tìm kiếm nhanh</AdminDialogTitle>
+                      <AdminDialogDescription>Tìm kiếm nhanh các mục, trang hoặc cài đặt.</AdminDialogDescription>
+                    </AdminDialogHeader>
                     <div className="relative">
                       <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
                         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -253,12 +267,14 @@ export default function AdminShell({
                           <path d="M20 20l-3.5-3.5" />
                         </svg>
                       </span>
-                      <Input
+                      <AdminInput
                         placeholder="Tìm kiếm các mục hoặc cài đặt..."
                         aria-label="Search admin content"
                         autoComplete="off"
                         value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.target.value)}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                          setSearchQuery(event.target.value)
+                        }
                         className="h-12 rounded-full border-white/5 bg-[#111a25] pl-10 text-white/90 placeholder:text-slate-500"
                       />
                     </div>
@@ -307,8 +323,8 @@ export default function AdminShell({
                         </>
                       )}
                     </div>
-                  </DialogContent>
-                </Dialog>
+                  </AdminDialogContent>
+                </AdminDialog>
               ) : null}
               <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#0f1722] p-1">
                 {["vi", "en"].map((code) => (

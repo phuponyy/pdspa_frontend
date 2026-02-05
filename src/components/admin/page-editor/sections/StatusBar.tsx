@@ -1,13 +1,13 @@
-import { Button as UiButton } from "@/components/ui/button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
 
 export type StatusBarProps = {
   mounted: boolean;
@@ -40,42 +40,42 @@ export default function StatusBar({
       </div>
       <div className="flex items-center gap-3">
         {mounted ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <UiButton variant="outline" size="sm">
+          <AdminAlertDialog>
+            <AdminAlertDialogTrigger asChild>
+              <AdminButton variant="outline" size="sm">
                 Discard
-              </UiButton>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogTitle>Discard draft changes?</AlertDialogTitle>
-              <AlertDialogDescription>
+              </AdminButton>
+            </AdminAlertDialogTrigger>
+            <AdminAlertDialogContent>
+              <AdminAlertDialogTitle>Discard draft changes?</AdminAlertDialogTitle>
+              <AdminAlertDialogDescription>
                 This clears your local draft and reloads the last saved version.
-              </AlertDialogDescription>
+              </AdminAlertDialogDescription>
               <div className="mt-5 flex items-center justify-end gap-3">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={discardChanges}>
+                <AdminAlertDialogCancel>Cancel</AdminAlertDialogCancel>
+                <AdminAlertDialogAction onClick={discardChanges}>
                   Discard changes
-                </AlertDialogAction>
+                </AdminAlertDialogAction>
               </div>
-            </AlertDialogContent>
-          </AlertDialog>
+            </AdminAlertDialogContent>
+          </AdminAlertDialog>
         ) : null}
-        <UiButton
+        <AdminButton
           size="sm"
           variant="outline"
           onClick={() => persistStatus("DRAFT")}
           disabled={isSavingStatus}
         >
           Save draft
-        </UiButton>
-        <UiButton
+        </AdminButton>
+        <AdminButton
           size="sm"
           onClick={() => persistStatus("PUBLISHED")}
           disabled={isSavingStatus}
           className="bg-[#ff9f40] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.3)] hover:bg-[#ffb454]"
         >
           Publish page
-        </UiButton>
+        </AdminButton>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import Button from "@/components/common/Button";
 import { API_BASE_URL } from "@/lib/constants";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type ThumbnailPanelProps = {
   thumbnailUrl: string | null | undefined;
@@ -37,9 +37,9 @@ export default function ThumbnailPanel({
         )}
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onOpenMediaDialog}>
+        <AdminButton variant="outline" size="sm" onClick={onOpenMediaDialog}>
           Chọn từ Media
-        </Button>
+        </AdminButton>
         {onUploadFile ? (
           <label className="inline-flex cursor-pointer items-center rounded-full border border-[var(--line)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
             Upload ảnh
@@ -58,9 +58,9 @@ export default function ThumbnailPanel({
           </label>
         ) : null}
         {thumbnailUrl ? (
-          <Button variant="outline" size="sm" onClick={onClearThumbnail}>
+          <AdminButton variant="outline" size="sm" onClick={onClearThumbnail}>
             Xoá
-          </Button>
+          </AdminButton>
         ) : null}
       </div>
     </div>

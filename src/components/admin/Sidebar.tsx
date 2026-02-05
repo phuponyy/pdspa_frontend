@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/constants";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +11,7 @@ import { getAdminMe } from "@/lib/api/admin";
 import { apiFetch } from "@/lib/api/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 type AdminNavLink = {
   href: string;
@@ -568,7 +568,7 @@ export default function Sidebar() {
             <p className="text-xs text-white/60">Phiên bảo mật đã được kích hoạt</p>
           </div>
         </div>
-        <Button
+        <AdminButton
           variant="outline"
           className="w-full"
           onClick={async () => {
@@ -583,7 +583,7 @@ export default function Sidebar() {
           }}
         >
           {t("admin.logout")}
-        </Button>
+        </AdminButton>
       </div>
     </aside>
   );

@@ -1,4 +1,4 @@
-import Button from "@/components/common/Button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type CmsPostFloatingBarProps = {
   show: boolean;
@@ -88,9 +88,9 @@ export default function CmsPostFloatingBar({
               Saved
             </span>
           )}
-          <Button onClick={onSave} disabled={isSaving}>
+          <AdminButton onClick={onSave} disabled={isSaving}>
             {isSaving ? "Saving..." : "Save"}
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </div>

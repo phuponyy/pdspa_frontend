@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export type AutoCrawlCardProps = {
   autoConfig: {
@@ -20,11 +20,11 @@ export type AutoCrawlCardProps = {
 
 export const AutoCrawlCard = ({ autoConfig, setAutoConfig, isCrawling, onCrawl }: AutoCrawlCardProps) => {
   return (
-    <Card className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
-      <CardHeader className="pb-0">
-        <CardTitle className="text-base !text-[var(--ink)]">Auto crawl từ CMS</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <AdminCard className="border-[var(--line)] bg-white shadow-[var(--shadow)]">
+      <AdminCardHeader className="pb-0">
+        <AdminCardTitle className="text-base !text-[var(--ink)]">Auto crawl từ CMS</AdminCardTitle>
+      </AdminCardHeader>
+      <AdminCardContent className="space-y-3">
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
           <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
             Lang
@@ -66,11 +66,11 @@ export const AutoCrawlCard = ({ autoConfig, setAutoConfig, isCrawling, onCrawl }
               Trang
             </label>
           </div>
-          <Button onClick={onCrawl} disabled={isCrawling}>
+          <AdminButton onClick={onCrawl} disabled={isCrawling}>
             {isCrawling ? "Crawling..." : "Auto crawl"}
-          </Button>
+          </AdminButton>
         </div>
-      </CardContent>
-    </Card>
+      </AdminCardContent>
+    </AdminCard>
   );
 };

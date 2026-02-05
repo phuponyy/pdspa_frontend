@@ -1,6 +1,4 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeReviews, updateHomeReviews } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type {
@@ -9,6 +7,9 @@ import type {
   ReviewsState,
 } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type ReviewsSectionProps = {
   activeLang: "vi" | "en";
@@ -78,7 +79,7 @@ export default function ReviewsSection({
             </p>
           </div>
         </div>
-        <Button
+        <AdminButton
           type="button"
           className="px-4 py-2 text-xs"
           onClick={() => {
@@ -93,10 +94,10 @@ export default function ReviewsSection({
           }}
         >
           Thêm review
-        </Button>
+        </AdminButton>
       </div>
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentReviews.heading}
           onChange={(event) => {
@@ -107,7 +108,7 @@ export default function ReviewsSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentReviews.description}
           onChange={(event) => {
@@ -128,7 +129,7 @@ export default function ReviewsSection({
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Review {index + 1}
                 </span>
-                <Button
+                <AdminButton
                   type="button"
                   className="px-2 py-1 text-[10px]"
                   onClick={() => {
@@ -144,9 +145,9 @@ export default function ReviewsSection({
                   }}
                 >
                   Xóa
-                </Button>
+                </AdminButton>
               </div>
-              <Input
+              <AdminInput
                 label="Reviewer name"
                 value={item.name || ""}
                 onChange={(event) => {
@@ -161,7 +162,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Contributions"
                 value={item.contributions || ""}
                 onChange={(event) => {
@@ -179,7 +180,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Rating (0-5)"
                 type="number"
                 min={0}
@@ -200,7 +201,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Textarea
+              <AdminTextarea
                 label="Review content"
                 value={item.review || ""}
                 onChange={(event) => {
@@ -215,7 +216,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Visit label"
                 value={item.visit || ""}
                 onChange={(event) => {
@@ -230,7 +231,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Tag"
                 value={item.tag || ""}
                 onChange={(event) => {
@@ -245,7 +246,7 @@ export default function ReviewsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Avatar URL"
                 value={item.avatarUrl || ""}
                 onChange={(event) => {
@@ -261,7 +262,7 @@ export default function ReviewsSection({
                 }}
               />
               <div className="mt-2 flex justify-end">
-                <Button
+                <AdminButton
                   type="button"
                   className="px-4 py-2 text-xs"
                   onClick={() => {
@@ -270,12 +271,12 @@ export default function ReviewsSection({
                   }}
                 >
                   Chọn từ Media
-                </Button>
+                </AdminButton>
               </div>
             </div>
           ))}
         </div>
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalized = (currentReviews.items || [])
@@ -326,7 +327,7 @@ export default function ReviewsSection({
           }}
         >
           Save reviews
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

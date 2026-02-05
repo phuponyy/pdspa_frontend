@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import type { MediaFolder, MediaTag } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminSelect from "@/components/admin/ui/AdminSelect";
 
 type BulkActionBarProps = {
   selectedCount: number;
@@ -41,47 +42,47 @@ export const BulkActionBar = ({
           files selected
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button
+          <AdminButton
             type="button"
             variant="outline"
             className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={() => setMode((prev) => (prev === "move" ? "none" : "move"))}
           >
             Move
-          </Button>
-          <Button
+          </AdminButton>
+          <AdminButton
             type="button"
             variant="outline"
             className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={() => setMode((prev) => (prev === "tag" ? "none" : "tag"))}
           >
             Tag
-          </Button>
-          <Button
+          </AdminButton>
+          <AdminButton
             type="button"
             variant="outline"
             className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={onBulkDownload}
           >
             Download
-          </Button>
-          <Button
+          </AdminButton>
+          <AdminButton
             type="button"
             variant="outline"
             className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={onBulkConvertWebp}
           >
             Convert WebP
-          </Button>
-          <Button type="button" className="h-9" onClick={onBulkDelete}>
+          </AdminButton>
+          <AdminButton type="button" className="h-9" onClick={onBulkDelete}>
             Delete
-          </Button>
+          </AdminButton>
         </div>
       </div>
       {mode === "move" ? (
         <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <select
-            className="h-9 rounded-lg border border-white/10 bg-[#141414] px-3 text-white/80"
+          <AdminSelect
+            className="h-9 rounded-lg border-white/10 bg-[#141414] px-3 text-white/80"
             value={folderId ?? ""}
             onChange={(event) =>
               setFolderId(event.target.value ? Number(event.target.value) : null)
@@ -93,10 +94,10 @@ export const BulkActionBar = ({
                 {folder.name}
               </option>
             ))}
-          </select>
-          <Button type="button" className="h-9" onClick={() => onBulkMove(folderId)}>
+          </AdminSelect>
+          <AdminButton type="button" className="h-9" onClick={() => onBulkMove(folderId)}>
             Apply move
-          </Button>
+          </AdminButton>
         </div>
       ) : null}
       {mode === "tag" ? (
@@ -121,9 +122,9 @@ export const BulkActionBar = ({
               {tag.name}
             </button>
           ))}
-          <Button type="button" className="h-8 px-3 text-xs" onClick={() => onBulkTag(tagIds)}>
+          <AdminButton type="button" className="h-8 px-3 text-xs" onClick={() => onBulkTag(tagIds)}>
             Apply tags
-          </Button>
+          </AdminButton>
         </div>
       ) : null}
     </div>

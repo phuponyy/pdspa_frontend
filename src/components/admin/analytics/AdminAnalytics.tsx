@@ -3,17 +3,17 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminAnalytics } from "@/lib/api/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import LineChart from "@/components/admin/charts/LineChart";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminTabs, AdminTabsList, AdminTabsTrigger, AdminTabsContent } from "@/components/admin/ui/AdminTabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  AdminDropdownMenu,
+  AdminDropdownMenuTrigger,
+  AdminDropdownMenuContent,
+  AdminDropdownMenuItem,
+} from "@/components/admin/ui/AdminDropdown";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const filterOptions = {
   branch: ["Tất cả danh mục", "Đà Nẵng", "Hà Nội"],
@@ -59,20 +59,20 @@ export default function AdminAnalytics() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Tabs value={range} onValueChange={setRange}>
-              <TabsList>
-                <TabsTrigger value="7d">7D</TabsTrigger>
-                <TabsTrigger value="30d">30D</TabsTrigger>
-                <TabsTrigger value="custom">Custom</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Tabs value={interval} onValueChange={setInterval}>
-              <TabsList>
-                <TabsTrigger value="day">Day</TabsTrigger>
-                <TabsTrigger value="week">Week</TabsTrigger>
-                <TabsTrigger value="month">Month</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <AdminTabs value={range} onValueChange={setRange}>
+              <AdminTabsList>
+                <AdminTabsTrigger value="7d">7D</AdminTabsTrigger>
+                <AdminTabsTrigger value="30d">30D</AdminTabsTrigger>
+                <AdminTabsTrigger value="custom">Custom</AdminTabsTrigger>
+              </AdminTabsList>
+            </AdminTabs>
+            <AdminTabs value={interval} onValueChange={setInterval}>
+              <AdminTabsList>
+                <AdminTabsTrigger value="day">Day</AdminTabsTrigger>
+                <AdminTabsTrigger value="week">Week</AdminTabsTrigger>
+                <AdminTabsTrigger value="month">Month</AdminTabsTrigger>
+              </AdminTabsList>
+            </AdminTabs>
           </div>
         </div>
         <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -82,97 +82,97 @@ export default function AdminAnalytics() {
             { label: "Source", value: source, setValue: setSource, options: filterOptions.source },
             { label: "Service", value: service, setValue: setService, options: filterOptions.service },
           ].map((filter) => (
-            <DropdownMenu key={filter.label}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+            <AdminDropdownMenu key={filter.label}>
+              <AdminDropdownMenuTrigger asChild>
+                <AdminButton variant="outline" size="sm">
                   {filter.label}: {filter.value}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
+                </AdminButton>
+              </AdminDropdownMenuTrigger>
+              <AdminDropdownMenuContent>
                 {filter.options.map((option) => (
-                  <DropdownMenuItem key={option} onClick={() => filter.setValue(option)}>
+                  <AdminDropdownMenuItem key={option} onClick={() => filter.setValue(option)}>
                     {option}
-                  </DropdownMenuItem>
+                  </AdminDropdownMenuItem>
                 ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </AdminDropdownMenuContent>
+            </AdminDropdownMenu>
           ))}
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-white/5">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Doanh thu</CardTitle>
-            <Badge variant="default">{data?.comparison.revenue.change ?? 0}%</Badge>
-          </CardHeader>
-          <CardContent>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader className="flex flex-row items-center justify-between">
+            <AdminCardTitle>Doanh thu</AdminCardTitle>
+            <AdminBadge variant="default">{data?.comparison.revenue.change ?? 0}%</AdminBadge>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">
               {(data?.comparison.revenue.current || 0).toLocaleString()} đ
             </p>
             <p className="text-xs text-white/50">
               Kỳ trước: {(data?.comparison.revenue.previous || 0).toLocaleString()} đ
             </p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Đặt chỗ</CardTitle>
-            <Badge variant="default">{data?.comparison.bookings.change ?? 0}%</Badge>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader className="flex flex-row items-center justify-between">
+            <AdminCardTitle>Đặt chỗ</AdminCardTitle>
+            <AdminBadge variant="default">{data?.comparison.bookings.change ?? 0}%</AdminBadge>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">{data?.comparison.bookings.current || 0}</p>
             <p className="text-xs text-white/50">Kỳ trước: {data?.comparison.bookings.previous || 0}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Người dùng</CardTitle>
-            <Badge variant="default">{data?.comparison.users.change ?? 0}%</Badge>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader className="flex flex-row items-center justify-between">
+            <AdminCardTitle>Người dùng</AdminCardTitle>
+            <AdminBadge variant="default">{data?.comparison.users.change ?? 0}%</AdminBadge>
+          </AdminCardHeader>
+          <AdminCardContent>
             <p className="text-2xl font-semibold text-white">{data?.comparison.users.current || 0}</p>
             <p className="text-xs text-white/50">Kỳ trước: {data?.comparison.users.previous || 0}</p>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-white/5 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Doanh thu</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <AdminCard className="border-white/5 lg:col-span-2">
+          <AdminCardHeader>
+            <AdminCardTitle>Doanh thu</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <LineChart labels={data?.labels || []} data={data?.series.revenue || []} label="Doanh thu" />
-          </CardContent>
-        </Card>
-        <Card className="border-white/5">
-          <CardHeader>
-            <CardTitle>Người dùng</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </AdminCardContent>
+        </AdminCard>
+        <AdminCard className="border-white/5">
+          <AdminCardHeader>
+            <AdminCardTitle>Người dùng</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent>
             <LineChart
               labels={data?.labels || []}
               data={data?.series.users || []}
               label="Users"
               color="#22c55e"
             />
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
-      <Card className="border-white/5">
-        <CardHeader>
-          <CardTitle>Khách Bookings</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <AdminCard className="border-white/5">
+        <AdminCardHeader>
+          <AdminCardTitle>Khách Bookings</AdminCardTitle>
+        </AdminCardHeader>
+        <AdminCardContent>
           <LineChart
             labels={data?.labels || []}
             data={data?.series.bookings || []}
             label="Bookings"
             color="#8b5cf6"
           />
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }

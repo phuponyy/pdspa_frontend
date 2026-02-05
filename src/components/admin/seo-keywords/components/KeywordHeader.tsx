@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type KeywordHeaderProps = {
   isScanning: boolean;
@@ -15,25 +15,25 @@ export const KeywordHeader = ({ isScanning, isExporting, onScan, onExport }: Key
         <h1 className="text-2xl font-semibold text-[var(--ink)]">Keyword Tracking & Rank History</h1>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="secondary" onClick={() => onScan(false)} disabled={isScanning}>
+        <AdminButton variant="secondary" onClick={() => onScan(false)} disabled={isScanning}>
           {isScanning ? "Scanning..." : "Auto fetch"}
-        </Button>
-        <Button
+        </AdminButton>
+        <AdminButton
           variant="outline"
           className="!text-white !border-[var(--line)] hover:!bg-black/5"
           onClick={() => onScan(true)}
           disabled={isScanning}
         >
           Force scan
-        </Button>
-        <Button
+        </AdminButton>
+        <AdminButton
           variant="outline"
           className="!text-white !border-[var(--line)] hover:!bg-black/5"
           onClick={onExport}
           disabled={isExporting}
         >
           {isExporting ? "Exporting..." : "Export CSV"}
-        </Button>
+        </AdminButton>
       </div>
     </div>
   );

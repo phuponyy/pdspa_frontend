@@ -4,19 +4,19 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/common/ToastProvider";
 import Loading from "@/components/common/Loading";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { getAdminSessions, revokeAdminSession, revokeAdminSessions } from "@/lib/api/admin";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
+} from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const formatDate = (value?: string) => {
   if (!value) return "-";
@@ -170,8 +170,8 @@ export default function AdminSessionsPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
-        <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-          <CardContent className="space-y-4 py-5">
+        <AdminCard className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <AdminCardContent className="space-y-4 py-5">
             <div className="grid gap-3 md:grid-cols-4">
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
@@ -210,7 +210,7 @@ export default function AdminSessionsPage() {
                   { key: "active", label: "Đang hoạt động" },
                   { key: "expired", label: "Hết hạn" },
                 ].map((item) => (
-                  <Button
+                  <AdminButton
                     key={item.key}
                     variant={activeFilter === item.key ? "default" : "secondary"}
                     size="sm"
@@ -222,13 +222,13 @@ export default function AdminSessionsPage() {
                     onClick={() => setActiveFilter(item.key as typeof activeFilter)}
                   >
                     {item.label}
-                  </Button>
+                  </AdminButton>
                 ))}
                 {[
                   { key: "desktop", label: "Desktop" },
                   { key: "mobile", label: "Mobile" },
                 ].map((item) => (
-                  <Button
+                  <AdminButton
                     key={item.key}
                     variant={deviceType === item.key ? "default" : "secondary"}
                     size="sm"
@@ -236,49 +236,49 @@ export default function AdminSessionsPage() {
                     onClick={() => setDeviceType(item.key as typeof deviceType)}
                   >
                     {item.label}
-                  </Button>
+                  </AdminButton>
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2 md:ml-auto">
-                <Button
+                <AdminButton
                   size="sm"
                   variant="outline"
                   onClick={revokeByFilter}
                   disabled={!canBulkRevoke}
                 >
                   Thu hồi theo bộ lọc
-                </Button>
-                <AlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
-                  <AlertDialogTrigger asChild>
-                    <Button className="bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90">
+                </AdminButton>
+                <AdminAlertDialog open={confirmRevokeAll} onOpenChange={setConfirmRevokeAll}>
+                  <AdminAlertDialogTrigger asChild>
+                    <AdminButton className="bg-[var(--accent-strong)] text-black hover:bg-[var(--accent-strong)]/90">
                       Thu hồi tất cả
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogTitle>Thu hồi toàn bộ phiên?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    </AdminButton>
+                  </AdminAlertDialogTrigger>
+                  <AdminAlertDialogContent>
+                    <AdminAlertDialogTitle>Thu hồi toàn bộ phiên?</AdminAlertDialogTitle>
+                    <AdminAlertDialogDescription>
                       Hành động này sẽ đăng xuất tất cả thiết bị và không thể hoàn tác.
-                    </AlertDialogDescription>
+                    </AdminAlertDialogDescription>
                     <div className="mt-6 flex items-center justify-end gap-3">
-                      <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                      <AlertDialogAction
+                      <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+                      <AdminAlertDialogAction
                         onClick={() => {
                           setConfirmRevokeAll(false);
                           void revokeAll();
                         }}
                       >
                         Thu hồi
-                      </AlertDialogAction>
+                      </AdminAlertDialogAction>
                     </div>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  </AdminAlertDialogContent>
+                </AdminAlertDialog>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
 
-        <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-          <CardContent className="flex h-full items-center justify-between gap-4 py-5">
+        <AdminCard className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <AdminCardContent className="flex h-full items-center justify-between gap-4 py-5">
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-white/50">
                 Tổng số phiên
@@ -290,12 +290,12 @@ export default function AdminSessionsPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-strong)]/15 text-[var(--accent-strong)]">
               #
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       </div>
 
-      <Card className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-        <CardContent className="py-5">
+      <AdminCard className="border-white/10 bg-[#0f1623] text-white shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+        <AdminCardContent className="py-5">
           {sessionsQuery.isLoading ? (
             <Loading label="Loading sessions" />
           ) : (
@@ -305,25 +305,25 @@ export default function AdminSessionsPage() {
                   Tổng <span className="text-white">{filteredItems.length}</span> phiên
                 </span>
                 <div className="flex items-center gap-2">
-                  <Button
+                  <AdminButton
                     size="sm"
                     variant="secondary"
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                     disabled={page <= 1}
                   >
                     Trước
-                  </Button>
+                  </AdminButton>
                   <span className="text-xs uppercase tracking-[0.2em] text-white/50">
                     {page} / {totalPages}
                   </span>
-                  <Button
+                  <AdminButton
                     size="sm"
                     variant="secondary"
                     onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={page >= totalPages}
                   >
                     Sau
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
 
@@ -358,22 +358,22 @@ export default function AdminSessionsPage() {
                         </div>
                         <div className="space-y-1">
                           <p className="text-white">{formatDate(session.lastUsedAt)}</p>
-                          <Badge variant={session.isActive ? "success" : "draft"}>
+                          <AdminBadge variant={session.isActive ? "success" : "draft"}>
                             {session.isActive ? "Active" : "Expired"}
-                          </Badge>
+                          </AdminBadge>
                           <p className="text-xs text-white/40">
                             Hết hạn: {formatDate(session.expiresAt)}
                           </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <Button
+                          <AdminButton
                             size="sm"
                             variant="outline"
                             onClick={() => revokeSingle(session.id)}
                           >
                             Thu hồi
-                          </Button>
-                          <Button
+                          </AdminButton>
+                          <AdminButton
                             size="sm"
                             variant="secondary"
                             onClick={() =>
@@ -384,8 +384,8 @@ export default function AdminSessionsPage() {
                             disabled={!session.ip}
                           >
                             Thu hồi IP
-                          </Button>
-                          <Button
+                          </AdminButton>
+                          <AdminButton
                             size="sm"
                             variant="secondary"
                             onClick={() => {
@@ -397,7 +397,7 @@ export default function AdminSessionsPage() {
                             disabled={!session.device && !session.userAgent}
                           >
                             Thu hồi thiết bị
-                          </Button>
+                          </AdminButton>
                         </div>
                       </div>
                     ))
@@ -408,27 +408,27 @@ export default function AdminSessionsPage() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <AlertDialog
+      <AdminAlertDialog
         open={Boolean(confirmRevokeTarget)}
         onOpenChange={(open) => {
           if (!open) setConfirmRevokeTarget(null);
         }}
       >
-        <AlertDialogContent>
-          <AlertDialogTitle>
+        <AdminAlertDialogContent>
+          <AdminAlertDialogTitle>
             Thu hồi theo {confirmRevokeTarget?.type === "ip" ? "IP" : "thiết bị"}?
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+          </AdminAlertDialogTitle>
+          <AdminAlertDialogDescription>
             {confirmRevokeTarget?.type === "ip"
               ? `Tất cả phiên dùng IP ${confirmRevokeTarget?.value} sẽ bị đăng xuất.`
               : `Tất cả phiên dùng thiết bị ${confirmRevokeTarget?.value} sẽ bị đăng xuất.`}
-          </AlertDialogDescription>
+          </AdminAlertDialogDescription>
           <div className="mt-6 flex items-center justify-end gap-3">
-            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-            <AlertDialogAction
+            <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+            <AdminAlertDialogAction
               onClick={() => {
                 const target = confirmRevokeTarget;
                 setConfirmRevokeTarget(null);
@@ -441,10 +441,10 @@ export default function AdminSessionsPage() {
               }}
             >
               Thu hồi
-            </AlertDialogAction>
+            </AdminAlertDialogAction>
           </div>
-        </AlertDialogContent>
-      </AlertDialog>
+        </AdminAlertDialogContent>
+      </AdminAlertDialog>
     </div>
   );
 }

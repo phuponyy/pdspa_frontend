@@ -1,6 +1,4 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeHighlights, updateHomeHighlights } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type {
@@ -9,6 +7,10 @@ import type {
   RecoveryState,
 } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type HighlightsSectionProps = {
   activeLang: "vi" | "en";
@@ -54,7 +56,7 @@ export default function HighlightsSection({
         </div>
       </div>
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentHighlights.heading}
           onChange={(event) => {
@@ -65,7 +67,7 @@ export default function HighlightsSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentHighlights.description}
           onChange={(event) => {
@@ -82,8 +84,8 @@ export default function HighlightsSection({
               key={`highlight-item-${index}`}
               className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
             >
-              <Input
-                label={`Card ${index + 1} title`}
+              <AdminInput
+                label={`AdminCard ${index + 1} title`}
                 value={item.title || ""}
                 onChange={(event) => {
                   setIsDirty(true);
@@ -97,7 +99,7 @@ export default function HighlightsSection({
                   });
                 }}
               />
-              <Textarea
+              <AdminTextarea
                 label="Description"
                 value={item.description || ""}
                 onChange={(event) => {
@@ -112,7 +114,7 @@ export default function HighlightsSection({
                   });
                 }}
               />
-              <Input
+              <AdminInput
                 label="Image URL"
                 value={item.imageUrl || ""}
                 onChange={(event) => {
@@ -128,7 +130,7 @@ export default function HighlightsSection({
                 }}
               />
               <div className="mt-2 flex justify-end">
-                <Button
+                <AdminButton
                   type="button"
                   className="px-4 py-2 text-xs"
                   onClick={() => {
@@ -137,12 +139,12 @@ export default function HighlightsSection({
                   }}
                 >
                   Chọn từ Media
-                </Button>
+                </AdminButton>
               </div>
             </div>
           ))}
         </div>
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               const normalizedItems = (currentHighlights.items || [])
@@ -185,7 +187,7 @@ export default function HighlightsSection({
           }}
         >
           Save highlights
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

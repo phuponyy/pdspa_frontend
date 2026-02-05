@@ -1,7 +1,7 @@
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
-import Button from "@/components/common/Button";
 import type { CmsPostTranslationState } from "@/components/admin/cms-post-form/types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type PostContentSectionProps = {
   current: CmsPostTranslationState;
@@ -33,17 +33,17 @@ export default function PostContentSection({
   return (
     <div className="self-start rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]">
       <div className="grid gap-4">
-        <Input
+        <AdminInput
           label="Title"
           value={current.title}
           onChange={(event) => onTitleChange(event.target.value)}
         />
-        <Input
+        <AdminInput
           label="Slug"
           value={current.slug}
           onChange={(event) => onSlugChange(event.target.value)}
         />
-        <Textarea
+        <AdminTextarea
           label="Excerpt"
           value={current.excerpt}
           onChange={(event) => onExcerptChange(event.target.value)}
@@ -61,9 +61,9 @@ export default function PostContentSection({
             <option value="DRAFT">Draft</option>
             <option value="PUBLISHED">Published</option>
           </select>
-          <Button onClick={onSave} disabled={isSaving}>
+          <AdminButton onClick={onSave} disabled={isSaving}>
             {isSaving ? "Saving..." : "Save"}
-          </Button>
+          </AdminButton>
         </div>
         {slugEdited ? null : (
           <p className="text-xs text-[var(--ink-muted)]">

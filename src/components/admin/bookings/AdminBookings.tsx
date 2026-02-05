@@ -12,19 +12,19 @@ import {
 } from "@/lib/api/admin";
 import { getServices } from "@/lib/api/public";
 import DataTable from "@/components/admin/DataTable";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
 import type { Booking } from "@/types/admin-dashboard.types";
 import type { PublicService } from "@/types/api.types";
 import { DEFAULT_LANG } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 import { useAdminQuery } from "@/lib/api/adminHooks";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const statusColor: Record<Booking["status"], string> = {
   NEW: "bg-sky-500/15 text-sky-200 border-sky-500/30",
@@ -231,7 +231,7 @@ export default function AdminBookings() {
         header: "Hành động",
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-2">
-            <Button
+            <AdminButton
               variant="secondary"
               size="sm"
               onClick={() => {
@@ -240,30 +240,30 @@ export default function AdminBookings() {
               }}
             >
               Xem
-            </Button>
+            </AdminButton>
             {canEditBookings ? (
               <>
-                <Button
+                <AdminButton
                   variant="outline"
                   size="sm"
                   onClick={() => mutation.mutate({ id: row.original.id, status: "CONFIRMED" })}
                 >
                   Xác nhận
-                </Button>
-                <Button
+                </AdminButton>
+                <AdminButton
                   variant="outline"
                   size="sm"
                   onClick={() => mutation.mutate({ id: row.original.id, status: "PENDING" })}
                 >
                   Pending
-                </Button>
-                <Button
+                </AdminButton>
+                <AdminButton
                   variant="outline"
                   size="sm"
                   onClick={() => mutation.mutate({ id: row.original.id, status: "CANCELED" })}
                 >
                   Huỷ
-                </Button>
+                </AdminButton>
               </>
             ) : null}
           </div>
@@ -337,22 +337,22 @@ export default function AdminBookings() {
 
   return (
     <div className="space-y-8">
-      <Card className="border-white/5">
-        <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <AdminCard className="border-white/5">
+        <AdminCardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="py-2">
-            <CardTitle>Bookings</CardTitle>
+            <AdminCardTitle>Bookings</AdminCardTitle>
             <p className="text-sm text-white/60">Quy trình: Mới &gt; Đã Xác Nhận &gt; Pending / Huỷ</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => handleExport("csv")}>
+            <AdminButton variant="outline" size="sm" onClick={() => handleExport("csv")}>
               Xuất CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
+            </AdminButton>
+            <AdminButton variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
               Xuất Excel
-            </Button>
+            </AdminButton>
           </div>
-        </CardHeader>
-        <CardContent>
+        </AdminCardHeader>
+        <AdminCardContent>
           {bookingsQuery.isError ? (
             <div className="rounded-2xl border border-white/10 bg-[#111a25] p-4 text-sm text-white/70">
               Không thể tải booking.
@@ -367,13 +367,13 @@ export default function AdminBookings() {
           ) : (
             <DataTable columns={columns} data={bookingsQuery.data?.items || []} searchColumn="customer" />
           )}
-        </CardContent>
-      </Card>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-h-[85vh] w-[96vw] max-w-6xl overflow-y-auto border-white/10 bg-[#0f1722] text-white">
-          <DialogHeader>
-            <DialogTitle>Comprehensive Spa Reservation</DialogTitle>
-          </DialogHeader>
+        </AdminCardContent>
+      </AdminCard>
+      <AdminDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AdminDialogContent className="max-h-[85vh] w-[96vw] max-w-6xl overflow-y-auto border-white/10 bg-[#0f1722] text-white">
+          <AdminDialogHeader>
+            <AdminDialogTitle>Comprehensive Spa Reservation</AdminDialogTitle>
+          </AdminDialogHeader>
           <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
             <div className="space-y-6">
               <div className="rounded-2xl border border-white/10 bg-[#101826] p-5">
@@ -595,23 +595,23 @@ export default function AdminBookings() {
                   <p className="mt-3 text-sm text-rose-300">{bookingError}</p>
                 ) : null}
                 {canEditBookings ? (
-                  <Button
+                  <AdminButton
                     className="mt-4 w-full"
                     onClick={handleSaveBooking}
                     disabled={updateMutation.isPending}
                   >
                     {updateMutation.isPending ? "Saving..." : "Cập nhật booking"}
-                  </Button>
+                  </AdminButton>
                 ) : (
-                  <Button className="mt-4 w-full" disabled>
+                  <AdminButton className="mt-4 w-full" disabled>
                     Chỉ xem
-                  </Button>
+                  </AdminButton>
                 )}
               </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </AdminDialogContent>
+      </AdminDialog>
     </div>
   );
 }

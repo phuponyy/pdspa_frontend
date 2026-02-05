@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLeads } from "@/lib/api/admin";
 import LeadTable from "@/components/admin/LeadTable";
 import Loading from "@/components/common/Loading";
-import { Button } from "@/components/ui/button";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export default function LeadsPage() {
   const [page, setPage] = useState(1);
@@ -37,20 +37,20 @@ export default function LeadsPage() {
               Page {page} of {maxPage}
             </span>
             <div className="flex gap-2">
-              <Button
+              <AdminButton
                 variant="secondary"
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               >
                 Prev
-              </Button>
-              <Button
+              </AdminButton>
+              <AdminButton
                 variant="secondary"
                 disabled={page >= maxPage}
                 onClick={() => setPage((prev) => Math.min(maxPage, prev + 1))}
               >
                 Next
-              </Button>
+              </AdminButton>
             </div>
           </div>
         </>

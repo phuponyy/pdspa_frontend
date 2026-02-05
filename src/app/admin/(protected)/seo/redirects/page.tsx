@@ -8,27 +8,26 @@ import {
   getRedirects,
   updateRedirect,
 } from "@/lib/api/admin";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogDescription,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogTrigger,
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AdminAlertDialog,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogDescription,
+  AdminAlertDialogTitle,
+  AdminAlertDialogTrigger,
 import type { RedirectItem } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
 
 export default function RedirectsPage() {
   const toast = useToast();
@@ -80,13 +79,13 @@ export default function RedirectsPage() {
 
       <div className="grid gap-4 rounded-3xl border border-[var(--line)] bg-white p-4 shadow-[var(--shadow)]">
         <div className="grid gap-3 lg:grid-cols-[2fr_2fr_1fr_auto] lg:items-end">
-          <Input
+          <AdminInput
             label="From"
             placeholder="/old-url"
             value={form.fromPath}
             onChange={(event) => setForm((prev) => ({ ...prev, fromPath: event.target.value }))}
           />
-          <Input
+          <AdminInput
             label="To"
             placeholder="/new-url"
             value={form.toPath}
@@ -105,7 +104,7 @@ export default function RedirectsPage() {
               <option value={302}>302</option>
             </select>
           </label>
-          <Button
+          <AdminButton
             disabled={!canSubmit}
             onClick={async () => {
               try {
@@ -119,10 +118,10 @@ export default function RedirectsPage() {
             }}
           >
             Add redirect
-          </Button>
+          </AdminButton>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Input
+          <AdminInput
             label="Search"
             placeholder="Find redirects..."
             value={query}
@@ -149,25 +148,25 @@ export default function RedirectsPage() {
             </select>
           </label>
           <div className="ml-auto flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page <= 1}
             >
               Prev
-            </Button>
+            </AdminButton>
             <span>
               {page} / {totalPages}
             </span>
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={page >= totalPages}
             >
               Next
-            </Button>
+            </AdminButton>
           </div>
         </div>
       </div>
@@ -209,29 +208,29 @@ export default function RedirectsPage() {
               </button>
               <div className="text-xs text-[var(--ink-muted)]">Hits: {item.hits || 0}</div>
               <div className="ml-auto flex items-center gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
+                <AdminDialog>
+                  <AdminDialogTrigger asChild>
                     <button
                       type="button"
                       className="rounded-full border border-[var(--line)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)]"
                     >
                       Edit
                     </button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Edit redirect</DialogTitle>
-                      <DialogDescription>Update path and status.</DialogDescription>
-                    </DialogHeader>
+                  </AdminDialogTrigger>
+                  <AdminDialogContent>
+                    <AdminDialogHeader>
+                      <AdminDialogTitle>Edit redirect</AdminDialogTitle>
+                      <AdminDialogDescription>Update path and status.</AdminDialogDescription>
+                    </AdminDialogHeader>
                     <div className="grid gap-3">
-                      <Input
+                      <AdminInput
                         label="From"
                         defaultValue={item.fromPath}
                         onChange={(event) =>
                           setForm((prev) => ({ ...prev, fromPath: event.target.value }))
                         }
                       />
-                      <Input
+                      <AdminInput
                         label="To"
                         defaultValue={item.toPath}
                         onChange={(event) =>
@@ -254,7 +253,7 @@ export default function RedirectsPage() {
                           <option value={302}>302</option>
                         </select>
                       </label>
-                      <Button
+                      <AdminButton
                         onClick={async () => {
                           try {
                             await updateRedirect(undefined, item.id, {
@@ -270,27 +269,27 @@ export default function RedirectsPage() {
                         }}
                       >
                         Save
-                      </Button>
+                      </AdminButton>
                     </div>
-                  </DialogContent>
-                </Dialog>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                  </AdminDialogContent>
+                </AdminDialog>
+                <AdminAlertDialog>
+                  <AdminAlertDialogTrigger asChild>
                     <button
                       type="button"
                       className="rounded-full border border-rose-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rose-500"
                     >
                       Delete
                     </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogTitle>Delete redirect?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                  </AdminAlertDialogTrigger>
+                  <AdminAlertDialogContent>
+                    <AdminAlertDialogTitle>Delete redirect?</AdminAlertDialogTitle>
+                    <AdminAlertDialogDescription>
                       This action cannot be undone.
-                    </AlertDialogDescription>
+                    </AdminAlertDialogDescription>
                     <div className="mt-6 flex items-center justify-end gap-3">
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
+                      <AdminAlertDialogCancel>Cancel</AdminAlertDialogCancel>
+                      <AdminAlertDialogAction
                         onClick={async () => {
                           try {
                             await deleteRedirect(undefined, item.id);
@@ -302,10 +301,10 @@ export default function RedirectsPage() {
                         }}
                       >
                         Delete
-                      </AlertDialogAction>
+                      </AdminAlertDialogAction>
                     </div>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  </AdminAlertDialogContent>
+                </AdminAlertDialog>
               </div>
             </div>
           ))

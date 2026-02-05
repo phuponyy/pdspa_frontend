@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
 
 export type KeywordSearchBarProps = {
   query: string;
@@ -24,7 +24,7 @@ export const KeywordSearchBar = ({
     <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-[var(--line)] bg-white px-4 py-3 text-sm text-[var(--ink-muted)] shadow-[var(--shadow)]">
       <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)]">
         Search
-        <Input
+        <AdminInput
           placeholder="Find keyword..."
           value={query}
           onChange={(event) => {
@@ -51,20 +51,20 @@ export const KeywordSearchBar = ({
         </select>
       </label>
       <div className="ml-auto flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[var(--ink-muted)]">
-        <Button size="sm" variant="secondary" onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}>
+        <AdminButton size="sm" variant="secondary" onClick={() => setPage(Math.max(1, page - 1))} disabled={page <= 1}>
           Prev
-        </Button>
+        </AdminButton>
         <span>
           {page} / {totalPages}
         </span>
-        <Button
+        <AdminButton
           size="sm"
           variant="secondary"
           onClick={() => setPage(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages}
         >
           Next
-        </Button>
+        </AdminButton>
       </div>
     </div>
   );

@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminAuditLogs } from "@/lib/api/admin";
 import Loading from "@/components/common/Loading";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { AdminAuditLog } from "@/types/api.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const formatDate = (value?: string) => {
   if (!value) return "-";
@@ -162,19 +162,19 @@ export default function AdminAuditLogsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button
+          <AdminButton
             variant="secondary"
             className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={handleExport}
           >
             Xuất báo cáo
-          </Button>
-          <Button onClick={() => auditQuery.refetch()}>Làm mới</Button>
+          </AdminButton>
+          <AdminButton onClick={() => auditQuery.refetch()}>Làm mới</AdminButton>
         </div>
       </div>
 
-      <Card className="border-white/10 bg-[#111827] text-white">
-        <CardContent className="space-y-4 py-5">
+      <AdminCard className="border-white/10 bg-[#111827] text-white">
+        <AdminCardContent className="space-y-4 py-5">
           <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_1.2fr]">
             <div className="relative">
               <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
@@ -238,11 +238,11 @@ export default function AdminAuditLogsPage() {
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className="border-white/10 bg-[#101826] text-white">
-        <CardContent className="py-5">
+      <AdminCard className="border-white/10 bg-[#101826] text-white">
+        <AdminCardContent className="py-5">
           {auditQuery.isLoading ? (
             <Loading label="Loading audit logs" />
           ) : (
@@ -274,25 +274,25 @@ export default function AdminAuditLogsPage() {
                       ))}
                     </select>
                   </label>
-                  <Button
+                  <AdminButton
                     size="sm"
                     variant="secondary"
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                     disabled={page <= 1}
                   >
                     &lt;
-                  </Button>
+                  </AdminButton>
                   <span className="text-xs uppercase tracking-[0.2em] text-white/50">
                     {page} / {totalPages}
                   </span>
-                  <Button
+                  <AdminButton
                     size="sm"
                     variant="secondary"
                     onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={page >= totalPages}
                   >
                     &gt;
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
 
@@ -321,9 +321,9 @@ export default function AdminAuditLogsPage() {
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                               <p className="text-white">{log.action}</p>
-                              <Badge variant={pickActionBadge(log.action)}>
+                              <AdminBadge variant={pickActionBadge(log.action)}>
                                 {log.action.split("_").slice(-1)[0]}
-                              </Badge>
+                              </AdminBadge>
                             </div>
                             <div className="rounded-xl border border-white/10 bg-[#0f1722] px-3 py-2 text-xs text-white/50">
                               {hash ? <p>hash: {hash.slice(0, 12)}…</p> : null}
@@ -331,7 +331,7 @@ export default function AdminAuditLogsPage() {
                               {userAgent ? <p>ua: {userAgent}</p> : null}
                             </div>
                           </div>
-                          <Badge variant="default">{log.scope || "-"}</Badge>
+                          <AdminBadge variant="default">{log.scope || "-"}</AdminBadge>
                           <div>
                             <p>{log.entity}</p>
                             <p className="text-xs text-white/40">ID: {log.entityId ?? "-"}</p>
@@ -359,8 +359,8 @@ export default function AdminAuditLogsPage() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
       <div className="grid gap-4 md:grid-cols-3">
         {[

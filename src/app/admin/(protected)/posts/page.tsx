@@ -14,21 +14,28 @@ import {
 import Loading from "@/components/common/Loading";
 import { API_BASE_URL, DEFAULT_LANG } from "@/lib/constants";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { ApiError } from "@/lib/api/client";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import {
+  AdminDialog,
+  AdminDialogTrigger,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+  AdminDialogDescription,
+  AdminDialogFooter,
+  AdminAlertDialog,
+  AdminAlertDialogTrigger,
+  AdminAlertDialogAction,
+  AdminAlertDialogCancel,
+  AdminAlertDialogContent,
+  AdminAlertDialogTitle,
+  AdminAlertDialogDescription,
+} from "@/components/admin/ui/AdminDialog";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export default function PostsListPage() {
   const { i18n } = useTranslation();
@@ -166,11 +173,11 @@ export default function PostsListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Quản lý Bài viết</h1>
         <Link href={`${ADMIN_ROUTES.posts}/new?lang=${resolvedLang}`}>
-          <Button size="icon">
+          <AdminButton size="icon">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
             </svg>
-          </Button>
+          </AdminButton>
         </Link>
       </div>
 
@@ -182,19 +189,19 @@ export default function PostsListPage() {
               <path d="M20 20l-3.5-3.5" />
             </svg>
           </span>
-          <Input
+          <AdminInput
             placeholder="Tìm kiếm bài viết..."
             className="pl-12"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
           />
         </div>
-        <Button variant="secondary" onClick={() => setShowFilters((prev) => !prev)}>
+        <AdminButton variant="secondary" onClick={() => setShowFilters((prev) => !prev)}>
           <svg viewBox="0 0 24 24" className="mr-2 h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 6h16M7 12h10M10 18h4" />
           </svg>
           Bộ lọc nâng cao
-        </Button>
+        </AdminButton>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-[#0f1722] px-4 py-3 text-sm text-white/70">
@@ -213,7 +220,9 @@ export default function PostsListPage() {
             <select
               className="rounded-full border border-white/10 bg-transparent px-3 py-1 text-xs text-white"
               value={pageSize}
-              onChange={(event) => handlePageSizeChange(Number(event.target.value))}
+              onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+                handlePageSizeChange(Number(event.target.value))
+              }
             >
               {[10, 20, 30, 50].map((size) => (
                 <option key={size} value={size} className="bg-[#0f1722] text-white">
@@ -223,25 +232,25 @@ export default function PostsListPage() {
             </select>
           </label>
           <div className="flex items-center gap-2">
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page <= 1}
             >
               Trước
-            </Button>
+            </AdminButton>
             <span className="text-xs uppercase tracking-[0.2em] text-white/50">
               {page} / {totalPages}
             </span>
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={page >= totalPages}
             >
               Sau
-            </Button>
+            </AdminButton>
           </div>
         </div>
       </div>
@@ -250,10 +259,12 @@ export default function PostsListPage() {
         <div className="grid gap-4 rounded-3xl border border-white/10 bg-[#0f1722] p-4 text-sm text-white/70 md:grid-cols-2">
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.2em] text-white/40">Danh mục</p>
-            <Input
+            <AdminInput
               placeholder="Tìm danh mục..."
               value={categoryQuery}
-              onChange={(event) => setCategoryQuery(event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setCategoryQuery(event.target.value)
+              }
             />
             <div className="flex max-h-40 flex-wrap gap-2 overflow-auto">
               {filteredCategories.map((category) => {
@@ -283,10 +294,12 @@ export default function PostsListPage() {
           </div>
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.2em] text-white/40">Thẻ</p>
-            <Input
+            <AdminInput
               placeholder="Tìm thẻ..."
               value={tagQuery}
-              onChange={(event) => setTagQuery(event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setTagQuery(event.target.value)
+              }
             />
             <div className="flex max-h-40 flex-wrap gap-2 overflow-auto">
               {filteredTags.map((tag) => {
@@ -318,18 +331,18 @@ export default function PostsListPage() {
       {selectedIds.length ? (
         <div className="flex flex-wrap items-center gap-2 rounded-3xl border border-white/10 bg-[#0f1722] p-4 text-xs uppercase tracking-[0.2em] text-white/70">
           <span>{selectedIds.length} đã chọn</span>
-          <Button size="sm" variant="secondary" onClick={toggleSelectAll}>
+          <AdminButton size="sm" variant="secondary" onClick={toggleSelectAll}>
             {selectedIds.length === filteredPosts.length ? "Bỏ chọn tất cả" : "Chọn tất cả"}
-          </Button>
-          <Button size="sm" onClick={() => bulkUpdateStatus("PUBLISHED")}>
+          </AdminButton>
+          <AdminButton size="sm" onClick={() => bulkUpdateStatus("PUBLISHED")}>
             Xuất bản
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => bulkUpdateStatus("DRAFT")}>
+          </AdminButton>
+          <AdminButton size="sm" variant="secondary" onClick={() => bulkUpdateStatus("DRAFT")}>
             Chuyển nháp
-          </Button>
-          <Button size="sm" variant="outline" onClick={bulkDelete}>
+          </AdminButton>
+          <AdminButton size="sm" variant="outline" onClick={bulkDelete}>
             Xoá
-          </Button>
+          </AdminButton>
         </div>
       ) : null}
 
@@ -339,13 +352,13 @@ export default function PostsListPage() {
           { label: "Đã xuất bản", value: "PUBLISHED" as const },
           { label: "Nháp", value: "DRAFT" as const },
         ].map((tab) => (
-          <Button
+          <AdminButton
             key={tab.value}
             variant={filter === tab.value ? "default" : "secondary"}
             onClick={() => setFilter(tab.value)}
           >
             {tab.label}
-          </Button>
+          </AdminButton>
         ))}
       </div>
 
@@ -377,8 +390,8 @@ export default function PostsListPage() {
                 : "";
               const previewLabel = isPublished ? "Xem site" : "Xem trước";
               return (
-                <Card key={post.id}>
-                  <CardContent className="flex items-center justify-between gap-4 py-5">
+                <AdminCard key={post.id}>
+                  <AdminCardContent className="flex items-center justify-between gap-4 py-5">
                     <div className="flex items-center gap-4">
                       <input
                         type="checkbox"
@@ -407,9 +420,9 @@ export default function PostsListPage() {
                         <p className="text-sm text-slate-400">
                           Tác giả: Admin · {post.updatedAt || "Chưa cập nhật"}
                         </p>
-                        <Badge variant={isPublished ? "success" : "draft"}>
+                        <AdminBadge variant={isPublished ? "success" : "draft"}>
                           {isPublished ? "Đã xuất bản" : "Nháp"}
-                        </Badge>
+                        </AdminBadge>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -422,29 +435,29 @@ export default function PostsListPage() {
                           {previewLabel}
                         </Link>
                       ) : null}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      <AdminAlertDialog>
+                        <AdminAlertDialogTrigger asChild>
                           <button
                             type="button"
                             className="rounded-full border border-red-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-200/80 hover:text-red-100"
                           >
                             Xoá
                           </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogTitle>Xoá bài viết?</AlertDialogTitle>
-                          <AlertDialogDescription>
+                        </AdminAlertDialogTrigger>
+                        <AdminAlertDialogContent>
+                          <AdminAlertDialogTitle>Xoá bài viết?</AdminAlertDialogTitle>
+                          <AdminAlertDialogDescription>
                             Hành động này không thể hoàn tác. Bạn chắc chắn muốn xoá bài viết
                             này?
-                          </AlertDialogDescription>
+                          </AdminAlertDialogDescription>
                           <div className="mt-6 flex items-center justify-end gap-3">
-                            <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteSingle(post.id)}>
+                            <AdminAlertDialogCancel>Huỷ</AdminAlertDialogCancel>
+                            <AdminAlertDialogAction onClick={() => deleteSingle(post.id)}>
                               Xoá ngay
-                            </AlertDialogAction>
+                            </AdminAlertDialogAction>
                           </div>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                        </AdminAlertDialogContent>
+                      </AdminAlertDialog>
                       <Link
                         href={`${ADMIN_ROUTES.posts}/${post.id}?lang=${resolvedLang}`}
                         className="text-white/60 hover:text-white"
@@ -454,8 +467,8 @@ export default function PostsListPage() {
                         </svg>
                       </Link>
                     </div>
-                  </CardContent>
-                </Card>
+                  </AdminCardContent>
+                </AdminCard>
               );
             })
           ) : (

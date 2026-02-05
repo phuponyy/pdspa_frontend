@@ -13,17 +13,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  AdminDropdownMenu,
+  AdminDropdownMenuContent,
+  AdminDropdownMenuItem,
+  AdminDropdownMenuTrigger,
 
 export type DataTableProps<TData> = {
   columns: ColumnDef<TData, any>[];
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDropdownMenu, AdminDropdownMenuTrigger, AdminDropdownMenuContent, AdminDropdownMenuItem } from "@/components/admin/ui/AdminDropdown";
   data: TData[];
   searchColumn?: string;
   emptyLabel?: string;
@@ -59,22 +59,22 @@ export default function DataTable<TData>({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="w-full max-w-xs">
           {filterColumn ? (
-            <Input
+            <AdminInput
               placeholder="Tìm kiếm..."
               value={(filterColumn.getFilterValue() as string) ?? ""}
               onChange={(event) => filterColumn.setFilterValue(event.target.value)}
             />
           ) : null}
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
+        <AdminDropdownMenu>
+          <AdminDropdownMenuTrigger asChild>
+            <AdminButton variant="outline" size="sm">
               Lọc
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+            </AdminButton>
+          </AdminDropdownMenuTrigger>
+          <AdminDropdownMenuContent align="end">
             {table.getAllLeafColumns().map((column) => (
-              <DropdownMenuItem
+              <AdminDropdownMenuItem
                 key={column.id}
                 onClick={() => column.toggleVisibility()}
               >
@@ -84,10 +84,10 @@ export default function DataTable<TData>({
                   ) : null}
                 </span>
                 {column.id}
-              </DropdownMenuItem>
+              </AdminDropdownMenuItem>
             ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </AdminDropdownMenuContent>
+        </AdminDropdownMenu>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111a25]">
@@ -132,22 +132,22 @@ export default function DataTable<TData>({
           Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </span>
         <div className="flex gap-2">
-          <Button
+          <AdminButton
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             Prev
-          </Button>
-          <Button
+          </AdminButton>
+          <AdminButton
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
             Next
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </div>

@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getAdminIpConfig, updateAdminIpConfig } from "@/lib/api/admin";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Loading from "@/components/common/Loading";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/common/ToastProvider";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export default function AdminWhitelistPage() {
   const toast = useToast();
@@ -98,26 +98,26 @@ export default function AdminWhitelistPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button
+          <AdminButton
             variant="secondary"
             className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={handleExport}
           >
             Xuất danh sách
-          </Button>
-          <Button
+          </AdminButton>
+          <AdminButton
             variant="secondary"
             className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={() => handleSave([])}
             disabled={!localList.length}
           >
             Xoá tất cả
-          </Button>
+          </AdminButton>
         </div>
       </div>
 
-      <Card className="border-white/10 bg-[#111827] text-white">
-        <CardContent className="space-y-4 py-5">
+      <AdminCard className="border-white/10 bg-[#111827] text-white">
+        <AdminCardContent className="space-y-4 py-5">
           <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr]">
             <div className="relative">
               <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
@@ -136,15 +136,15 @@ export default function AdminWhitelistPage() {
               placeholder="Thêm IP mới"
               className="h-11 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white"
             />
-            <Button className="h-11" onClick={handleAddIp} disabled={!newIp.trim()}>
+            <AdminButton className="h-11" onClick={handleAddIp} disabled={!newIp.trim()}>
               Thêm IP
-            </Button>
+            </AdminButton>
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className="border-white/10 bg-[#101826] text-white">
-        <CardContent className="py-5">
+      <AdminCard className="border-white/10 bg-[#101826] text-white">
+        <AdminCardContent className="py-5">
           {isLoading ? (
             <Loading label="Loading whitelist" />
           ) : (
@@ -177,16 +177,16 @@ export default function AdminWhitelistPage() {
                             <p className="text-xs text-white/40">Allowed</p>
                           </div>
                         </div>
-                        <Badge variant="default">{ip.includes(":") ? "IPv6" : "IPv4"}</Badge>
+                        <AdminBadge variant="default">{ip.includes(":") ? "IPv6" : "IPv4"}</AdminBadge>
                         <div className="flex items-center gap-2">
-                          <Button
+                          <AdminButton
                             size="sm"
                             variant="secondary"
                             className="border border-white/10 bg-white/5 text-white hover:bg-white/10"
                             onClick={() => handleRemoveIp(ip)}
                           >
                             Thu hồi
-                          </Button>
+                          </AdminButton>
                         </div>
                       </div>
                     ))
@@ -197,23 +197,23 @@ export default function AdminWhitelistPage() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className="border-white/10 bg-[#111827] text-white">
-        <CardContent className="space-y-3 py-5">
+      <AdminCard className="border-white/10 bg-[#111827] text-white">
+        <AdminCardContent className="space-y-3 py-5">
           <p className="text-xs uppercase tracking-[0.2em] text-white/50">
             Cập nhật nhanh (bulk)
           </p>
-          <Textarea
+          <AdminTextarea
             value={value}
             onChange={(event) => setValue(event.target.value)}
             placeholder="Mỗi dòng là một IP"
             rows={6}
           />
-          <Button onClick={handleBulkSave}>Lưu whitelist</Button>
-        </CardContent>
-      </Card>
+          <AdminButton onClick={handleBulkSave}>Lưu whitelist</AdminButton>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }

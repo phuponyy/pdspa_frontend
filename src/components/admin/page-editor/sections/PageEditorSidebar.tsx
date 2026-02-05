@@ -1,4 +1,4 @@
-import { Switch } from "@/components/ui/switch";
+import AdminSwitch from "@/components/admin/ui/AdminSwitch";
 
 export type PageEditorSidebarProps = {
   sectionNav: { label: string; href: string }[];
@@ -93,7 +93,7 @@ export default function PageEditorSidebar({
                 <p className="text-sm font-semibold text-white">{status}</p>
               </div>
             </div>
-            <Switch
+            <AdminSwitch
               checked={status === "PUBLISHED"}
               onCheckedChange={(checked) => {
                 if (isSavingStatus) return;

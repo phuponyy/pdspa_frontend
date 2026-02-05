@@ -2,10 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import Button from "@/components/common/Button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAdminMutation, useAdminQuery } from "@/lib/api/adminHooks";
 import {
   createCmsPage,
@@ -21,6 +17,10 @@ import {
   normalizeGoodMassageContent,
   type GoodMassageContent,
 } from "@/types/goodMassage.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 const CMS_SLUG = "good-massage-in-da-nang";
 const LANGS = ["vi", "en"] as const;
@@ -291,9 +291,9 @@ export default function GoodMassageAdminPage() {
               {code.toUpperCase()}
             </button>
           ))}
-          <Button onClick={handleSave} disabled={updateMutation.isPending || createPageMutation.isPending}>
+          <AdminButton onClick={handleSave} disabled={updateMutation.isPending || createPageMutation.isPending}>
             {pageId ? "Lưu cập nhật" : "Tạo trang"}
-          </Button>
+          </AdminButton>
         </div>
       </div>
 
@@ -316,7 +316,7 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <h2 className="text-lg font-semibold text-white">Hero</h2>
             <div className="mt-4 grid gap-4">
-              <Input
+              <AdminInput
                 placeholder="Eyebrow"
                 value={currentContent.hero.eyebrow || ""}
                 onChange={(event) => {
@@ -328,7 +328,7 @@ export default function GoodMassageAdminPage() {
                   setIsDirty(true);
                 }}
               />
-              <Input
+              <AdminInput
                 placeholder="Title"
                 value={currentContent.hero.title}
                 onChange={(event) => {
@@ -340,7 +340,7 @@ export default function GoodMassageAdminPage() {
                   setIsDirty(true);
                 }}
               />
-              <Textarea
+              <AdminTextarea
                 placeholder="Subtitle"
                 value={currentContent.hero.subtitle || ""}
                 onChange={(event) => {
@@ -353,7 +353,7 @@ export default function GoodMassageAdminPage() {
                 }}
               />
               <div className="flex flex-wrap items-center gap-3">
-                <Input
+                <AdminInput
                   placeholder="Hero image URL"
                   value={currentContent.hero.heroImage || ""}
                   onChange={(event) => {
@@ -365,7 +365,7 @@ export default function GoodMassageAdminPage() {
                     setIsDirty(true);
                   }}
                 />
-                <Button
+                <AdminButton
                   type="button"
                   onClick={() => {
                     setMediaTarget({ section: "hero" });
@@ -373,7 +373,7 @@ export default function GoodMassageAdminPage() {
                   }}
                 >
                   Chọn từ Media
-                </Button>
+                </AdminButton>
               </div>
             </div>
           </section>
@@ -381,7 +381,7 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <h2 className="text-lg font-semibold text-white">Intro</h2>
             <div className="mt-4 grid gap-4">
-              <Input
+              <AdminInput
                 placeholder="Heading"
                 value={currentContent.intro.heading || ""}
                 onChange={(event) => {
@@ -409,14 +409,14 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Stats</h2>
-              <Button type="button" onClick={addStat}>
+              <AdminButton type="button" onClick={addStat}>
                 Thêm số liệu
-              </Button>
+              </AdminButton>
             </div>
             <div className="mt-4 grid gap-4">
               {currentContent.stats.map((stat, index) => (
                 <div key={`${stat.label}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                  <Input
+                  <AdminInput
                     placeholder="Label"
                     value={stat.label}
                     onChange={(event) => {
@@ -429,7 +429,7 @@ export default function GoodMassageAdminPage() {
                       setIsDirty(true);
                     }}
                   />
-                  <Input
+                  <AdminInput
                     placeholder="Value"
                     value={stat.value}
                     onChange={(event) => {
@@ -464,15 +464,15 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Highlights</h2>
-              <Button type="button" onClick={addHighlight}>
+              <AdminButton type="button" onClick={addHighlight}>
                 Thêm highlight
-              </Button>
+              </AdminButton>
             </div>
             <div className="mt-4 grid gap-5">
               {currentContent.highlights.map((item, index) => (
                 <div key={`${item.title}-${index}`} className="rounded-2xl border border-white/10 p-4">
                   <div className="grid gap-3 md:grid-cols-2">
-                    <Input
+                    <AdminInput
                       placeholder="Title"
                       value={item.title}
                       onChange={(event) => {
@@ -485,7 +485,7 @@ export default function GoodMassageAdminPage() {
                         setIsDirty(true);
                       }}
                     />
-                    <Input
+                    <AdminInput
                       placeholder="Image URL"
                       value={item.imageUrl || ""}
                       onChange={(event) => {
@@ -500,7 +500,7 @@ export default function GoodMassageAdminPage() {
                     />
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <Textarea
+                    <AdminTextarea
                       placeholder="Description"
                       value={item.description || ""}
                       onChange={(event) => {
@@ -513,7 +513,7 @@ export default function GoodMassageAdminPage() {
                         setIsDirty(true);
                       }}
                     />
-                    <Button
+                    <AdminButton
                       type="button"
                       onClick={() => {
                         setMediaTarget({ section: "highlights", index });
@@ -521,7 +521,7 @@ export default function GoodMassageAdminPage() {
                       }}
                     >
                       Chọn ảnh
-                    </Button>
+                    </AdminButton>
                     <button
                       type="button"
                       onClick={() => {
@@ -545,12 +545,12 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Gallery</h2>
-              <Button type="button" onClick={addGalleryItem}>
+              <AdminButton type="button" onClick={addGalleryItem}>
                 Thêm ảnh
-              </Button>
+              </AdminButton>
             </div>
             <div className="mt-4 grid gap-4">
-              <Input
+              <AdminInput
                 placeholder="Title"
                 value={currentContent.gallery.title || ""}
                 onChange={(event) => {
@@ -564,7 +564,7 @@ export default function GoodMassageAdminPage() {
               />
               {currentContent.gallery.items.map((item, index) => (
                 <div key={`${item.imageUrl}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                  <Input
+                  <AdminInput
                     placeholder="Image URL"
                     value={item.imageUrl}
                     onChange={(event) => {
@@ -577,7 +577,7 @@ export default function GoodMassageAdminPage() {
                       setIsDirty(true);
                     }}
                   />
-                  <Input
+                  <AdminInput
                     placeholder="Caption"
                     value={item.caption || ""}
                     onChange={(event) => {
@@ -591,7 +591,7 @@ export default function GoodMassageAdminPage() {
                     }}
                   />
                   <div className="flex items-center gap-2">
-                    <Button
+                    <AdminButton
                       type="button"
                       onClick={() => {
                         setMediaTarget({ section: "gallery", index });
@@ -599,7 +599,7 @@ export default function GoodMassageAdminPage() {
                       }}
                     >
                       Media
-                    </Button>
+                    </AdminButton>
                     <button
                       type="button"
                       onClick={() => {
@@ -623,7 +623,7 @@ export default function GoodMassageAdminPage() {
           <section className="rounded-3xl border border-white/10 bg-[#101828] p-6">
             <h2 className="text-lg font-semibold text-white">CTA</h2>
             <div className="mt-4 grid gap-4">
-              <Input
+              <AdminInput
                 placeholder="Title"
                 value={currentContent.cta.title || ""}
                 onChange={(event) => {
@@ -635,7 +635,7 @@ export default function GoodMassageAdminPage() {
                   setIsDirty(true);
                 }}
               />
-              <Textarea
+              <AdminTextarea
                 placeholder="Description"
                 value={currentContent.cta.description || ""}
                 onChange={(event) => {
@@ -648,7 +648,7 @@ export default function GoodMassageAdminPage() {
                 }}
               />
               <div className="grid gap-3 md:grid-cols-2">
-                <Input
+                <AdminInput
                   placeholder="Primary label"
                   value={currentContent.cta.primaryLabel || ""}
                   onChange={(event) => {
@@ -660,7 +660,7 @@ export default function GoodMassageAdminPage() {
                     setIsDirty(true);
                   }}
                 />
-                <Input
+                <AdminInput
                   placeholder="Primary link"
                   value={currentContent.cta.primaryLink || ""}
                   onChange={(event) => {
@@ -716,13 +716,13 @@ export default function GoodMassageAdminPage() {
         </aside>
       </div>
 
-      <Dialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Chọn ảnh từ Media</DialogTitle>
-          </DialogHeader>
+      <AdminDialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
+        <AdminDialogContent className="max-w-4xl">
+          <AdminDialogHeader>
+            <AdminDialogTitle>Chọn ảnh từ Media</AdminDialogTitle>
+          </AdminDialogHeader>
           <div className="space-y-4">
-            <Input
+            <AdminInput
               placeholder="Tìm ảnh..."
               value={mediaQuery}
               onChange={(event) => setMediaQuery(event.target.value)}
@@ -753,13 +753,13 @@ export default function GoodMassageAdminPage() {
               )}
             </div>
             <div className="flex justify-end">
-              <Button type="button" onClick={() => setMediaDialogOpen(false)}>
+              <AdminButton type="button" onClick={() => setMediaDialogOpen(false)}>
                 Đóng
-              </Button>
+              </AdminButton>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </AdminDialogContent>
+      </AdminDialog>
     </div>
   );
 }

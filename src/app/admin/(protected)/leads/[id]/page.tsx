@@ -6,8 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getLead, updateLeadStatus } from "@/lib/api/admin";
 import type { LeadStatus } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
-import Button from "@/components/common/Button";
 import Loading from "@/components/common/Loading";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 const STATUS_OPTIONS: LeadStatus[] = ["NEW", "CONTACTED", "DONE"];
 
@@ -117,14 +117,14 @@ export default function LeadDetailPage() {
               </option>
             ))}
           </select>
-          <Button
+          <AdminButton
             variant="outline"
             onClick={async () => {
               await updateLeadStatus(undefined, lead.id, { status });
             }}
           >
             Save status
-          </Button>
+          </AdminButton>
         </div>
       </div>
     </div>

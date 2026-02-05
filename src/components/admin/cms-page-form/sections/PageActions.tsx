@@ -1,5 +1,5 @@
-import Button from "@/components/common/Button";
 import type { CmsPageStatus } from "../types";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type PageActionsProps = {
   status: CmsPageStatus;
@@ -23,9 +23,9 @@ export const PageActions = ({ status, setStatus, isSaving, onSave, setDirty }: P
         <option value="DRAFT">Draft</option>
         <option value="PUBLISHED">Published</option>
       </select>
-      <Button onClick={onSave} disabled={isSaving}>
+      <AdminButton onClick={onSave} disabled={isSaving}>
         {isSaving ? "Saving..." : "Save"}
-      </Button>
+      </AdminButton>
     </div>
   );
 };

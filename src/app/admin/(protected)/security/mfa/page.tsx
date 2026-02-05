@@ -10,9 +10,9 @@ import {
   regenerateMfaRecoveryCodes,
   setupMfa,
 } from "@/lib/api/admin";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/common/ToastProvider";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 const OTP_LENGTH = 6;
 
@@ -152,8 +152,8 @@ export default function AdminMfaPage() {
         </p>
       </div>
 
-      <Card className="border-white/10 bg-[#141a22] text-white">
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 py-5">
+      <AdminCard className="border-white/10 bg-[#141a22] text-white">
+        <AdminCardContent className="flex flex-wrap items-center justify-between gap-4 py-5">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-white/50">
               Trạng thái hiện tại
@@ -163,19 +163,19 @@ export default function AdminMfaPage() {
               {mfaEnabled ? "Đã kích hoạt" : "Chưa kích hoạt"}
             </div>
           </div>
-          <Button
+          <AdminButton
             className="h-11 px-6"
             onClick={() => setupMutation.mutate()}
             disabled={setupMutation.isPending}
           >
             {setupMutation.isPending ? "Đang tạo..." : "Bật MFA ngay"}
-          </Button>
-        </CardContent>
-      </Card>
+          </AdminButton>
+        </AdminCardContent>
+      </AdminCard>
 
       {setupData ? (
-        <Card className="border-white/10 bg-[#141a22] text-white">
-          <CardContent className="grid gap-6 py-6 md:grid-cols-[240px_1fr]">
+        <AdminCard className="border-white/10 bg-[#141a22] text-white">
+          <AdminCardContent className="grid gap-6 py-6 md:grid-cols-[240px_1fr]">
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-[#121620] p-4 text-center">
               <div className="flex h-44 w-44 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-[#ff7b4b] to-[#ffae5b] shadow-[0_0_40px_rgba(255,140,60,0.45)]">
                 {qrDataUrl ? (
@@ -198,13 +198,13 @@ export default function AdminMfaPage() {
                 </p>
                 <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/10 bg-[#0f1420] px-4 py-3 text-sm">
                   <span className="flex-1 break-all text-white/80">{setupData.secret}</span>
-                  <Button
+                  <AdminButton
                     variant="secondary"
                     className="h-8 px-3 text-xs"
                     onClick={() => copyText(setupData.secret, "Đã sao chép secret key.")}
                   >
                     Copy
-                  </Button>
+                  </AdminButton>
                 </div>
               </div>
               <div>
@@ -226,13 +226,13 @@ export default function AdminMfaPage() {
                     />
                   ))}
                 </div>
-                <Button
+                <AdminButton
                   className="mt-4 h-11 w-full"
                   onClick={() => enableMutation.mutate(activeOtp.trim())}
                   disabled={enableMutation.isPending || activeOtp.trim().length !== OTP_LENGTH}
                 >
                   {enableMutation.isPending ? "Đang xác nhận..." : "Xác thực & Kích hoạt"}
-                </Button>
+                </AdminButton>
                 <input
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
@@ -250,14 +250,14 @@ export default function AdminMfaPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button
+                      <AdminButton
                         variant="secondary"
                         className="h-9 px-4 text-xs"
                         onClick={downloadRecoveryCodes}
                       >
                         Tải về
-                      </Button>
-                      <Button
+                      </AdminButton>
+                      <AdminButton
                         variant="secondary"
                         className="h-9 px-4 text-xs"
                         onClick={() =>
@@ -265,7 +265,7 @@ export default function AdminMfaPage() {
                         }
                       >
                         Sao chép
-                      </Button>
+                      </AdminButton>
                     </div>
                   </div>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -281,16 +281,16 @@ export default function AdminMfaPage() {
                 </div>
               ) : null}
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       ) : null}
 
       {mfaEnabled ? (
-        <Card className="border-white/10 bg-[#141a22] text-white">
-          <CardHeader>
-            <CardTitle>Tắt MFA</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminCard className="border-white/10 bg-[#141a22] text-white">
+          <AdminCardHeader>
+            <AdminCardTitle>Tắt MFA</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-4">
             <input
               value={disableCode}
               onChange={(event) => setDisableCode(event.target.value)}
@@ -298,14 +298,14 @@ export default function AdminMfaPage() {
               className="h-11 w-full rounded-xl border border-white/10 bg-[#0f1420] px-4 text-sm text-white"
             />
             <div className="flex flex-wrap items-center gap-3">
-              <Button
+              <AdminButton
                 size="sm"
                 variant="secondary"
                 onClick={() => setDisableUseRecovery((prev) => !prev)}
               >
                 {disableUseRecovery ? "Dùng mã OTP" : "Dùng recovery code"}
-              </Button>
-              <Button
+              </AdminButton>
+              <AdminButton
                 size="sm"
                 onClick={() =>
                   disableMutation.mutate(
@@ -317,33 +317,33 @@ export default function AdminMfaPage() {
                 disabled={disableMutation.isPending || !disableCode.trim()}
               >
                 {disableMutation.isPending ? "Đang tắt..." : "Tắt MFA"}
-              </Button>
+              </AdminButton>
             </div>
-          </CardContent>
-        </Card>
+          </AdminCardContent>
+        </AdminCard>
       ) : null}
 
       {mfaEnabled ? (
-        <Card className="border-white/10 bg-[#141a22] text-white">
-          <CardHeader>
-            <CardTitle>Regenerate recovery codes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <AdminCard className="border-white/10 bg-[#141a22] text-white">
+          <AdminCardHeader>
+            <AdminCardTitle>Regenerate recovery codes</AdminCardTitle>
+          </AdminCardHeader>
+          <AdminCardContent className="space-y-3">
             <input
               value={regenCode}
               onChange={(event) => setRegenCode(event.target.value)}
               placeholder="Authenticator code"
               className="h-11 w-full rounded-xl border border-white/10 bg-[#0f1420] px-4 text-sm text-white"
             />
-            <Button
+            <AdminButton
               size="sm"
               onClick={() => regenMutation.mutate(regenCode.trim())}
               disabled={regenMutation.isPending || !regenCode.trim()}
             >
               {regenMutation.isPending ? "Đang tạo..." : "Tạo lại codes"}
-            </Button>
-          </CardContent>
-        </Card>
+            </AdminButton>
+          </AdminCardContent>
+        </AdminCard>
       ) : null}
       {isSetupReady ? null : (
         <p className="text-center text-xs text-white/50">

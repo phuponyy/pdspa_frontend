@@ -1,7 +1,7 @@
-import Button from "@/components/common/Button";
 import { updateHomeSectionsOrder } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
 
 export type SectionOrderSectionProps = {
   sectionOrder: string[];
@@ -88,7 +88,7 @@ export default function SectionOrderSection({
               <span className="cursor-grab rounded-full border border-slate-200 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.18em] text-slate-500">
                 Drag
               </span>
-              <Button
+              <AdminButton
                 type="button"
                 className="px-1.5 py-1 text-[9px] leading-none"
                 disabled={index === 0}
@@ -102,8 +102,8 @@ export default function SectionOrderSection({
                 }}
               >
                 ↑
-              </Button>
-              <Button
+              </AdminButton>
+              <AdminButton
                 type="button"
                 className="px-1.5 py-1 text-[9px] leading-none"
                 disabled={index === sectionOrder.length - 1}
@@ -117,12 +117,12 @@ export default function SectionOrderSection({
                 }}
               >
                 ↓
-              </Button>
+              </AdminButton>
             </div>
           </div>
         ))}
       </div>
-      <Button
+      <AdminButton
         className="mt-5"
         disabled={isSavingOrder}
         onClick={async () => {
@@ -146,7 +146,7 @@ export default function SectionOrderSection({
         }}
       >
         Save order
-      </Button>
+      </AdminButton>
     </section>
   );
 }

@@ -9,11 +9,11 @@ import { getSiteConfig } from "@/lib/api/public";
 import Loading from "@/components/common/Loading";
 import { API_BASE_URL, DEFAULT_LANG } from "@/lib/constants";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/common/ToastProvider";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminBadge from "@/components/admin/ui/AdminBadge";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export default function PagesListPage() {
   const { i18n } = useTranslation();
@@ -165,11 +165,11 @@ export default function PagesListPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-white">Quản lý Trang</h1>
         <Link href={`${ADMIN_ROUTES.pages}/new?lang=${resolvedLang}`}>
-          <Button size="icon">
+          <AdminButton size="icon">
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 5v14M5 12h14" />
             </svg>
-          </Button>
+          </AdminButton>
         </Link>
       </div>
 
@@ -181,25 +181,25 @@ export default function PagesListPage() {
               <path d="M20 20l-3.5-3.5" />
             </svg>
           </span>
-          <Input
+          <AdminInput
             placeholder="Tìm kiếm trang..."
             className="pl-12"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-        <Button variant={showActiveOnly ? "default" : "secondary"} onClick={() => setShowActiveOnly(true)}>
+        <AdminButton variant={showActiveOnly ? "default" : "secondary"} onClick={() => setShowActiveOnly(true)}>
           Đang hiển thị
-        </Button>
-        <Button variant={!showActiveOnly ? "default" : "secondary"} onClick={() => setShowActiveOnly(false)}>
+        </AdminButton>
+        <AdminButton variant={!showActiveOnly ? "default" : "secondary"} onClick={() => setShowActiveOnly(false)}>
           Tất cả
-        </Button>
-        <Button variant="secondary">
+        </AdminButton>
+        <AdminButton variant="secondary">
           <svg viewBox="0 0 24 24" className="mr-2 h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 6h16M7 12h10M10 18h4" />
           </svg>
           Lọc
-        </Button>
+        </AdminButton>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-[#0f1722] px-4 py-3 text-sm text-white/70">
@@ -228,25 +228,25 @@ export default function PagesListPage() {
             </select>
           </label>
           <div className="flex items-center gap-2">
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page <= 1}
             >
               Trước
-            </Button>
+            </AdminButton>
             <span className="text-xs uppercase tracking-[0.2em] text-white/50">
               {page} / {totalPages}
             </span>
-            <Button
+            <AdminButton
               size="sm"
               variant="secondary"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={page >= totalPages}
             >
               Sau
-            </Button>
+            </AdminButton>
           </div>
         </div>
       </div>
@@ -259,12 +259,12 @@ export default function PagesListPage() {
           </div>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-            <Card className="border-white/10 bg-[#111a25]">
-              <CardContent className="flex items-center justify-between gap-4 py-4">
+            <AdminCard className="border-white/10 bg-[#111a25]">
+              <AdminCardContent className="flex items-center justify-between gap-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-white">Trang chủ</p>
                   <p className="text-xs text-white/50">/</p>
-                  <Badge variant="success">Xuất bản</Badge>
+                  <AdminBadge variant="success">Xuất bản</AdminBadge>
                 </div>
                 <div className="flex items-center gap-2">
                   <Link
@@ -281,8 +281,8 @@ export default function PagesListPage() {
                     Chỉnh sửa
                   </Link>
                 </div>
-              </CardContent>
-            </Card>
+              </AdminCardContent>
+            </AdminCard>
             {menuPages.length ? (
               menuPages.map((item) => {
                 const translation = item.page
@@ -300,8 +300,8 @@ export default function PagesListPage() {
                   ? `${ADMIN_ROUTES.pages}/${item.page.id}?lang=${resolvedLang}`
                   : "";
                 return (
-                  <Card key={item.href} className="border-white/10 bg-[#111a25]">
-                    <CardContent className="flex items-center justify-between gap-4 py-4">
+                  <AdminCard key={item.href} className="border-white/10 bg-[#111a25]">
+                    <AdminCardContent className="flex items-center justify-between gap-4 py-4">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="h-12 w-12 overflow-hidden rounded-2xl bg-white/5">
                           {thumb ? (
@@ -322,9 +322,9 @@ export default function PagesListPage() {
                             {item.label || translation?.title || item.slug || "Trang menu"}
                           </p>
                           <p className="text-xs text-white/50">{item.href}</p>
-                          <Badge variant={item.page?.status === "PUBLISHED" ? "success" : "draft"}>
+                          <AdminBadge variant={item.page?.status === "PUBLISHED" ? "success" : "draft"}>
                             {item.page?.status === "PUBLISHED" ? "Xuất bản" : "Bản nháp"}
-                          </Badge>
+                          </AdminBadge>
                           {item.page ? (
                             <p className="mt-2 text-[11px] uppercase tracking-[0.2em] text-white/40">
                               SEO: {translation?.seoTitle ? "ok" : "missing"} · Schema:{" "}
@@ -361,7 +361,7 @@ export default function PagesListPage() {
                             Chỉnh sửa
                           </Link>
                         ) : (
-                          <Button
+                          <AdminButton
                             size="sm"
                             variant="secondary"
                             onClick={() =>
@@ -373,11 +373,11 @@ export default function PagesListPage() {
                             }
                           >
                             Tạo trang
-                          </Button>
+                          </AdminButton>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </AdminCardContent>
+                  </AdminCard>
                 );
               })
             ) : (
@@ -398,8 +398,8 @@ export default function PagesListPage() {
               const isPublished = page.status === "PUBLISHED";
               const previewUrl = isPublished ? buildPreviewUrl(translation?.slug) : "";
               return (
-                <Card key={page.id} className="group">
-                  <CardContent className="flex flex-wrap items-center justify-between gap-4 py-5">
+                <AdminCard key={page.id} className="group">
+                  <AdminCardContent className="flex flex-wrap items-center justify-between gap-4 py-5">
                     <div className="space-y-2">
                       <h3 className="text-base font-semibold text-white">
                         {translation?.title || `Trang #${page.id}`}
@@ -407,9 +407,9 @@ export default function PagesListPage() {
                       <p className="text-sm text-slate-400">
                         Tác giả: Admin | Cập nhật: {page.updatedAt || "-"}
                       </p>
-                      <Badge variant={isPublished ? "success" : "draft"}>
+                      <AdminBadge variant={isPublished ? "success" : "draft"}>
                         {isPublished ? "Xuất bản" : "Bản nháp"}
-                      </Badge>
+                      </AdminBadge>
                     </div>
                     <div className="flex items-center gap-3">
                       {previewUrl ? (
@@ -431,8 +431,8 @@ export default function PagesListPage() {
                         </svg>
                       </Link>
                     </div>
-                  </CardContent>
-                </Card>
+                  </AdminCardContent>
+                </AdminCard>
               );
             })
           ) : (

@@ -1,10 +1,11 @@
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 import { getHomeIntro, updateHomeIntro } from "@/lib/api/admin";
 import { storageKey } from "@/components/admin/page-editor/defaults";
 import type { IntroState } from "@/components/admin/page-editor/types";
 import type { Dispatch, SetStateAction } from "react";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import AdminInput from "@/components/admin/ui/AdminInput";
+import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type IntroSectionProps = {
   activeLang: "vi" | "en";
@@ -44,7 +45,7 @@ export default function IntroSection({
         </div>
       </div>
       <div className="mt-5 grid gap-4">
-        <Input
+        <AdminInput
           label="Heading"
           value={currentIntro.heading}
           onChange={(event) => {
@@ -55,7 +56,7 @@ export default function IntroSection({
             }));
           }}
         />
-        <Textarea
+        <AdminTextarea
           label="Description"
           value={currentIntro.description}
           onChange={(event) => {
@@ -67,7 +68,7 @@ export default function IntroSection({
           }}
         />
         <div className="grid gap-4 md:grid-cols-2">
-          <Input
+          <AdminInput
             label="Image URL"
             value={currentIntro.imageUrl}
             onChange={(event) => {
@@ -78,7 +79,7 @@ export default function IntroSection({
               }));
             }}
           />
-          <Input
+          <AdminInput
             label="Video URL"
             value={currentIntro.videoUrl}
             onChange={(event) => {
@@ -91,7 +92,7 @@ export default function IntroSection({
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input
+          <AdminInput
             label="Provider name"
             value={currentIntro.providerName}
             onChange={(event) => {
@@ -102,7 +103,7 @@ export default function IntroSection({
               }));
             }}
           />
-          <Input
+          <AdminInput
             label="Listing name"
             value={currentIntro.listingName}
             onChange={(event) => {
@@ -115,7 +116,7 @@ export default function IntroSection({
           />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <Input
+          <AdminInput
             label="Rating"
             value={currentIntro.rating}
             onChange={(event) => {
@@ -126,7 +127,7 @@ export default function IntroSection({
               }));
             }}
           />
-          <Input
+          <AdminInput
             label="Reviews"
             value={currentIntro.reviews}
             onChange={(event) => {
@@ -137,7 +138,7 @@ export default function IntroSection({
               }));
             }}
           />
-          <Input
+          <AdminInput
             label="Rank text"
             value={currentIntro.rankText}
             onChange={(event) => {
@@ -150,7 +151,7 @@ export default function IntroSection({
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Input
+          <AdminInput
             label="Button label"
             value={currentIntro.buttonLabel}
             onChange={(event) => {
@@ -161,7 +162,7 @@ export default function IntroSection({
               }));
             }}
           />
-          <Input
+          <AdminInput
             label="Button link"
             value={currentIntro.buttonLink}
             onChange={(event) => {
@@ -173,7 +174,7 @@ export default function IntroSection({
             }}
           />
         </div>
-        <Button
+        <AdminButton
           onClick={async () => {
             try {
               await updateHomeIntro(undefined, activeLang, {
@@ -219,7 +220,7 @@ export default function IntroSection({
           }}
         >
           Save intro
-        </Button>
+        </AdminButton>
       </div>
     </section>
   );

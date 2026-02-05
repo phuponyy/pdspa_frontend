@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { exportCustomers, getCustomers } from "@/lib/api/admin";
 import DataTable from "@/components/admin/DataTable";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import type { Customer } from "@/types/admin-dashboard.types";
+import AdminButton from "@/components/admin/ui/AdminButton";
+import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export default function AdminCustomers() {
   const { data } = useQuery({
@@ -44,25 +44,25 @@ export default function AdminCustomers() {
 
   return (
     <div className="space-y-8">
-      <Card className="border-white/5">
-        <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <AdminCard className="border-white/5">
+        <AdminCardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="py-2">
-            <CardTitle>Customers</CardTitle>
+            <AdminCardTitle>Customers</AdminCardTitle>
             <p className="text-sm text-white/60">Tìm kiếm, lọc, tags, và ghi chú của khách hàng</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => handleExport("csv")}>
+            <AdminButton variant="outline" size="sm" onClick={() => handleExport("csv")}>
               Xuất CSV
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
+            </AdminButton>
+            <AdminButton variant="outline" size="sm" onClick={() => handleExport("xlsx")}>
               Xuất Excel
-            </Button>
+            </AdminButton>
           </div>
-        </CardHeader>
-        <CardContent>
+        </AdminCardHeader>
+        <AdminCardContent>
           <DataTable columns={columns} data={data?.items || []} searchColumn="name" />
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   );
 }
