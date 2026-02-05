@@ -45,6 +45,7 @@ export const useMediaLibrary = () => {
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [selectedDimensions, setSelectedDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const validateImage = (file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -276,8 +277,22 @@ export const useMediaLibrary = () => {
     setNewTagName("");
   };
 
-  const onDrop = (event: DragEvent<HTMLDivElement>) => {
+  const isFileDrag = (event: DragEvent<HTMLDivElement>) =>
+    Array.from(event.dataTransfer.types || []).includes("Files");
+
+  const onDragEnter = (event: DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) return;
     event.preventDefault();
+    dragCounter.current += 1;
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const onDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    dragCounter.current = 0;
     setIsDragging(false);
     if (event.dataTransfer.files?.length) {
       uploadFiles(event.dataTransfer.files);
@@ -285,12 +300,18 @@ export const useMediaLibrary = () => {
   };
 
   const onDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) return;
     event.preventDefault();
-    setIsDragging(true);
+    event.dataTransfer.dropEffect = "copy";
   };
 
-  const onDragLeave = () => {
-    setIsDragging(false);
+  const onDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    if (!isFileDrag(event)) return;
+    event.preventDefault();
+    dragCounter.current = Math.max(0, dragCounter.current - 1);
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
   };
 
   return {
@@ -353,6 +374,7 @@ export const useMediaLibrary = () => {
     handleBulkDownload,
     handleBulkConvertWebp,
     handleConvertWebp,
+    onDragEnter,
     onDrop,
     onDragOver,
     onDragLeave,

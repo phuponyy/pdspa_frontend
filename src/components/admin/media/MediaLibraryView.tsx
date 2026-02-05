@@ -22,12 +22,13 @@ export default function MediaLibraryView({ onPick, pickLabel }: MediaLibraryView
       className={`relative space-y-6 rounded-[28px] border border-white/10 bg-[#0b0b0b] p-6 text-white ${
         media.isDragging ? "outline outline-2 outline-[var(--accent-strong)]" : ""
       }`}
+      onDragEnter={media.onDragEnter}
       onDrop={media.onDrop}
       onDragOver={media.onDragOver}
       onDragLeave={media.onDragLeave}
     >
       {media.isDragging ? (
-        <div className="absolute inset-0 z-20 grid place-items-center rounded-[28px] bg-black/70 text-sm text-white/80">
+        <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center rounded-[28px] bg-black/70 text-sm text-white/80">
           Thả ảnh vào đây để upload
         </div>
       ) : null}
