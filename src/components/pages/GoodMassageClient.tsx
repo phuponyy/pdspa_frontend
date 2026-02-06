@@ -4,7 +4,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Container from "@/components/common/Container";
-import Button from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import { renderCmsHtml } from "@/lib/sanitize";
 import { resolveMediaUrl } from "@/lib/media";
 import type { GoodMassageContent } from "@/types/goodMassage.types";
@@ -105,7 +105,7 @@ export default function GoodMassageClient({ lang, content }: GoodMassageClientPr
             ) : null}
             <div className="flex flex-wrap items-center gap-3">
               <Button
-                className="px-6 py-3 text-sm uppercase tracking-[0.2em]"
+                className="rounded-full bg-[linear-gradient(135deg,#ff6a3d,#ffb640)] px-6 py-3 text-sm uppercase tracking-[0.2em] text-white shadow-[0_18px_40px_rgba(255,106,61,0.35)] hover:brightness-110"
                 onClick={() => {
                   if (content.cta.primaryLink) {
                     window.location.href = content.cta.primaryLink;

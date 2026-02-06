@@ -1,5 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import Button from "../../Button";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { PublicService } from "@/types/api.types";
 import type { BookingServiceRow } from "../types";
 
@@ -91,7 +100,7 @@ export const BookingDialog = ({
                 {fixedT("bookingPopup.guestInfo")}
               </p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <input
+                <Input
                   type="text"
                   placeholder={fixedT("bookingPopup.placeholders.fullName")}
                   value={fullName}
@@ -100,7 +109,7 @@ export const BookingDialog = ({
                     fieldErrors.fullName ? "border-rose-500 ring-1 ring-rose-500/40" : "border-white/10"
                   }`}
                 />
-                <input
+                <Input
                   type="email"
                   placeholder={fixedT("bookingPopup.placeholders.email")}
                   value={email}
@@ -109,7 +118,7 @@ export const BookingDialog = ({
                     fieldErrors.email ? "border-rose-500 ring-1 ring-rose-500/40" : "border-white/10"
                   }`}
                 />
-                <input
+                <Input
                   type="tel"
                   placeholder={fixedT("bookingPopup.placeholders.phone")}
                   value={phone}
@@ -118,21 +127,21 @@ export const BookingDialog = ({
                     fieldErrors.phone ? "border-rose-500 ring-1 ring-rose-500/40" : "border-white/10"
                   }`}
                 />
-                <input
+                <Input
                   type="text"
                   placeholder={fixedT("bookingPopup.placeholders.whatsapp")}
                   value={whatsappId}
                   onChange={(event) => setWhatsappId(event.target.value)}
                   className="h-11 rounded-xl border border-white/10 bg-[#0f1722] px-4 text-sm text-white/80 placeholder:text-white/40"
                 />
-                <input
+                <Input
                   type="text"
                   placeholder={fixedT("bookingPopup.placeholders.line")}
                   value={lineId}
                   onChange={(event) => setLineId(event.target.value)}
                   className="h-11 rounded-xl border border-white/10 bg-[#0f1722] px-4 text-sm text-white/80 placeholder:text-white/40"
                 />
-                <input
+                <Input
                   type="text"
                   placeholder={fixedT("bookingPopup.placeholders.wechat")}
                   value={wechatId}
@@ -175,10 +184,9 @@ export const BookingDialog = ({
                         <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
                           {fixedT("bookingPopup.labels.service")}
                         </p>
-                        <select
+                        <Select
                           value={item.serviceId ? `id:${item.serviceId}` : `label:${item.serviceLabel}`}
-                          onChange={(event) => {
-                            const value = event.target.value;
+                          onValueChange={(value: string) => {
                             if (value.startsWith("id:")) {
                               const nextId = Number(value.replace("id:", ""));
                               const nextService = services.find((s) => s.id === nextId);
@@ -188,27 +196,31 @@ export const BookingDialog = ({
                                 optionId: nextService?.priceOptions?.[0]?.id,
                                 duration: "60 minutes",
                               });
-                            } else {
-                              updateBookingService(item.id, {
-                                serviceId: undefined,
-                                serviceLabel: value.replace("label:", ""),
-                              });
+                              return;
                             }
+                            updateBookingService(item.id, {
+                              serviceId: undefined,
+                              serviceLabel: value.replace("label:", ""),
+                            });
                           }}
-                          className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-[#111a25] px-3 text-sm text-white/80"
                         >
-                          {services.length
-                            ? services.map((serviceItem) => (
-                                <option key={serviceItem.id} value={`id:${serviceItem.id}`}>
-                                  {serviceItem.name}
-                                </option>
-                              ))
-                            : ["Aroma Massage", "Stone Therapy", "Facial Care", "Body Scrub"].map((serviceItem) => (
-                                <option key={serviceItem} value={`label:${serviceItem}`}>
-                                  {serviceItem}
-                                </option>
-                              ))}
-                        </select>
+                          <SelectTrigger className="mt-2 h-10 w-full rounded-lg border-white/10 bg-[#111a25] text-white/80">
+                            <SelectValue placeholder={fixedT("bookingPopup.labels.service")} />
+                          </SelectTrigger>
+                          <SelectContent className="border-white/10 bg-[#0f1722] text-white">
+                            {services.length
+                              ? services.map((serviceItem) => (
+                                  <SelectItem key={serviceItem.id} value={`id:${serviceItem.id}`}>
+                                    {serviceItem.name}
+                                  </SelectItem>
+                                ))
+                              : ["Aroma Massage", "Stone Therapy", "Facial Care", "Body Scrub"].map((serviceItem) => (
+                                  <SelectItem key={serviceItem} value={`label:${serviceItem}`}>
+                                    {serviceItem}
+                                  </SelectItem>
+                                ))}
+                          </SelectContent>
+                        </Select>
                         {servicesLoading ? (
                           <p className="mt-2 text-xs text-white/50">
                             {fixedT("bookingPopup.labels.loadingServices")}
@@ -222,15 +234,15 @@ export const BookingDialog = ({
                         <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
                           {fixedT("bookingPopup.labels.duration")}
                         </p>
-                        <select
+                                                <Select
                           value={
                             usePriceOptions
                               ? String(item.optionId ?? priceOptions[0]?.id ?? "")
                               : item.duration || "60 minutes"
                           }
-                          onChange={(event) => {
+                          onValueChange={(value: string) => {
                             if (usePriceOptions) {
-                              const nextId = Number(event.target.value);
+                              const nextId = Number(value);
                               const nextOption = priceOptions.find((opt) => opt.id === nextId);
                               updateBookingService(item.id, {
                                 optionId: nextId,
@@ -238,26 +250,30 @@ export const BookingDialog = ({
                                   ? `${nextOption.durationMinutes} min`
                                   : item.duration,
                               });
-                            } else {
-                              updateBookingService(item.id, { duration: event.target.value });
+                              return;
                             }
+                            updateBookingService(item.id, { duration: value });
                           }}
-                          className="mt-2 h-10 w-full rounded-lg border border-white/10 bg-[#111a25] px-3 text-sm text-white/80"
                         >
-                          {usePriceOptions
-                            ? priceOptions.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                  {option.durationMinutes
-                                    ? `${option.durationMinutes} min · ${formatPrice(option.price)} đ`
-                                    : `${option.code} · ${formatPrice(option.price)} đ`}
-                                </option>
-                              ))
-                            : ["60 minutes", "90 minutes", "120 minutes"].map((option) => (
-                                <option key={option} value={option}>
-                                  {option}
-                                </option>
-                              ))}
-                        </select>
+                          <SelectTrigger className="mt-2 h-10 w-full rounded-lg border-white/10 bg-[#111a25] text-white/80">
+                            <SelectValue placeholder={fixedT("bookingPopup.labels.duration")} />
+                          </SelectTrigger>
+                          <SelectContent className="border-white/10 bg-[#0f1722] text-white">
+                            {usePriceOptions
+                              ? priceOptions.map((option) => (
+                                  <SelectItem key={option.id} value={String(option.id)}>
+                                    {option.durationMinutes
+                                      ? `${option.durationMinutes} min · ${formatPrice(option.price)} đ`
+                                      : `${option.code} · ${formatPrice(option.price)} đ`}
+                                  </SelectItem>
+                                ))
+                              : ["60 minutes", "90 minutes", "120 minutes"].map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                          </SelectContent>
+                        </Select>
                         {selectedOption?.durationMinutes ? (
                           <p className="mt-2 text-xs text-white/60">
                             {fixedT("bookingPopup.labels.duration")}: {selectedOption.durationMinutes} min
@@ -268,7 +284,7 @@ export const BookingDialog = ({
                         <p className="text-[11px] uppercase tracking-[0.2em] text-white/50">
                           {fixedT("bookingPopup.labels.guests")}
                         </p>
-                        <input
+                        <Input
                           type="number"
                           min={1}
                           value={item.guests}
@@ -295,19 +311,19 @@ export const BookingDialog = ({
                 {fixedT("bookingPopup.bookingSchedule")}
               </p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <input
+                <Input
                   type="date"
                   value={scheduleDate}
                   onChange={(event) => setScheduleDate(event.target.value)}
-                  className={`h-11 rounded-xl border bg-[#0f1722] px-4 text-sm text-white/80 ${
+                  className={`h-11 rounded-xl border bg-[#0f1722] px-4 text-sm text-white/80 focus:ring-2 focus:ring-[#ff9f40]/40 ${
                     fieldErrors.scheduleDate ? "border-rose-500 ring-1 ring-rose-500/40" : "border-white/10"
                   }`}
                 />
-                <input
+                <Input
                   type="time"
                   value={scheduleTime}
                   onChange={(event) => setScheduleTime(event.target.value)}
-                  className={`h-11 rounded-xl border bg-[#0f1722] px-4 text-sm text-white/80 ${
+                  className={`h-11 rounded-xl border bg-[#0f1722] px-4 text-sm text-white/80 focus:ring-2 focus:ring-[#ff9f40]/40 ${
                     fieldErrors.scheduleTime ? "border-rose-500 ring-1 ring-rose-500/40" : "border-white/10"
                   }`}
                 />
@@ -324,7 +340,7 @@ export const BookingDialog = ({
               <p className="text-xs uppercase tracking-[0.25em] text-white/50">
                 {fixedT("bookingPopup.specialRequirements")}
               </p>
-              <textarea
+              <Textarea
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 placeholder={fixedT("bookingPopup.placeholders.note")}
@@ -371,7 +387,11 @@ export const BookingDialog = ({
                 <p className="text-2xl font-semibold text-[#ff9f40]">{formatPrice(totalAmount || 0)} đ</p>
               </div>
               {bookingError ? <p className="mt-3 text-sm text-rose-300">{bookingError}</p> : null}
-              <Button className="mt-4 w-full" onClick={handleSubmit} disabled={isSubmitting}>
+              <Button
+                className="mt-4 w-full rounded-full bg-[linear-gradient(135deg,#ff7a45,#ffa14a)] text-white shadow-[0_16px_36px_rgba(255,122,69,0.35)] hover:brightness-110"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? fixedT("form.sending") : fixedT("bookingPopup.bookNow")}
               </Button>
             </div>

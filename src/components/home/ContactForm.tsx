@@ -4,9 +4,9 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { leadSchema, type LeadFormValues } from "@/lib/schemas/leadSchema";
 import { submitLead } from "@/lib/api/public";
-import Button from "@/components/common/Button";
-import Input from "@/components/common/Input";
-import Textarea from "@/components/common/Textarea";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { PublicService } from "@/types/api.types";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -83,28 +83,48 @@ export default function ContactForm({
       className="grid gap-6 rounded-3xl border border-[var(--line)] bg-white p-6 shadow-[var(--shadow)]"
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <Input
-          label={t("form.fullName")}
-          error={errors.fullName?.message}
-          {...register("fullName")}
-        />
-        <Input
-          label={t("form.phone")}
-          error={errors.phone?.message}
-          {...register("phone")}
-        />
+        <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+          {t("form.fullName")}
+          <Input
+            className="h-12 rounded-2xl border border-[var(--line)] bg-white text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:ring-[rgba(31,107,95,0.2)]"
+            {...register("fullName")}
+          />
+          {errors.fullName?.message ? (
+            <span className="text-xs text-red-500">{errors.fullName.message}</span>
+          ) : null}
+        </label>
+        <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+          {t("form.phone")}
+          <Input
+            className="h-12 rounded-2xl border border-[var(--line)] bg-white text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:ring-[rgba(31,107,95,0.2)]"
+            {...register("phone")}
+          />
+          {errors.phone?.message ? (
+            <span className="text-xs text-red-500">{errors.phone.message}</span>
+          ) : null}
+        </label>
       </div>
-      <Input
-        label={t("form.email")}
-        error={errors.email?.message}
-        type="email"
-        {...register("email")}
-      />
-      <Textarea
-        label={t("form.note")}
-        error={errors.note?.message}
-        {...register("note")}
-      />
+      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+        {t("form.email")}
+        <Input
+          type="email"
+          className="h-12 rounded-2xl border border-[var(--line)] bg-white text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:ring-[rgba(31,107,95,0.2)]"
+          {...register("email")}
+        />
+        {errors.email?.message ? (
+          <span className="text-xs text-red-500">{errors.email.message}</span>
+        ) : null}
+      </label>
+      <label className="flex flex-col gap-2 text-sm font-medium text-[var(--ink-muted)]">
+        {t("form.note")}
+        <Textarea
+          className="min-h-[120px] rounded-2xl border border-[var(--line)] bg-white text-[15px] text-[var(--ink)] placeholder:text-[var(--ink-muted)] focus-visible:ring-[rgba(31,107,95,0.2)]"
+          {...register("note")}
+        />
+        {errors.note?.message ? (
+          <span className="text-xs text-red-500">{errors.note.message}</span>
+        ) : null}
+      </label>
       <div className="space-y-3">
         <p className="text-sm font-semibold text-[var(--ink)]">
           {t("form.pickServices")}
@@ -222,7 +242,11 @@ export default function ContactForm({
           <p className="text-xs text-red-500">{errors.items.message}</p>
         ) : null}
       </div>
-      <Button type="submit" disabled={status === "loading"}>
+      <Button
+        type="submit"
+        disabled={status === "loading"}
+        className="rounded-full bg-[linear-gradient(135deg,#ff6a3d,#ffb640)] text-white shadow-[0_18px_40px_rgba(255,106,61,0.35)] hover:brightness-110"
+      >
         {status === "loading" ? t("form.sending") : t("form.submit")}
       </Button>
       {status === "success" ? (

@@ -1,4 +1,4 @@
-import Button from "@/components/common/Button";
+import { Button } from "@/components/ui/button";
 import Container from "@/components/common/Container";
 import HeroSlider from "@/components/home/HeroSlider";
 import type { HeroSlide } from "@/types/page.types";
@@ -49,8 +49,13 @@ export default function HeroSection({
                 {subheading}
               </p>
               <div className="flex flex-wrap gap-3">
-                <Button>{primaryCta || "Book now"}</Button>
-                <Button variant="outline">
+                <Button className="rounded-full bg-[linear-gradient(135deg,#ff6a3d,#ffb640)] text-white shadow-[0_18px_40px_rgba(255,106,61,0.35)] hover:brightness-110">
+                  {primaryCta || "Book now"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-full border border-[rgba(255,106,61,0.4)] bg-white text-[var(--ink)] hover:border-[var(--accent-strong)] hover:text-[var(--accent-strong)]"
+                >
                   {secondaryCta || "Quick consult"}
                 </Button>
               </div>
@@ -77,8 +82,15 @@ export default function HeroSection({
             {subheading}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Button>{primaryCta || "Book now"}</Button>
-            <Button variant="outline">{secondaryCta || "Quick consult"}</Button>
+            <Button className="rounded-full bg-[linear-gradient(135deg,#ff6a3d,#ffb640)] text-white shadow-[0_18px_40px_rgba(255,106,61,0.35)] hover:brightness-110">
+              {primaryCta || "Book now"}
+            </Button>
+            <Button
+              variant="outline"
+              className="rounded-full border border-[rgba(255,106,61,0.4)] bg-white text-[var(--ink)] hover:border-[var(--accent-strong)] hover:text-[var(--accent-strong)]"
+            >
+              {secondaryCta || "Quick consult"}
+            </Button>
           </div>
           <div className="grid grid-cols-2 gap-4 rounded-3xl border border-[var(--line)] bg-white/80 p-4 text-xs uppercase tracking-[0.3em] text-[var(--ink-muted)] md:grid-cols-4">
             <span>4.9 rating</span>

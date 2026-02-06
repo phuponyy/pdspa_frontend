@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Button from "../../Button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import type { NavItem } from "../types";
@@ -86,7 +86,10 @@ export const MainNav = ({
                 <path d="M21 21l-3.5-3.5" />
               </svg>
             </button>
-            <Button className="hidden px-7 py-3 text-base md:inline-flex" onClick={onOpenBooking}>
+            <Button
+              className="hidden rounded-full bg-[linear-gradient(135deg,#ff7a45,#ffa14a)] px-7 py-3 text-base text-white shadow-[0_16px_36px_rgba(255,122,69,0.35)] hover:brightness-110 md:inline-flex"
+              onClick={onOpenBooking}
+            >
               {fixedT("hero.ctaPrimary")}
             </Button>
             <Link
