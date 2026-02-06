@@ -26,8 +26,6 @@ import {
   AdminAlertDialogTrigger,
   AdminDialog,
   AdminDialogContent,
-  AdminDialogDescription,
-  AdminDialogFooter,
   AdminDialogHeader,
   AdminDialogTitle,
   AdminDialogTrigger,

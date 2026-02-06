@@ -435,7 +435,35 @@ export default function PageEditor({ lang }: { lang: string }) {
   const handleMediaPick = (item: MediaItem) => {
     if (!mediaTarget) return;
     const nextUrl = normalizeMediaUrl(item.url);
-    if (mediaTarget.section === "highlights") {
+    if (mediaTarget.section === "hero") {
+      setHeroByLang((prev) => {
+        const next = [...(prev[activeLang]?.slides ?? [])];
+        const slideIndex = mediaTarget.index;
+        const baseSlide = {
+          imageUrl: nextUrl,
+          heading: "",
+          subheading: "",
+          primaryCta: "",
+          primaryLink: "",
+          secondaryCta: "",
+          secondaryLink: "",
+        };
+        if (slideIndex >= next.length) {
+          next.push(baseSlide);
+        } else {
+          next[slideIndex] = { ...next[slideIndex], imageUrl: nextUrl };
+        }
+        return {
+          ...prev,
+          [activeLang]: { ...prev[activeLang], slides: next.slice(0, 10) },
+        };
+      });
+    } else if (mediaTarget.section === "intro") {
+      setIntroByLang((prev) => ({
+        ...prev,
+        [activeLang]: { ...prev[activeLang], imageUrl: nextUrl },
+      }));
+    } else if (mediaTarget.section === "highlights") {
       setHighlightsByLang((prev) => {
         const next = ensureRecoveryItems(prev[activeLang]?.items ?? []);
         next[mediaTarget.index] = {
@@ -532,6 +560,8 @@ export default function PageEditor({ lang }: { lang: string }) {
           setIsUploading={setIsUploading}
           setHeroByLang={setHeroByLang}
           setIsDirty={setIsDirty}
+          setMediaTarget={setMediaTarget}
+          setMediaDialogOpen={setMediaDialogOpen}
           notify={notify}
           handleError={handleError}
         />
@@ -541,6 +571,8 @@ export default function PageEditor({ lang }: { lang: string }) {
           currentIntro={currentIntro}
           setIntroByLang={setIntroByLang}
           setIsDirty={setIsDirty}
+          setMediaTarget={setMediaTarget}
+          setMediaDialogOpen={setMediaDialogOpen}
           notify={notify}
           handleError={handleError}
         />

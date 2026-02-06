@@ -21,13 +21,6 @@ import {
   AdminAlertDialogDescription,
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
-  AdminDialog,
-  AdminDialogContent,
-  AdminDialogDescription,
-  AdminDialogFooter,
-  AdminDialogHeader,
-  AdminDialogTitle,
-  AdminDialogTrigger,
 } from "@/components/admin/ui/AdminDialog";
 import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 import { useToast } from "@/components/common/ToastProvider";

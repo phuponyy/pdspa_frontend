@@ -25,7 +25,7 @@ import {
   AdminDialogTitle,
   AdminDialogTrigger,
 } from "@/components/admin/ui/AdminDialog";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 import AdminSwitch from "@/components/admin/ui/AdminSwitch";
 type NavItem = { label: string; href: string };
 type TopBarFields = {

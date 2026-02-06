@@ -11,7 +11,6 @@ import {
 } from "@/lib/api/admin";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { normalizeMediaUrl, resolveMediaUrl } from "@/lib/media";
-import type { CmsPage } from "@/types/api.types";
 import {
   defaultGoodMassageContent,
   normalizeGoodMassageContent,
@@ -19,7 +18,12 @@ import {
 } from "@/types/goodMassage.types";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import {
+  AdminDialog,
+  AdminDialogContent,
+  AdminDialogHeader,
+  AdminDialogTitle,
+} from "@/components/admin/ui/AdminDialog";
 import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 const CMS_SLUG = "good-massage-in-da-nang";

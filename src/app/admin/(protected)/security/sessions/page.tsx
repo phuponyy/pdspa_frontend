@@ -16,7 +16,7 @@ import {
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
 } from "@/components/admin/ui/AdminDialog";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 const formatDate = (value?: string) => {
   if (!value) return "-";

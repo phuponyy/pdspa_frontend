@@ -14,6 +14,8 @@ export type HeroSectionProps = {
   setIsUploading: (value: boolean) => void;
   setHeroByLang: Dispatch<SetStateAction<Record<string, HeroState>>>;
   setIsDirty: (value: boolean) => void;
+  setMediaTarget: (value: { section: "hero"; index: number } | null) => void;
+  setMediaDialogOpen: (value: boolean) => void;
   notify: (text: string, type?: "success" | "error" | "info") => void;
   handleError: (err: unknown) => void;
 };
@@ -25,6 +27,8 @@ export default function HeroSection({
   setIsUploading,
   setHeroByLang,
   setIsDirty,
+  setMediaTarget,
+  setMediaDialogOpen,
   notify,
   handleError,
 }: HeroSectionProps) {
@@ -144,9 +148,20 @@ export default function HeroSection({
                 }}
               />
             </label>
-            <span className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
+            <button
+              type="button"
+              className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60"
+              onClick={() => {
+                if (currentHero.slides.length >= 10) {
+                  notify("Maximum 10 images.", "info");
+                  return;
+                }
+                setMediaTarget({ section: "hero", index: currentHero.slides.length });
+                setMediaDialogOpen(true);
+              }}
+            >
               Library
-            </span>
+            </button>
           </div>
           <p className="mt-2 text-[11px] text-white/50">Tối thiểu: 1920x1080px</p>
         </div>
@@ -220,6 +235,17 @@ export default function HeroSection({
                     });
                   }}
                 />
+                <div className="flex justify-end">
+                  <AdminButton
+                    variant="outline"
+                    onClick={() => {
+                      setMediaTarget({ section: "hero", index: idx });
+                      setMediaDialogOpen(true);
+                    }}
+                  >
+                    Chọn từ Media
+                  </AdminButton>
+                </div>
                 <AdminInput
                   label="Heading"
                   placeholder="Tiêu đề slide..."

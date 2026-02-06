@@ -3,7 +3,7 @@ import StatusPill from "./StatusPill";
 import type { Lead } from "@/types/lead.types";
 import { formatDateTime } from "@/lib/utils/formatters";
 import { ADMIN_ROUTES } from "@/lib/admin/constants";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 export default function LeadTable({
   leads,

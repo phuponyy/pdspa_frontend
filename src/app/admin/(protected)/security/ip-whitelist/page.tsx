@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/common/ToastProvider";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminBadge from "@/components/admin/ui/AdminBadge";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export default function AdminWhitelistPage() {

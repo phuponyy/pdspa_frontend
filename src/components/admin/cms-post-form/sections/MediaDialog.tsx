@@ -1,6 +1,6 @@
 import MediaLibraryView from "@/components/admin/media/MediaLibraryView";
 import type { MediaItem } from "@/types/api.types";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminDialog, AdminDialogContent, AdminDialogHeader, AdminDialogTitle } from "@/components/admin/ui/AdminDialog";
 
 export type MediaDialogProps = {
   open: boolean;

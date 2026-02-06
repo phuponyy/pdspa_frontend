@@ -9,7 +9,6 @@ import type {
 import type { Dispatch, SetStateAction } from "react";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
 
 export type RecoverySectionProps = {
   activeLang: "vi" | "en";

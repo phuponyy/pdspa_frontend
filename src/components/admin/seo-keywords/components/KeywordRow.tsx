@@ -5,13 +5,6 @@ import type { SeoKeyword, SeoKeywordRank, SeoKeywordSerpPreviewItem } from "@/ty
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
 import {
-  AdminDialog,
-  AdminDialogTrigger,
-  AdminDialogContent,
-  AdminDialogHeader,
-  AdminDialogTitle,
-  AdminDialogDescription,
-  AdminDialogFooter,
   AdminAlertDialog,
   AdminAlertDialogTrigger,
   AdminAlertDialogAction,
@@ -20,7 +13,7 @@ import {
   AdminAlertDialogTitle,
   AdminAlertDialogDescription,
 } from "@/components/admin/ui/AdminDialog";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 export type KeywordRowProps = {
   keyword: SeoKeyword;

@@ -35,7 +35,7 @@ import {
   AdminAlertDialogTitle,
   AdminAlertDialogDescription,
 } from "@/components/admin/ui/AdminDialog";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 export default function PostsListPage() {
   const { i18n } = useTranslation();

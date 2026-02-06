@@ -8,7 +8,7 @@ import type {
 import type { Dispatch, SetStateAction } from "react";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard } from "@/components/admin/ui/AdminCard";
 import AdminTextarea from "@/components/admin/ui/AdminTextarea";
 
 export type HighlightsSectionProps = {

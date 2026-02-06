@@ -6,7 +6,7 @@ import { useToast } from "@/components/common/ToastProvider";
 import type { BrokenLinkItem, BrokenLinksScanResponse } from "@/types/api.types";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 type ScanResult = BrokenLinksScanResponse["data"] | null;
 

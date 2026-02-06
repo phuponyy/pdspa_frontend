@@ -13,7 +13,7 @@ import { useToast } from "@/components/common/ToastProvider";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
 import AdminBadge from "@/components/admin/ui/AdminBadge";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 export default function PagesListPage() {
   const { i18n } = useTranslation();

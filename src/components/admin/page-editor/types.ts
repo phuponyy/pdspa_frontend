@@ -95,10 +95,13 @@ export type ServicesState = {
   items: ServicesItem[];
 };
 
-export type PageEditorMediaTarget = {
-  section: "highlights" | "recovery" | "services" | "reviews" | "gallery" | "mentions";
-  index: number;
-};
+export type PageEditorMediaTarget =
+  | { section: "hero"; index: number }
+  | { section: "intro" }
+  | {
+      section: "highlights" | "recovery" | "services" | "reviews" | "gallery" | "mentions";
+      index: number;
+    };
 
 export type BlogState = {
   heading: string;

@@ -22,13 +22,6 @@ import {
   AdminAlertDialogDescription,
   AdminAlertDialogTitle,
   AdminAlertDialogTrigger,
-  AdminDialog,
-  AdminDialogTrigger,
-  AdminDialogContent,
-  AdminDialogHeader,
-  AdminDialogTitle,
-  AdminDialogDescription,
-  AdminDialogFooter,
 } from "@/components/admin/ui/AdminDialog";
 import { useTranslation } from "react-i18next";
 import AdminButton from "@/components/admin/ui/AdminButton";

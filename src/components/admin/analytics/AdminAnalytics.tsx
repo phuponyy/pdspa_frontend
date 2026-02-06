@@ -6,7 +6,7 @@ import { getAdminAnalytics } from "@/lib/api/admin";
 import LineChart from "@/components/admin/charts/LineChart";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminBadge from "@/components/admin/ui/AdminBadge";
-import { AdminTabs, AdminTabsList, AdminTabsTrigger, AdminTabsContent } from "@/components/admin/ui/AdminTabs";
+import { AdminTabs, AdminTabsList, AdminTabsTrigger } from "@/components/admin/ui/AdminTabs";
 import {
   AdminDropdownMenu,
   AdminDropdownMenuTrigger,

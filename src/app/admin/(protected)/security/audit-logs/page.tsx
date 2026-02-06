@@ -7,7 +7,7 @@ import Loading from "@/components/common/Loading";
 import type { AdminAuditLog } from "@/types/api.types";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminBadge from "@/components/admin/ui/AdminBadge";
-import { AdminCard, AdminCardContent, AdminCardHeader, AdminCardTitle } from "@/components/admin/ui/AdminCard";
+import { AdminCard, AdminCardContent } from "@/components/admin/ui/AdminCard";
 
 const formatDate = (value?: string) => {
   if (!value) return "-";

@@ -11,6 +11,8 @@ export type IntroSectionProps = {
   currentIntro: IntroState;
   setIntroByLang: Dispatch<SetStateAction<Record<string, IntroState>>>;
   setIsDirty: (value: boolean) => void;
+  setMediaTarget: (value: { section: "intro" } | null) => void;
+  setMediaDialogOpen: (value: boolean) => void;
   notify: (text: string, type?: "success" | "error" | "info") => void;
   handleError: (err: unknown) => void;
 };
@@ -20,6 +22,8 @@ export default function IntroSection({
   currentIntro,
   setIntroByLang,
   setIsDirty,
+  setMediaTarget,
+  setMediaDialogOpen,
   notify,
   handleError,
 }: IntroSectionProps) {
@@ -81,6 +85,18 @@ export default function IntroSection({
               }));
             }}
           />
+          <div className="flex items-end">
+            <AdminButton
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setMediaTarget({ section: "intro" });
+                setMediaDialogOpen(true);
+              }}
+            >
+              Chọn từ Media
+            </AdminButton>
+          </div>
           <AdminInput
             label="Video URL"
             placeholder="https://youtube.com/..."

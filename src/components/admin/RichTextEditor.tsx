@@ -10,7 +10,7 @@ import { adminFetch } from "@/lib/api/client";
 import FocusTrap from "@/components/common/FocusTrap";
 import AdminButton from "@/components/admin/ui/AdminButton";
 import AdminInput from "@/components/admin/ui/AdminInput";
-import { AdminDialog, AdminDialogTrigger, AdminDialogContent, AdminDialogHeader, AdminDialogTitle, AdminDialogDescription, AdminDialogFooter, AdminAlertDialog, AdminAlertDialogTrigger, AdminAlertDialogAction, AdminAlertDialogCancel, AdminAlertDialogContent, AdminAlertDialogTitle, AdminAlertDialogDescription } from "@/components/admin/ui/AdminDialog";
+import { AdminDialog, AdminDialogContent, AdminDialogHeader, AdminDialogTitle } from "@/components/admin/ui/AdminDialog";
 
 const Editor = dynamic(async () => {
   const mod = await import("@tinymce/tinymce-react");
