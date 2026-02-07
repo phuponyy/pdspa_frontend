@@ -24,7 +24,7 @@ export default function AdminLogin() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useZodForm<AuthFormValues>(authSchema);
+  } = useZodForm(authSchema);
 
   const onSubmit = async (data: AuthFormValues) => {
     setError(null);

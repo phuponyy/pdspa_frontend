@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
-type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   endAdornment?: React.ReactNode;
 };
 
@@ -20,7 +20,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
       />
       {endAdornment ? (
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/70">
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70">
           {endAdornment}
         </span>
       ) : null}
