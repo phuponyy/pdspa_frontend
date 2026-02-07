@@ -209,7 +209,7 @@ export const resources = {
         title: "Panda Spa & Massage",
         subtitle:
           "A calm, curated sanctuary with expert therapists and tailored rituals.",
-        ctaPrimary: "Book now",
+        ctaPrimary: "Booking",
         ctaSecondary: "Quick consult",
       },
       sections: {

@@ -24,7 +24,7 @@ export default function HeroSection({
 }) {
   if (slides?.length || images?.length) {
     return (
-      <section className="relative min-h-screen bg-black">
+      <section className="relative h-[30svh] max-h-[30svh] overflow-hidden bg-black md:min-h-screen md:h-auto md:max-h-none">
         <HeroSlider
           images={images || []}
           slides={slides}
@@ -67,7 +67,7 @@ export default function HeroSection({
   }
 
   return (
-    <section className="relative overflow-hidden pb-16 pt-16">
+    <section className="relative overflow-hidden pb-0 pt-16 md:pt-16 md:pb-0 mb-0">
       <Container className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="space-y-8">
           {badge ? (

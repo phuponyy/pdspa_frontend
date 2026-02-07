@@ -339,7 +339,7 @@ export default async function HomePage({
   };
 
   return (
-    <div className="home-dark space-y-16 pb-16">
+    <div className="home-dark pb-16">
       {resolvedSchema ? (
         <script
           type="application/ld+json"

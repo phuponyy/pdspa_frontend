@@ -41,7 +41,7 @@ export default function ServiceCardItem({
             onClick={() => onBook(card.id)}
             className="rounded-full bg-[#ff9f40] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#1a1410] shadow-[0_12px_24px_rgba(255,159,64,0.35)]"
           >
-            {lang === "vi" ? "Đặt lịch" : "Book now"}
+            {lang === "vi" ? "Đặt lịch" : "Booking"}
           </button>
         </div>
       </div>

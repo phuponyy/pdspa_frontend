@@ -1,7 +1,16 @@
+"use client"
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils/cn";
-import { ADMIN_ROUTES } from "@/lib/admin/constants";
 import type { NavItem } from "../types";
 
 export type MainNavProps = {
@@ -13,6 +22,8 @@ export type MainNavProps = {
   onOpenBooking: () => void;
   fixedT: (key: string) => string;
   buildPublicHref: (path: string) => string;
+  currentLang: string;
+  buildLangSwitcherHref: (lang: string) => string;
 };
 
 export const MainNav = ({
@@ -24,7 +35,16 @@ export const MainNav = ({
   onOpenBooking,
   fixedT,
   buildPublicHref,
+  currentLang,
+  buildLangSwitcherHref,
 }: MainNavProps) => {
+  const router = useRouter();
+  const nextLang = currentLang === "vi" ? "en" : "vi";
+  const langLabel = currentLang === "vi" ? "VI" : "EN";
+  const handleLangChange = (value: string) => {
+    if (!value || value === currentLang) return;
+    router.push(buildLangSwitcherHref(value));
+  };
   return (
     <div className="bg-transparent">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 lg:px-10">
@@ -68,6 +88,25 @@ export const MainNav = ({
             ))}
           </nav>
           <div className="flex items-center gap-3">
+            <div className="md:hidden">
+              <Select value={currentLang} onValueChange={handleLangChange}>
+                <SelectTrigger
+                  aria-label="Switch language"
+                  data-theme="light"
+                  className="h-9 w-[70px] rounded-full px-3 text-[12px] font-semibold shadow-none"
+                >
+                  <SelectValue className="text-black">{langLabel}</SelectValue>
+                </SelectTrigger>
+                <SelectContent data-theme="light" className="z-[90] min-w-[120px]">
+                  <SelectItem value="vi" className="!text-black">
+                    🇻🇳
+                  </SelectItem>
+                  <SelectItem value="en" className="!text-black">
+                    🇺🇸
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <button
               type="button"
               className="hidden h-12 w-12 items-center justify-center rounded-full border border-[rgba(0,0,0,0.08)] text-[var(--accent-strong)] transition hover:border-[var(--accent-strong)] md:inline-flex"
@@ -87,21 +126,43 @@ export const MainNav = ({
               </svg>
             </button>
             <Button
-              className="hidden rounded-full bg-[linear-gradient(135deg,#ff7a45,#ffa14a)] px-7 py-3 text-base text-white shadow-[0_16px_36px_rgba(255,122,69,0.35)] hover:brightness-110 md:inline-flex"
+              className="!hidden rounded-full bg-[linear-gradient(135deg,#ff7a45,#ffa14a)] px-7 py-3 text-base text-white shadow-[0_16px_36px_rgba(255,122,69,0.35)] hover:brightness-110 md:!inline-flex"
               onClick={onOpenBooking}
             >
               {fixedT("hero.ctaPrimary")}
             </Button>
-            <Link
-              href={ADMIN_ROUTES.login}
-              className={cn(
-                "hidden text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ink-muted)] hover:text-[var(--accent-strong)] md:inline-flex"
-              )}
-            >
-              {fixedT("nav.admin")}
-            </Link>
           </div>
         </div>
+      </div>
+      <div className="mx-auto mt-2 flex w-full max-w-3xl items-center justify-center gap-4 overflow-x-auto overflow-y-visible pb-1 text-white md:hidden">
+        <Link
+          href={buildPublicHref("")}
+          className="flex h-12 w-12 items-center justify-center rounded-full text-white/80"
+          aria-label="Home"
+        >
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" />
+          </svg>
+        </Link>
+        {links
+          .filter((link) =>
+            ["/dich-vu", "/price-list", "/contact"].some((path) => link.href.includes(path))
+          )
+          .map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="whitespace-nowrap text-[14px] font-semibold text-white transition hover:brightness-110"
+            >
+              {link.label}
+            </Link>
+          ))}
+        <Button
+          className="rounded-full bg-[linear-gradient(135deg,#ff7a45,#ffa14a)] px-3 py-1 text-sm text-white shadow-[0_16px_36px_rgba(255,122,69,0.35)] hover:brightness-110"
+          onClick={onOpenBooking}
+        >
+          {fixedT("hero.ctaPrimary")}
+        </Button>
       </div>
     </div>
   );

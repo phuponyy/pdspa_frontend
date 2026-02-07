@@ -8,6 +8,7 @@ import "swiper/css/effect-fade";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import type { HeroSlide } from "@/types/page.types";
+import { cn } from "@/lib/utils/cn";
 
 export default function HeroSlider({
   images = [],
@@ -34,7 +35,7 @@ export default function HeroSlider({
 
   return (
     <Swiper
-      className={className}
+      className={cn("h-full w-full", className)}
       modules={[Autoplay, EffectFade, Navigation, Pagination]}
       effect="fade"
       loop={slideItems.length > 1}
@@ -48,7 +49,7 @@ export default function HeroSlider({
       fadeEffect={{ crossFade: true }}
     >
       {slideItems.map((slide, idx) => (
-        <SwiperSlide key={`${slide.imageUrl}-${idx}`}>
+        <SwiperSlide key={`${slide.imageUrl}-${idx}`} className="h-full">
           <div className="relative h-full w-full">
             <img
               src={slide.imageUrl}

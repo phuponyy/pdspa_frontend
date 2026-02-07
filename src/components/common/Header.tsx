@@ -54,8 +54,9 @@ export default function Header({
   return (
     <header
       className={cn(
-        "sticky top-0 z-[70] bg-black transition-[padding] duration-300 bg-transparent py-10 pointer-events-auto",
-        hideTopBar ? "m-[10px]" : "pt-0",
+        "sticky top-0 z-[70] bg-black transition-[padding] duration-300 bg-transparent py-2 md:py-0 pointer-events-auto md:bg-transparent",
+        "bg-transparent/60 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none",
+        hideTopBar ? "md:m-[10px]" : "pt-0",
         className
       )}
     >
@@ -84,6 +85,8 @@ export default function Header({
         onOpenBooking={() => booking.setIsOpen(true)}
         fixedT={fixedT}
         buildPublicHref={buildPublicHref}
+        currentLang={currentLang}
+        buildLangSwitcherHref={buildLangSwitcherHref}
       />
       <BookingDialog
         open={booking.isOpen}

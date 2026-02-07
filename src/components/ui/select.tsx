@@ -36,7 +36,17 @@ import { cn } from "@/lib/utils/cn";
 
 const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
-const SelectValue = SelectPrimitive.Value;
+const SelectValue = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Value>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Value>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Value
+    ref={ref}
+    className={cn("text-black data-[placeholder]:text-black/60", className)}
+    {...props}
+  />
+));
+SelectValue.displayName = SelectPrimitive.Value.displayName;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
@@ -46,6 +56,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-[#0f1722] px-3 py-2 text-sm text-white shadow-sm placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--accent-strong)] disabled:cursor-not-allowed disabled:opacity-50",
+      "data-[theme=light]:border-black/10 data-[theme=light]:bg-white/80 data-[theme=light]:text-black data-[theme=light]:placeholder:text-black/60",
       className
     )}
     {...props}
@@ -66,7 +77,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-hidden rounded-xl border border-white/10 bg-[#0f1722] text-white shadow-lg",
+        "relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-hidden rounded-xl border border-white/10 bg-[#0f1722] text-white shadow-lg data-[theme=light]:border-black/10 data-[theme=light]:bg-white/95 data-[theme=light]:text-black",
         position === "popper" &&
           "data-[side=bottom]:translate-y-2 data-[side=top]:-translate-y-2",
         className
@@ -92,7 +103,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("px-2 py-1.5 text-xs font-semibold text-white/60", className)}
+    className={cn("px-2 py-1.5 text-xs font-semibold text-white/60 data-[theme=light]:text-black/60", className)}
     {...props}
   />
 ));
@@ -105,7 +116,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-md py-2 pl-8 pr-2 text-sm text-white/85 outline-none focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-md py-2 pl-8 pr-2 text-sm text-white/85 outline-none focus:bg-white/10 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[theme=light]:text-black data-[theme=light]:focus:bg-black/5",
       className
     )}
     {...props}
